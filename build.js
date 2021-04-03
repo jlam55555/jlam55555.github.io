@@ -4,9 +4,10 @@ const fsExtra = require('fs-extra');
 const pug = require('pug');
 const yaml = require('yaml');
 
+const SRCDIR = './src';
 const BUILDDIR = './docs';
-const TEMPLATEDIR = './src/templates';
-const RESDIR = './src/res';
+const TEMPLATEDIR = `${SRCDIR}/templates`;
+const RESDIR = `${SRCDIR}/res`;
 
 // clear builddir
 console.log(`Clearing build directory ${BUILDDIR}...`);
@@ -21,20 +22,23 @@ console.log(`Symlinking resource directory to ${RESDIR}...`);
 fsExtra.copySync(RESDIR, `${BUILDDIR}/res`);
 
 // get pages to build and where to build them
-const pagesYaml = fs.readFileSync('src/pages.yaml', 'utf-8');
+const pagesYaml = fs.readFileSync(`${SRCDIR}/index.yaml`, 'utf-8');
 const pages = yaml.parse(pagesYaml);
 for (const page of pages) {
-  const {template, destination, title} = page;
+  const {template, destination, title, dataSrc} = page;
   const outDir = `${BUILDDIR}/${destination || template}`;
   const outFile = `${outDir}/index.html`;
   const templateFile = `${TEMPLATEDIR}/${template}.pug`;
+  const data = dataSrc
+    && yaml.parse(fs.readFileSync(`${SRCDIR}/${dataSrc}`, 'utf-8'));
 
   console.log(`Making directory ${outDir}...`);
   fs.mkdirSync(outDir, {recursive: true});
 
   console.log(`Reading template file ${templateFile}...`);
   const templateFileHtml = pug.renderFile(templateFile, {
-    title: title
+    title: title,
+    data: data
   });
 
   console.log(`Writing compiled file to ${outFile}...`);

@@ -5,3 +5,6 @@
   title: FAQ
 - template: contact
   title: Contact
+- template: projects
+  title: Projects
+  dataSrc: projects.yaml
