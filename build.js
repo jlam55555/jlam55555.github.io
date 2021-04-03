@@ -4,10 +4,17 @@ const fsExtra = require('fs-extra');
 const pug = require('pug');
 const yaml = require('yaml');
 
+// source file directory
 const SRCDIR = './src';
+
+// output file directory
 const BUILDDIR = './docs';
+
+// directory to find pug files
 const TEMPLATEDIR = `${SRCDIR}/templates`;
-const RESDIR = `${SRCDIR}/res`;
+
+// list of files to copy to build directory (path relative to src/build)
+const COPYFILES = ['res', 'CNAME'];
 
 // clear builddir
 console.log(`Clearing build directory ${BUILDDIR}...`);
@@ -17,9 +24,12 @@ fs.rmSync(BUILDDIR, {recursive: true, force: true});
 console.log(`Creating build directory ${BUILDDIR}...`);
 fs.mkdirSync(BUILDDIR);
 
-// copy res to builddir (symlink doesn't work in GitHub pages)
-console.log(`Symlinking resource directory to ${RESDIR}...`);
-fsExtra.copySync(RESDIR, `${BUILDDIR}/res`);
+// copy files to builddir
+console.log(`Copying static files...`);
+for (const file of COPYFILES) {
+  console.log(`Copying file ${SRCDIR}/${file} -> ${BUILDDIR}/${file}`)
+  fsExtra.copySync(`${SRCDIR}/${file}`, `${BUILDDIR}/${file}`);
+}
 
 // get pages to build and where to build them
 const pagesYaml = fs.readFileSync(`${SRCDIR}/index.yaml`, 'utf-8');
