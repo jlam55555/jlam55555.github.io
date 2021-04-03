@@ -20,6 +20,34 @@ Commissioned projects:
       See it: https://safe-rides-redding-easton.herokuapp.com/
       Source: https://github.com/jlam55555/srre-client
 School projects (EE/CS):
+  C99 compiler:
+    anchor: compiler
+    year: 2021
+    desc: A (poor) C99 compiler for the compilers class. Aims to implement most of the C99 standard. Compiler was built using the standard compiler tools flex (lex) and bison (yacc). Successive assignments included lexing; parsing (expressions, declarations, statements); quad generation; and target code generation. (WIP)
+    links:
+      Source: https://github.com/jlam55555/ece466-compiler
+  Cloud convex hull:
+    anchor: convex_hull
+    year: 2021
+    desc: A convex hull cloud service, built on AWS in order to be scalable, highly-available, and performant. (WIP)
+    links:
+      Source: https://github.com/jlam55555/cloud-convex-hull
+  Parallel graph coloring:
+    anchor: graph_color
+    year: 2021
+    desc: Graph coloring using the Gebremedhin-Manne distributed-memory speculative coloring algorithm for the ECE453 Cloud Computing. The goal is to achieve speedup with parallel (CPU) computation of a real distributed computing algorithm. The first assignment was to implement this on a multi-threaded single-node application, and the second assignment was to extend to multiple nodes. While this particular algorithm scaled well onto multiple threads, network speeds were insufficient to produce a speedup.
+    links:
+      Checkpoint 1 README: https://github.com/jlam55555/parallel-graph-coloring/blob/master/src/proj1/README.md
+      Checkpoint 2 README: https://github.com/jlam55555/parallel-graph-coloring/tree/master/src/proj2/README.md
+      Checkpoint 2 visuals: http://files.lambdalambda.ninja/reports/20-21_spring/ece465_proj2b.lam_son.pdf
+      Source: https://github.com/jlam55555/parallel-graph-coloring
+  Lucy-Richardson Deconvolution on CUDA:
+    anchor: lr_deconv_cuda
+    year: 2021
+    desc: A blind iterative deconvolution algorithm used to deblur an image. CUDA version compared with CPU version in terms of accuracy and speed. Deblurring effectiveness was evaluated using a LoG filter (edge detector). CUDA acceleration achieved an order of magnitude speed improvement, even with a naive implementation.
+    links:
+      Report: file:///remote/reports/20-21_spring/ece453_proj1_deblur.pdf
+      Source: https://github.com/jlam55555/lucy-richardson-deconv-cuda
   CYK parser:
     anchor: cyk_parser
     year: 2021
@@ -33,6 +61,13 @@ School projects (EE/CS):
     links:
       Source: https://github.com/jlam55555/naive-bayes-text-categorization
       Report: http://files.lambdalambda.ninja/reports/20-21_spring/ece467_naive_bayes_tc.pdf
+  Neural network in Scheme Lisp:
+    anchor: nn_scheme
+    year: 2020
+    desc: Neural network written in Scheme. Uses functional approaches to typically imperative (array-based) approaches, at the cost of some performance.
+    links:
+      Source: https://github.com/jlam55555/nn-scheme
+      Report: http://files.lambdalambda.ninja/reports/20-21_fall/ece469_proj2_nn_scheme.pdf
   Searching for a more minimal intrinsic dimension of objective landscapes:
     anchor: intrinsic_dimensions
     year: 2020
