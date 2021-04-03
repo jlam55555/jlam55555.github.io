@@ -130,4 +130,300 @@ School projects (EE/CS):
       Demo: https://racing-game-csp.herokuapp.com/
       Source: https://github.com/jlam55555/racing-game
       Report: http://files.lambdalambda.ninja/reports/17-18/apcsp_multiracer_create_performance_task.kiefer_lam.pdf
-
+Hackathons:
+  Itmine:
+    anchor: itmine
+    year: 2019
+    desc: Itmine is a tool to help people not lose things. Generate a QR code to put on your belongings; if lost, it will generate a shipping label to the owner and give a small monetary award to the finder. Powered by the MEAN stack and the ShipEngine API. Submitted to the ERP Hackathon hosted by General Assembly.
+    links:
+      Demo: http://itmine.herokuapp.com/hiw
+      Source: https://github.com/10b-erp
+  Accelomap:
+    anchor: accelomap
+    year: 2018
+    desc: Map out a region using accelerometer data, using the basic principle that distance is the second integral of acceleration. Won third place project at Stonybrook Local Hack Day 2018.
+    links:
+      Source: https://github.com/dubstepnium
+  Fluorination:
+    anchor: fluorination
+    year: 2018
+    desc: A gamified community with an education-focused forum. Won Best Use of Algolia award at HackCooper 2018.
+    links:
+      Source: https://github.com/FluorinationNation/fluorination-server
+  MoMath Hackathon 2:
+    anchor: momath_2018
+    year: 2018
+    desc: 'Created a number of projects for the MoMath: Expressions 2018 hackathon. See repo for more details.'
+    links:
+      MoMath showcase: http://hackathon.momath.org/showcase/
+      Source: https://github.com/jlam55555/howitfeelstochew6gum
+  Fruit Sensei:
+    anchor: fruit_sensei
+    year: 2017
+    desc: Use your smartphone as a controller in a fruit-slicing game! Back when Fruit Sensei was popular. Won Best Game at StuyHacks Local Hack Day 2017.
+    links:
+      Devpost: https://devpost.com/software/fruit-sensei
+      Source: https://github.com/FruitSensei/fruitsensei.github.io
+  MoMath Hackathon 1:
+    anchor: momath_2017
+    year: 2017
+    desc: 'Created a number of projects for the MoMath: Expressions 2017 hackathon. See repo for more details.'
+    links:
+      Source: https://github.com/poobaloofa/howitfeelstochew5gum
+  RingTune:
+    anchor: ringtune
+    year: 2016
+    desc: First hackathon project (LIHacks 2016)! Worked with <a href="https://github.com/All88keys">Chris Vassallo</a> to create a user-guided music generator using common sequences of notes. Won Most Entrepreneurial award.
+    links:
+      Demo: https://jlam55555.github.io/ringtune-website/
+      Source: https://github:com/jlam55555/ringtune-website
+Smaller projects:
+  Groovy Maven Template:
+    anchor: groovy_maven
+    year: 2020
+    desc: Template for compiling a Groovy application into an uber-JAR using mvn so that you can easily run export it without requiring a Groovy installation on the client.
+    links:
+      Source: https://github.com/jlam55555/groovy-maven-template
+  Catcake:
+    anchor: catcake
+    year: 2020
+    desc: Second attempt at making a gallery website. Preceded by Gatollery.
+    links:
+      Demo: https://catcake.herokuapp.com/
+      Source: https://github.com/jlam55555/catcake
+  Project Euler in Java:
+    anchor: pe_java
+    year: 2020
+    desc: Second attempt at handling Project Euler, but in Java (first time was in JS). Slightly less naive implementations.
+    links:
+      Source: https://github.com/jlam55555/project-euler-java
+  Gatollery:
+    anchor: gatollery
+    year: 2019
+    desc: First attempt at making a gallery website. Superseceded by Catcake.
+    links:
+      Demo: https://gatollery.github.io/
+      Source: https://github.com/gatollery/gatollery.github.io
+  Color layer generator:
+    anchor: color_layers
+    year: 2019
+    desc: CSS classes as "color filters" using Sass.
+    links:
+      Demo: https://jlam55555.github.io/color-layer-generator/examples/example.html
+      Source: https://github.com/jlam55555/color-layer-generator
+  Everything is Sheep (EiS):
+    anchor: eis
+    year: 2018
+    desc: My (current) personal blog. Built on a Node.JS backend, hosted on Heroku. No front end frameworks employed (all JS/CSS is vanilla).
+    links:
+      Demo: http://everything-is-sheep.herokuapp.com/
+  Unscrambler:
+    anchor: unscrambler
+    year: 2018
+    desc: Anagram finder. Additionally, scrambles words as a game for you to find an anagram.
+    links:
+      Demo: http://jlam55555.github.io/unscrambler/
+      Source: https://github.com/jlam55555/unscrambler
+  Blank new tab Chrome extension:
+    anchor: blank_new_tab
+    year: 2018
+    desc: Simplicity in the new tab page on Google Chrome. For those who don't like clutter.
+    links:
+      Source: https://github.com/jlam55555/simple-new-tab
+  Remeet:
+    anchor: remeet
+    year: 2018
+    desc: Messing around with WebRTC for P2P video streaming.
+    links:
+      Demo: http://remeet.herokuapp.com/
+      Source: https://github.com/jlam55555/remeet
+  Personal website (v2):
+    anchor: website_v2
+    year: 2018
+    desc: Second iteration of a personal website.
+    links:
+      Demo: https://jlam55555.github.io/personal-new/
+      Source: https://github.com/jlam55555/personal-new
+  Elastic band:
+    anchor: elastic_band
+    year: 2018
+    desc: Playing around with what we learned in physics class. Spring/elastic band simulation using p5/processing.js. Adjustable spring constants.
+    links:
+      Demo: https://jlam55555.github.io/elastic-band/
+      Source: https://github.com/jlam55555/elastic-band
+  Gravity points:
+    anchor: gravity_points
+    year: 2018
+    desc: Using what we learned in AP Physics.
+    links:
+      Demo: https://jlam55555.github.io/p5-gravity-field/
+      Source: https://github.com/jlam55555/p5-gravity-field
+  Barlow Bowling website:
+    anchor: barlow_bowling
+    year: 2018
+    desc: Website to keep track of scores for the JBHS bowling club and predict Varsity players for the upcoming week. First time attempting to use Angular Material.
+    links:
+      Demo: https://jbhsbowling.github.io/
+      Source: https://github.com/jbhsbowling/jbhsbowling.github.io
+  Haiku generator:
+    anchor: haikus
+    year: 2018
+    desc: Randomly scrapes random Wikipedia pages and chooses sentences that start with a 5-7-5 syllable pattern (according to Datamuse API).
+    links:
+      Source: https://github.com/jlam55555/haiku-generator
+  Fractals:
+    anchor: fractals
+    year: 2016
+    desc: Generate fractals with Chaos game (Sierpinski triangle &amp; chaos squares/hexagons), the Thue-Morse sequence (Koch curve), and convergence of complex series (Julia/Mendelbrot sets)
+    links:
+      Julia set: https://jsfiddle.net/jlam55555/ay4nqfqL/5/
+      Mendelbrot set: https://jsfiddle.net/jlam55555/3bgvt3c4/2/
+      Koch curve: https://jsfiddle.net/jlam55555/a1qshh6x/7/
+      Chaos game square: https://jsfiddle.net/jlam55555/m0gyzpt0/22/
+      Chaos game hexagon: https://jsfiddle.net/jlam55555/tkduy1o3/3/
+  Memory game:
+    anchor: memory_game
+    year: 2016
+    desc: Simple memory game in JS.
+    links:
+      Demo: http://jlam55555.github.io/memory-game/
+      Source: https://github.com/jlam55555/memory-game
+  Tic Tac Toe:
+    anchor: ttt_js
+    year: 2016
+    desc: Simple JS tic tac toe. Doesn't play very well.
+    links:
+      Demo: https://jlam55555.github.io/tic-tac-toe/
+      Source: https://github.com/jlam55555/tic-tac-toe
+  rps-random:
+    anchor: rps
+    year: 2016
+    desc: Rock paper scissors against a random computer opponent.
+    links:
+      Source: https://github.com/jlam55555/rps-random
+  ttt:
+    anchor: ttt_c
+    year: 2016
+    desc: A simple tic-tac-toe player in C.
+    links:
+      Source: https://github.com/jlam55555/ttt
+  Paste to HTML:
+    anchor: paste_html
+    year: 2016
+    desc: If you copy HTML from a webpage using Ctrl+C, you can paste it into this input box (using Ctrl+V) and get the underlying HTML. Handy little tool.
+    links:
+      Demo: https://jlam55555.github.io/paste-to-html/
+      Source: https://github.com/jlam55555/paste-to-html
+  Word visualizer:
+    anchor: word_vis
+    year: 2016
+    desc: Save image as text! Also change font family, size, (some) lighting, letter colors, and more! Can be used to imitate simple text-only logos.
+    links:
+      Demo: https://jlam55555.github.io/word-visualizer/
+      Source: https://github.com/jlam55555/word-visualizer
+  htmldebug:
+    anchor: htmldebug
+    year: 2016
+    desc: My attempt at making a simple debugging console like Firebug, since the browser developer console was slow (at the time).
+    links:
+      Source: https://github.com/jlam55555/htmldebug
+  Nutmeg Bowl website proposal:
+    anchor: nb_website
+    year: 2016
+    desc: My second attempt at revamping the original Nutmeg Bowl of Fairfield website. They didn't accept it.
+    links:
+      Demo: https://jlam55555.github.io/nutmegbowl/
+      Source: https://github.com/jlam55555/nutmegbowl
+  jkcd:
+    anchor: jkcd
+    year: 2016
+    desc: Desktop xkcd viewer with a JavaFX GUI. Requires Java 8+.
+    links:
+      Source: https://github.com/jlam55555/jkcd
+  xkcd-term:
+    anchor: xkcd_term
+    year: 2016
+    desc: Desktop xkcd viewer in the (Linux) terminal. Requires ImageMagick.
+    links:
+      Source: https://github.com/jlam55555/xkcd-term
+  Pop the lock:
+    anchor: pop_the_lock
+    year: 2016
+    desc: Imitation of the original game of the same name.
+    links:
+      Demo: http://jlam55555.github.io/pop-the-lock/
+      Source: https://github.com/jlam55555/pop-the-lock
+  Real coding time:
+    anchor: real_coding_time
+    year: 2016
+    desc: Real-time coding in the browser (like Google Docs but for code). Similar to the original chat, but experimented with syntax highlighting for inputted text.
+    links:
+      Client source: https://github.com/jlam55555/realcodingtime
+      Server source: https://github.com/jlam55555/real-coding-time
+  The Homework Life:
+    anchor: thl
+    year: 2016-18
+    desc: First attempt at a blog. MySQL backend. Lazy-loading front-end. All the posts have been migrated to Everything is Sheep. Used to be hosted at thehomeworklife.co.nf.
+    links:
+      Source: https://github.com/jlam55555/the-homework-life
+  Periodic Letters:
+    anchor: periodic_letters
+    year: 2016
+    desc: Fun tool to make strings of text out of periodic element boxes. I used this to make a Christmas tree out of some Christmas song for Honors Chemistry.
+    links:
+      Demo: http://jlam55555.github.io/periodic-letters/
+      Source: https://github.com/jlam55555/periodic-letters
+  Balencistry:
+    anchor: balencistry
+    year: 2016
+    desc: Visual aid to help when balancing chemical equations for Honors chemistry.
+    links:
+      Demo: http://jlam55555.github.io/balencistry/
+      Source: https://github.com/jlam55555/balencistry
+  Personal website (v1):
+    anchor: website_v1
+    year: 2015
+    desc: First iteration of a personal website.
+    links:
+      Demo: https://jlam55555.github.io/personal-old/
+      Source: https://github.com/jlam55555/personal-old
+  Chat:
+    anchor: chat
+    year: 2015
+    desc: My first Node.js application (!!!). Learned how to use ExpressJS and socket.io to create a real-time chat server. Was also playing around with Chrome extensions at the time and made one that connects to the main chat server.
+    links:
+      Source: https://github.com/jlam55555/chat
+      Chrome extension source: https://github.com/jlam55555/chat-chrome-extension
+  Speller:
+    anchor: speller
+    year: 2015
+    desc: Aimed to help my sister win the regional Spelling Bee (which she did!). Playing around with the voice using the native <a href="https://blog.teamtreehouse.com/getting-started-speech-synthesis-api">JS speech synthesis API</a>.
+    links:
+      Demo: http://jlam55555.github.io/speller/
+      Source: https://github.com/jlam55555/speller
+  Planetary:
+    anchor: planetary
+    year: 2015
+    desc: Fun little visual. Props to <a href="https://www.hunterlightman.com/">Hunter Lightman</a> for the visuals and showing me how to use trig to animate circles with code for the first time.
+    links:
+      Demo: http://jlam55555.github.io/planetary/
+      Source: https://github.com/jlam55555/planetary
+  Flappy:
+    anchor: flappy
+    year: 2015
+    desc: Naive attempt at Flappy bird. Buggy but kind of fun.
+    links:
+      Demo: http://jlam55555.github.io/flappy/
+      Source: https://github.com/jlam55555/flappy
+  (Early attempts at) Project Euler in JS:
+    anchor: pe_js
+    year: 2015
+    desc: First attempt at Project Euler. Many of these are brute force. Written while attending a summer program for learning C.
+    links:
+      Source: https://github.com/jlam55555/ProjectEuler
+  '"Programath" PLTW Final Project':
+    anchor: programath
+    year: 2014
+    desc: First website presented to peers. Calculator tools (in JS), and an explanation of how HTML/CSS/JS/PHP fit together to form a website.
+    links:
+      Demo: https://jlam55555.github.io/programath/
