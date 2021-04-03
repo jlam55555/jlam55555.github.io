@@ -1,0 +1,7 @@
+- template: index
+  destination: /
+  title: Home
+- template: faq
+  title: FAQ
+- template: contact
+  title: Contact

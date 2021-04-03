@@ -1,0 +1,114 @@
+Commissioned projects:
+  Maroon and Gold Labs:
+    year: 2019
+    desc: Maroon and Gold Labs incubator for Cooper students. Created on Strikingly.
+    links:
+      See it: https://www.maroonandgoldlabs.org/home
+  myGUT X22 and RespHealth X21:
+    year: 2018
+    desc: Gastrointestinal and upper respiratory take-home pathogen panels at Maverick Scientific (former Maverick Labs of Florida).
+    links:
+      RespHealth X21: https://resphealthx21.com/
+      myGUT X22: https://mygutx22.com/
+  Safe Rides of Redding and Easton Web-App:
+    year: 2018
+    desc: Web app for the newly-founded Safe Rides program at JBHS. Not operational anymore.
+    links:
+      See it: https://safe-rides-redding-easton.herokuapp.com/
+      Source: https://github.com/jlam55555/srre-client
+School projects (EE/CS):
+  CYK parser:
+    year: 2021
+    desc: Parse tree generator using CYK algorithm on a CNF grammar for ECE467.
+    links:
+      Source: https://github.com/jlam55555/cyk-parser
+  Naive Bayes text categorization:
+    year: 2021
+    desc: Naive Bayes bag-of-words (supervised) text categorization on three sample corpora. Uses the NLTK word tokenizer and Laplace (+1) smoothing for ECE467.
+    links:
+      Source: https://github.com/jlam55555/naive-bayes-text-categorization
+      Report: http://files.lambdalambda.ninja/reports/20-21_spring/ece467_naive_bayes_tc.pdf
+  Searching for a more minimal intrinsic dimension of objective landscapes:
+    year: 2020
+    desc: We base our methods and intuition off of <a href="https://arxiv.org/abs/1804.08838">Li et al. (2018)</a>, which attempts to define and estimate an &quot;intrinsic dimension&quot; of a given learning problem in conjunction with the neural architecture (the objective landscape). This is equivalent to approximating the minimum parameterization of an objective landscape, and may have practical application in model compression. We extend these methods with a series of experiments, mostly concerning using nonlinear transformations, in order to find a more minimal intrinsic dimension. For ECE472 final project.
+    links:
+      Source: https://github.com/jlam55555/intrinsic-dimension-projections
+      Paper: http://files.lambdalambda.ninja/reports/20-21_fall/ece472_intrinsic_dimension_projections.pdf
+      Presentation: http://files.lambdalambda.ninja/reports/20-21_fall/ece472_intrinsic_dimension_projections_presentation.pdf
+  Simulating Digital Coding Schemes (w/ Noise Distortion) in MATLAB:
+    year: 2020
+    desc: Similar to the projects on digital and analog modulation schemes below, but experimenting with a linear block code (LBC) and error detection/correction. For ECE300.
+    links:
+      Report: http://files.lambdalambda.ninja/reports/20-21_fall/ece300_proj3.lam_shersher_skok_yanofsky.pdf
+  Simulating Digital Modulation Schemes (w/ Noise Distortion) in MATLAB:
+    year: 2020
+    desc: Similar to the project on analog modulation schemes below, but with digital modulation schemes. Experimented with binary antipodal, binary orthogonal, PSK, DPSK, QAM. Theoretical results are largely reproduced. For ECE300.
+    links:
+      Report: http://files.lambdalambda.ninja/reports/20-21_fall/ece300_proj2.dehority_hong_lam.pdf
+  Checkers-playing AI:
+    year: 2020
+    desc: Checkers-playing AI using minimax-search with alpha-beta pruning and time-limited iterative deepening. Uses a custom heuristic based off of common Checkers strategy. Both a C++ and a Chez Scheme version were written, using very similar data structures and optimizations; Scheme version reaches roughly the same depth as C++ version. For ECE469.
+    links:
+      Source: https://www.github.com/jlam55555/checkers-ai
+      Report: http://files.lambdalambda.ninja/reports/20-21_fall/ece469_proj1_checkers_ai.pdf
+  Reproducing MobileNets on CIFAR-10:
+    year: 2020
+    desc: Created an implementation of the MobileNet architecture described in arXiv:1704.04861, and verified some of the results produced by the author. Used CIFAR-10 rather than ImageNet due to computational limitations. Assignment was to reproduce the findings of a research paper. Midterm project for ECE472.
+    links:
+      Report: http://files.lambdalambda.ninja/reports/20-21_fall/ece472_midterm_mobilenets.lam_lee.pdf
+  Simulating Analog Modulation Schemes (w/ Noise Distortion) in MATLAB:
+    year: 2020
+    desc: Used MATLAB to simulate signals and analog modulation schemes (conventional AM, SSB AM, FM, PM), and the results of applying changes to the parameters or of adding noise to the modulated signal. Able to reproduce most theoretical results fairly well. For ECE300.
+    links:
+      Report: http://files.lambdalambda.ninja/reports/20-21_fall/ece300_proj1.pdf
+  'How-to Series: Scheme Lisp':
+    year: 2020
+    desc: Exploratory session into Scheme as the first installation of the IEEExACM club How-to series.
+    links:
+      Video: http://files.lambdalambda.ninja/reports/20-21_nonacademic/how_to_scheme.mp4
+      Transcript: http://files.lambdalambda.ninja/reports/20-21_nonacademic/how_to_scheme.pdf
+  Assorted Frequentist Machine Learning Techniques:
+    year: 2020
+    desc: 'Experimenting with various machine learning techniques for ECE475. This includes supervised learning: linear regression/classification, ensemble classification (gradient-boosted trees and random forests), recommender systems; and unsupervised learning: market-basket analysis. Also explored proper validation techniques and regularization techniques: L1, L2, complexity pruning for decision trees.'
+    links:
+      Linear regression w/ L1, L2 regularization: http://files.lambdalambda.ninja/reports/20-21_fall/ece475_proj1.pdf
+      Logistic (binomial and multinomial) regression with stepwise pruning, L1 regularization: http://files.lambdalambda.ninja/reports/20-21_fall/ece475_proj2.pdf
+      Reproducing a wrong and correct methods for doing K-fold CV: http://files.lambdalambda.ninja/reports/20-21_fall/ece475_proj3.pdf
+      Regression using gradient-boosted trees (xgboost) and random forests (sklearn): http://files.lambdalambda.ninja/reports/20-21_fall/ece475_proj4.pdf
+      Comparing feature importance and performance betweeen GBT and RF: http://files.lambdalambda.ninja/reports/20-21_fall/ece475_proj5.pdf
+      Market-basket analysis (mlxtend): http://files.lambdalambda.ninja/reports/20-21_fall/ece475_proj6.pdf
+      Recommender systems, and an implementation using non-negative matrix factorization (NMF): http://files.lambdalambda.ninja/reports/20-21_fall/ece475_proj7.pdf
+  Photocol Photo Gallery:
+    year: 2020
+    desc: 'Explored various web design procedures and technologies, including but not limited to: CRLF injection attack, session cookies, Java Spring framework, React.JS, Bootstrap, HTTP protocols, containerization (w/ Docker), many-to-one relationships (e.g., access control) in PostgreSQL, prepared statements, one-way hashing (w/ bcrypt), SQL foreign keys, etc. For ECE366.'
+    links:
+      Source: https://github.com/photocol
+  Theremin:
+    year: 2019
+    desc: Constructed a theremin (the instrument) using the principles of circuit design and operational amplifiers. Final project for ECE291.
+    links:
+      Report: http://files.lambdalambda.ninja/reports/19-20_fall/ece291_theremin_lab.zhang_lam.pdf
+  Dataset-optimized Sorting:
+    year: 2018
+    desc: Implemented various common sorting algorithms adapted for provided datasets. Explored quicksort, counting/bin sort, indirect sort, insertion sort.
+    links:
+      Source: https://github.com/jlam55555/dsa-pa2
+  '"The Regulators" Colorimetric Test Strip':
+    year: 2018
+    desc: Engineering design project aimed towards providing a low-cost alternative to diabetes test strip. Uses a chemical that changes color based on glucose composition. Accompanying Android app to help determine glucose composition from color. (First time using React.) For EID101.
+    links:
+      Website: https://theregulators.github.io/
+      Source: https://github.com/theregulators
+  Tron:
+    year: 2018
+    desc: Recreated an 8x8 version of the Tron game in hardware as the Digital Logic Design final project. Involves use of CMOS 4000-series logic chips, flip-flops, and various timing optimizations. For ECE150.
+    links:
+      Report: http://files.lambdalambda.ninja/reports/18-19_fall/ece150_tron_project.kingsbury_lam.pdf
+  Multiplayer Racing Game:
+    year: 2018
+    desc: Create Performance Task for AP CSP. Worked with <a href="https://github.com/rdk750">Rahul Kiefer</a>. Multiplayer "racing" game written with a Node.JS+socket.io backend, THREE.js 3D library, JS orientation library for smartphone controls. (Much of the same technology as Fruit Sensei.)
+    links:
+      Demo: https://racing-game-csp.herokuapp.com/
+      Source: https://github.com/jlam55555/racing-game
+      Report: http://files.lambdalambda.ninja/reports/17-18/apcsp_multiracer_create_performance_task.kiefer_lam.pdf
+

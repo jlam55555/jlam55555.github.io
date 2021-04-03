@@ -1,0 +1,8 @@
+# IntelliJ files
+.idea
+
+# Scratch files
+scratch
+
+# Node files
+node_modules

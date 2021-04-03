@@ -1,0 +1,26 @@
+doctype html
+html
+    head
+        title Jonathan Lam -- #{title}
+        style.
+            body, html {
+                width: 100%;
+                max-width: 400pt;
+                margin: 0 auto;
+                padding: 0.5rem;
+            }
+        meta(name=viewport, content="width=device-width, initial-scale=1.0")
+    body
+        h1 Jonathan Lam
+        nav
+            a(href="/") Home
+            span &nbsp;|&nbsp;
+            a(href="/faq") FAQ
+            span &nbsp;|&nbsp;
+            a(href="/contact") Contact
+            span &nbsp;|&nbsp;
+            a(href="/projects") Projects
+            span &nbsp;|&nbsp;
+            a(href="/res/resume.pdf" target="_blank") Resume
+        hr
+        block content

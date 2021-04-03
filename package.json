@@ -1,0 +1,34 @@
+{
+  "name": "jonathan-lam-website",
+  "version": "1.0.0",
+  "description": "Static part of Jonathan Lam's website",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "build": "node build.js",
+    "serve": "node serve.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jlam55555/jonathan-lam-website.git"
+  },
+  "keywords": [
+    "jonathan",
+    "lam",
+    "website",
+    "personal"
+  ],
+  "author": "Jonathan Lam <jlam55555@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jlam55555/jonathan-lam-website/issues"
+  },
+  "homepage": "https://github.com/jlam55555/jonathan-lam-website#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "pug": "^3.0.2",
+    "yaml": "^1.10.2"
+  }
+}
