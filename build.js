@@ -1,5 +1,6 @@
 // a very simple buildsystem for a very simple website
 const fs = require('fs');
+const fsExtra = require('fs-extra');
 const pug = require('pug');
 const yaml = require('yaml');
 
@@ -15,9 +16,9 @@ fs.rmSync(BUILDDIR, {recursive: true, force: true});
 console.log(`Creating build directory ${BUILDDIR}...`);
 fs.mkdirSync(BUILDDIR);
 
-// symlink res directory to builddir
+// copy res to builddir (symlink doesn't work in GitHub pages)
 console.log(`Symlinking resource directory to ${RESDIR}...`);
-fs.symlinkSync(`../${RESDIR}`, `${BUILDDIR}/res`);
+fsExtra.copySync(RESDIR, `${BUILDDIR}/res`);
 
 // get pages to build and where to build them
 const pagesYaml = fs.readFileSync('src/pages.yaml', 'utf-8');
