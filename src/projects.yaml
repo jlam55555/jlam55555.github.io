@@ -46,7 +46,7 @@ School projects (EE/CS):
     year: 2021
     desc: A blind iterative deconvolution algorithm used to deblur an image. CUDA version compared with CPU version in terms of accuracy and speed. Deblurring effectiveness was evaluated using a LoG filter (edge detector). CUDA acceleration achieved an order of magnitude speed improvement, even with a naive implementation.
     links:
-      Report: file:///remote/reports/20-21_spring/ece453_proj1_deblur.pdf
+      Report: http://files.lambdalambda.ninja/reports/20-21_spring/ece453_proj1_deblur.pdf
       Source: https://github.com/jlam55555/lucy-richardson-deconv-cuda
   CYK parser:
     anchor: cyk_parser
