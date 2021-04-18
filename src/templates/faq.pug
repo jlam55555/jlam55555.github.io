@@ -2,9 +2,16 @@ extends layout
 
 block content
     h2 FAQ
-    h3 You're a web developer? Why does your website look like sh*t?
-    p I enjoy full-stack development, but not UI/UX. Whatever I try to do never ends up satisfying, so I'll leave it to designers when possible.
-    p Simple has its benefits: it's fast, nostalgic (of #[a(href="http://info.cern.ch/hypertext/WWW/TheProject.html") early webpages]), and less distracting.
+    h3 You're a web developer? Why is your website sh*t?
+    p From prior experience, I'm not skilled with UI/UX. I'll leave it to the design gurus when possible.
+    p This is also a design choice, because simplicity has its benefits:
+    ul
+        li cheap on network data and processing power (see: #[a(href='https://developers.google.com/amp') Google AMP])
+        li brings on the nostalgia of #[a(href="http://info.cern.ch/hypertext/WWW/TheProject.html") the web when it was cool]
+        li less distracting (naturally minimalist?)
+        li relatively mobile-friendly
+        li this website runs on anything (like NetBSD, but on browsers -- this looks great on #[a(href='https://en.wikipedia.org/wiki/W3m') w3m]!)
+    p While SPAs are great, I think they're starting to become an anti-pattern as they become the norm, even and especially for small academic projects that would do better with much less. Thus I regress.
 
     h3 Why are the margins so big?
     p See: #[a(href="https://tex.stackexchange.com/questions/71172/") Why are the default LaTeX margins so big?]
