@@ -1,31 +1,41 @@
 doctype html
 html
     head
-        title Jonathan Lam -- #{title}
+        title jlam | #{title}
         style.
-            body, html {
+            html {
+                margin: 0;
+                padding: 0;
+            }
+            body {
                 width: 100%;
                 max-width: 400pt;
                 margin: 0 auto;
                 padding: 0.5rem;
             }
-        meta(name=viewport, content="width=device-width, initial-scale=1.0")
+        meta(name='viewport' content="width=device-width, initial-scale=1.0")
     body
         h1 Jonathan Lam
         p EE/CS @ The Cooper Union
         nav
             a(href="/") Home
-            span &nbsp;|&nbsp;
+            = " | "
             a(href="/faq") FAQ
-            span &nbsp;|&nbsp;
+            = " | "
             a(href="/contact") Contact
-            span &nbsp;|&nbsp;
+            = " | "
             a(href="/projects") Projects
-            span &nbsp;|&nbsp;
+            = " | "
             a(href="/res/resume.pdf" target="_blank") Resume
-            span &nbsp;|&nbsp;
+            = " | "
             a(href="http://files.lambdalambda.ninja") Files
-            span &nbsp;|&nbsp;
-            a(href="http://eis.lambdalambda.ninja") Blog
+            = " | "
+            a(href="/blog") Blog
+            = " | "
+            a(href="http://eis.lambdalambda.ninja") EiS
         hr
+
         block content
+
+        hr
+        p &copy; Copyright 2021 Jonathan Lam

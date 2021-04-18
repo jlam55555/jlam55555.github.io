@@ -8,3 +8,8 @@
 - template: projects
   title: Projects
   dataSrc: projects.yaml
+- module: blog.yaml
+  destination: blog
+- template: 404
+  title: 404
+  is404: true

@@ -1,0 +1,11 @@
+extends layout
+
+block content
+    h1 Blog
+
+    each post in data
+        unless post.destination === '/'
+            div
+                a(href="/blog/" + post.destination)
+                    h2= post.title
+                p= new Date(post.date).toString()

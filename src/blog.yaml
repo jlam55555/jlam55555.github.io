@@ -1,0 +1,9 @@
+- template: blogindex
+  destination: /
+  title: Blog
+  dataSrc: blog.yaml
+- template: blogpost
+  dataSrc: posts/0.pug
+  destination: 0
+  title: Hello, world!
+  date: 2021-04-18T21:00:01.130Z
