@@ -8,5 +8,9 @@ const PORT = 5000;
 // static hosting of the docs folder
 app.use(express.static(BUILDDIR));
 
+app.get('**', (req, res) => {
+    res.sendFile(`${__dirname}/docs/404.html`);
+})
+
 // listen on port 5000
 app.listen(PORT, () => console.log(`Listening on port ${PORT}...`));

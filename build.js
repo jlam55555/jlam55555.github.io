@@ -32,25 +32,64 @@ for (const file of COPYFILES) {
 }
 
 // get pages to build and where to build them
-const pagesYaml = fs.readFileSync(`${SRCDIR}/index.yaml`, 'utf-8');
-const pages = yaml.parse(pagesYaml);
-for (const page of pages) {
-  const {template, destination, title, dataSrc} = page;
-  const outDir = `${BUILDDIR}/${destination || template}`;
-  const outFile = `${outDir}/index.html`;
-  const templateFile = `${TEMPLATEDIR}/${template}.pug`;
-  const data = dataSrc
-    && yaml.parse(fs.readFileSync(`${SRCDIR}/${dataSrc}`, 'utf-8'));
+const buildDir = (module, buildDest) => {
+  const pagesYaml = fs.readFileSync(`${SRCDIR}/${module}`, 'utf-8');
+  const pages = yaml.parse(pagesYaml);
+  for (const page of pages) {
+    const {module, template, destination, dataSrc, is404} = page;
 
-  console.log(`Making directory ${outDir}...`);
-  fs.mkdirSync(outDir, {recursive: true});
+    // must specify template or module
+    if (template === undefined && module === undefined) {
+      console.error('Each index entry must indicate a template or submodule.'
+        + `Got: ${page}`);
+      process.exit(-1);
+    }
 
-  console.log(`Reading template file ${templateFile}...`);
-  const templateFileHtml = pug.renderFile(templateFile, {
-    title: title,
-    data: data
-  });
+    // TODO: should do more error checking
 
-  console.log(`Writing compiled file to ${outFile}...`);
-  fs.writeFileSync(outFile, templateFileHtml);
-}
+    // submodule, not a subpage; generate recursively
+    if (module !== undefined) {
+      buildDir(module, `${buildDest}/${destination}`);
+      continue;
+    }
+
+    // 404 page is specifically built to /404.html, as GitHub Pages expects
+    const outDir = `${BUILDDIR}/${buildDest}/${destination === undefined
+        ? template : destination}`;
+    const outFile = is404 ? `${BUILDDIR}/404.html` : `${outDir}/index.html`;
+    const templateFile = `${TEMPLATEDIR}/${template}.pug`;
+
+    // parse extra data
+    let data;
+    if (dataSrc !== undefined) {
+      const dataSrcExt = dataSrc.split('.').pop()
+      data = fs.readFileSync(`${SRCDIR}/${dataSrc}`, 'utf-8');
+
+      // special parsing for certain file types
+      switch (dataSrcExt) {
+        case 'yaml':
+          data = yaml.parse(data);
+          break;
+        case 'pug':
+          data = pug.compile(data)();
+          break;
+        // TODO: can add other special parsing types (e.g., JSON)
+      }
+    }
+
+    console.log(`Making directory ${outDir}...`);
+    fs.mkdirSync(outDir, {recursive: true});
+
+    console.log(`Reading template file ${templateFile}...`);
+    const templateFileHtml = pug.renderFile(templateFile, {
+      ...page,
+      data: data
+    });
+
+    console.log(`Writing compiled file to ${outFile}...`);
+    fs.writeFileSync(outFile, templateFileHtml);
+  }
+};
+
+// begin recursive build
+buildDir('index.yaml', '');
