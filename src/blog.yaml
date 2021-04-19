@@ -1,3 +1,4 @@
+# to generate dates: `date -Iseconds`
 - template: blogindex
   destination: /
   title: Blog
@@ -12,3 +13,8 @@
   destination: 1
   title: On this blog
   date: 2021-04-18T19:21:01-04:00
+- template: blogpost
+  dataSrc: posts/2.pug
+  destination: 2
+  title: pip venvs and freezing
+  date: 2021-04-18T21:52:54-04:00

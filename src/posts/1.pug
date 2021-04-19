@@ -19,6 +19,7 @@ p In the case that the website has multiple subfolders with many files, the way 
 
 p And that's about it! The source code for this website can be found on GitHub at #[a(href='https://github.com/jlam55555/jonathan-lam-website') @jlam55555/jonathan-lam-website]. Some lesser details:
 ul
+    li When building the blog, there was the issue of what to make the permalinks: should posts URLs be numbered (like xkcd), titled (like Jekyll), or both (like Stack Overflow, in which case the title is functionally useless)? I went with numbers numeric indices because they are simple, short, ordered, and wouldn't cause problems if the post title changes.
     li As of now, there is a script to build the website (I don't have a file watcher set up, so every build is manually triggered). A local test server is created by statically hosting the built webpages using Express.
     li At the time of writing, there is only one instance of JS on the core website: #[a(href='/404') the 404 page] (to get the URL). (Two if you include MathJax on the previous blog post.) Similarly, the only CSS on this website are to modify the sizes of the #[code &lt;html&gt;] and #[code &lt;body&gt;] elements.
     li This website looks great in w3m! Almost as good as it looks in the browser! Wow!

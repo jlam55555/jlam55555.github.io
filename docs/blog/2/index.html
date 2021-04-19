@@ -1,0 +1,25 @@
+<!DOCTYPE html><html><head><title>jlam | pip venvs and freezing</title><style>html {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0.5rem;
+}
+body {
+    max-width: 400pt;
+    margin: 0 auto;
+    padding: 0;
+}</style><link rel="icon" href="/res/favicon.png"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head><body><h1>Jonathan Lam</h1><p>EE/CS @ The Cooper Union</p><nav><a href="/">Home</a> | <a href="/faq">FAQ</a> | <a href="/contact">Contact</a> | <a href="/projects">Projects</a> | <a href="/res/resume.pdf" target="_blank">Resume</a> | <a href="http://files.lambdalambda.ninja">Files</a> | <a href="/blog">Blog</a> | <a href="http://eis.lambdalambda.ninja">EiS</a></nav><hr><h2>Blog</h2><h3>pip venvs and freezing</h3><p>On Sun Apr 18 2021 21:52:54 GMT-0400 (Eastern Daylight Time)</p><p><a href="/blog">Return to blog</a></p><p>Notes for my own reference. I don't like pip (I prefer npm with its implicit local environments and don't find any of the following command names particularly intuitive) but had to use it for a group project today.</p><h3>Virtual environments:</h3><pre># creating virtual environment in venv/
+python -m venv venv
+
+# activating venv
+. venv/bin/activate
+
+# deactivating venv
+deactivate
+
+# destroying venv
+rm -rf venv
+</pre><h3>Saving/restoring dependencies</h3><p>Make sure you're in the venv when doing these.</p><pre># freezing dependencies
+pip freeze >requirements.txt
+
+# installing dependencies
+pip install -r requirements.txt</pre><hr><p>&copy; Copyright 2021 Jonathan Lam</p></body></html>
