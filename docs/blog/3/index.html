@@ -1,0 +1,24 @@
+<!DOCTYPE html><html><head><title>jlam | Interfacing with MATLAB</title><style>html {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0.5rem;
+}
+body {
+    max-width: 400pt;
+    margin: 0 auto;
+    padding: 0;
+}</style><link rel="icon" href="/res/favicon.png"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head><body><h1>Jonathan Lam</h1><p>EE/CS @ The Cooper Union</p><nav><a href="/">Home</a> | <a href="/faq">FAQ</a> | <a href="/contact">Contact</a> | <a href="/projects">Projects</a> | <a href="/res/resume.pdf" target="_blank">Resume</a> | <a href="http://files.lambdalambda.ninja">Files</a> | <a href="/blog">Blog</a> | <a href="http://eis.lambdalambda.ninja">EiS</a></nav><hr><h2>Blog</h2><h3>Interfacing with MATLAB</h3><p>On Mon Apr 19 2021 16:02:16 GMT-0400 (Eastern Daylight Time)</p><p><a href="/blog">Return to blog</a></p><p>(This is in preparation for my upcoming MATLAB seminar lecture, because the next prepared lecture doesn't follow the schedule of the corequisite class.)</p><p>I've never enjoyed having to open the MATLAB IDE in order to be able to run A MATLAB script. Even a warm start on a SSD takes over a dozen seconds for the UI to open and become usable (there's an initial few-second delay between the UI becoming visible and when it becomes responsive to UI events and running MATLAB commands). At least a command-line interface to start off batch scripts would be useful, and ideally a language SDK. Luckily MATLAB has these tools, but it doesn't seem as though they're widely advertised. (I was previously unaware of most of the following topics until I had to search for topics to cover for the seminar.)</p><p>This post will cover a few ways to handle external data from MATLAB, and call MATLAB scripts externally.</p><h4>File I/O (from MATLAB)</h4><p>This topic doesn't entirely follow the theme here, but it'll be included for completeness of external MATLAB interfaces. This is a common task and should be covered within a general MATLAB tutorial.</p><p>From within MATLAB we often need to read files containing some data (whether a standard image/audio/video data format, or MATLAB's internal memory dump format), and write out the signal to a file.</p><p>Luckily, MATLAB makes it fairly easy to read and write a good range of common data formats without any client-side frustration dealing with compression or encoding methods. Commonly, you'll be dealing with audio and images, for which the following methods will be helpful:</p><pre>% audio represented by a 1-D string of samples
+[Y, Fs] = audioread(filename);
+audiowrite(filename, Y, Fs);
+
+% images represented by a 3-D array (H x W x channels)
+A = imread(filename);
+imwrite(A, filename);</pre><p>Of course, there are many other options to play around with that you can explore with <code>help <em>fnname</em></code>. For example, you can use remote URIs in addition to local paths!</p><p>(In my experience, you're less prone to having any issues if you use "simpler" formats such as .wav for audio files and .tiff or .bmp (raw, uncompressed bitmaps) for image files, as I've sometimes had issues with color channels on other image types without fiddling with color options. YMMV.)</p><p>For arbitrary variables that you want to save to a file, you can use the save and load commands. For example:</p><pre>%% saves workspace to dataFile.mat
+clear;
+A = 4;
+B = 6;
+save dataFile;
+
+%% restores workspace from dataFile.mat
+clear;
+load dataFile;</pre><p>The output *.mat file is an opaque binary data format much like Python's <code>pickle</code> or Go's <code>gob</code> output formats.</p><hr><p>&copy; Copyright 2021 Jonathan Lam</p></body></html>

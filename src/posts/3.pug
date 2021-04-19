@@ -1,0 +1,31 @@
+p (This is in preparation for my upcoming MATLAB seminar lecture, because the next prepared lecture doesn't follow the schedule of the corequisite class.)
+p I've never enjoyed having to open the MATLAB IDE in order to be able to run A MATLAB script. Even a warm start on a SSD takes over a dozen seconds for the UI to open and become usable (there's an initial few-second delay between the UI becoming visible and when it becomes responsive to UI events and running MATLAB commands). At least a command-line interface to start off batch scripts would be useful, and ideally a language SDK. Luckily MATLAB has these tools, but it doesn't seem as though they're widely advertised. (I was previously unaware of most of the following topics until I had to search for topics to cover for the seminar.)
+p This post will cover a few ways to handle external data from MATLAB, and call MATLAB scripts externally.
+
+h4 File I/O (from MATLAB)
+p This topic doesn't entirely follow the theme here, but it'll be included for completeness of external MATLAB interfaces. This is a common task and should be covered within a general MATLAB tutorial.
+p From within MATLAB we often need to read files containing some data (whether a standard image/audio/video data format, or MATLAB's internal memory dump format), and write out the signal to a file.
+p Luckily, MATLAB makes it fairly easy to read and write a good range of common data formats without any client-side frustration dealing with compression or encoding methods. Commonly, you'll be dealing with audio and images, for which the following methods will be helpful:
+pre.
+    % audio represented by a 1-D string of samples
+    [Y, Fs] = audioread(filename);
+    audiowrite(filename, Y, Fs);
+
+    % images represented by a 3-D array (H x W x channels)
+    A = imread(filename);
+    imwrite(A, filename);
+p Of course, there are many other options to play around with that you can explore with #[code help #[em fnname]]. For example, you can use remote URIs in addition to local paths!
+p (In my experience, you're less prone to having any issues if you use "simpler" formats such as .wav for audio files and .tiff or .bmp (raw, uncompressed bitmaps) for image files, as I've sometimes had issues with color channels on other image types without fiddling with color options. YMMV.)
+
+p For arbitrary variables that you want to save to a file, you can use the save and load commands. For example:
+pre.
+    %% saves workspace to dataFile.mat
+    clear;
+    A = 4;
+    B = 6;
+    save dataFile;
+
+    %% restores workspace from dataFile.mat
+    clear;
+    load dataFile;
+p The output *.mat file is an opaque binary data format much like Python's #[code pickle] or Go's #[code gob] output formats.

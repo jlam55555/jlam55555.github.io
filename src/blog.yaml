@@ -18,3 +18,18 @@
   destination: 2
   title: pip venvs and freezing
   date: 2021-04-18T21:52:54-04:00
+- template: blogpost
+  dataSrc: posts/3.pug
+  destination: 3
+  title: Interfacing with MATLAB
+  date: 2021-04-19T16:02:16-04:00
+- template: blogpost
+  dataSrc: posts/4.pug
+  destination: 4
+  title: MATLAB's command vs. function syntax
+  date: 2021-04-19T16:44:39-04:00
+- template: blogpost
+  dataSrc: posts/5.pug
+  destination: 5
+  title: Installed packages on a (fairly) new Debian install
+  date: 2021-04-19T17:31:25-04:00
