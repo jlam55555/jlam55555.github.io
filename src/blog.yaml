@@ -7,3 +7,8 @@
   destination: 0
   title: Hello, world!
   date: 2021-04-18T21:00:01.130Z
+- template: blogpost
+  dataSrc: posts/1.pug
+  destination: 1
+  title: On this blog
+  date: 2021-04-18T19:21:01-04:00
