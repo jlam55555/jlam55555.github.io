@@ -1,0 +1,14 @@
+extends ../templates/layout
+
+block content
+    include ../mixins/codestyle
+    include ../mixins/imglink
+    include ../mixins/mathjax
+
+    h2 Blog
+    h3= title
+    p On #{new Date(date).toString()}
+    p
+        a(href="/blog") Return to blog
+
+    block post

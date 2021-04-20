@@ -1,27 +1,30 @@
-include ../mixins/codestyle
+extends blogpost
 
-p Notes for my own reference. I don't like pip (I prefer npm with its implicit local environments and don't find any of the following command names particularly intuitive) but had to use it for a group project today.
+block post
+	+codestyle
 
-h4 Virtual environments:
-+precode('bash').
-	# creating virtual environment in venv/
-	python -m venv venv
+	p Notes for my own reference. I don't like pip (I prefer npm with its implicit local environments and don't find any of the following command names particularly intuitive) but had to use it for a group project today.
 
-	# activating venv
-	. venv/bin/activate
+	h4 Virtual environments:
+	+precode('bash').
+		# creating virtual environment in venv/
+		python -m venv venv
 
-	# deactivating venv
-	deactivate
+		# activating venv
+		. venv/bin/activate
 
-	# destroying venv
-	rm -rf venv
+		# deactivating venv
+		deactivate
 
-h4 Saving/restoring dependencies
-p Make sure you're in the venv when doing these.
+		# destroying venv
+		rm -rf venv
 
-+precode('bash').
-	# freezing dependencies
-	pip freeze >requirements.txt
+	h4 Saving/restoring dependencies
+	p Make sure you're in the venv when doing these.
 
-	# installing dependencies
-	pip install -r requirements.txt
+	+precode('bash').
+		# freezing dependencies
+		pip freeze >requirements.txt
+
+		# installing dependencies
+		pip install -r requirements.txt
