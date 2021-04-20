@@ -7,16 +7,20 @@ body {
     max-width: 400pt;
     margin: 0 auto;
     padding: 0;
-}</style><link rel="icon" href="/res/favicon.png"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head><body><h1>Jonathan Lam</h1><p>EE/CS @ The Cooper Union</p><nav><a href="/">Home</a> | <a href="/faq">FAQ</a> | <a href="/contact">Contact</a> | <a href="/projects">Projects</a> | <a href="/res/resume.pdf" target="_blank">Resume</a> | <a href="http://files.lambdalambda.ninja">Files</a> | <a href="/blog">Blog</a> | <a href="http://eis.lambdalambda.ninja">EiS</a></nav><hr><h2>Blog</h2><h3>Installed packages on a (fairly) new Debian install</h3><p>On Mon Apr 19 2021 17:31:25 GMT-0400 (Eastern Daylight Time)</p><p><a href="/blog">Return to blog</a></p><style>pre {max-width:100%;white-space:pre-wrap;}</style><p>I recently reinstalled Debian 10 (buster, i.e., the stable version) due to a dependency disaster stemming from an accidental upgrade from bullseye to bullseye/sid that upgraded my CUDA version which caused incompatibility with my 8-yo Nvidia card...</p><p>I've been using this new system for a few days already, but I thought it'd be interesting to store all the packages somewhere for me to reflect on. Of course, most things are installed with apt. The only exceptions are MATLAB, the IntelliJ's (CLion, IDEA Community, PyCharm, WebStorm, and GoLand), and Python 3.8 (to install a newer pip version needed for TensorFlow 2).</p><p>Listing packages manually installed with <code>apt</code></p><pre>$ grep 'apt install' /var/log/apt/history.log \
-| cut -f 4- -d ' ' - \
-| sed 's/ /\n/'\
-| sort
-
-bison build-essential cifs-utils cmake ./code_1.55.2-1618307277_amd64.deb curl curl ./discord.deb evince feh flex fonts-ibm-plex gdb git golang ./google-chrome-stable_current_amd64.deb htop jq libbz2-dev libffi-dev libgdbm-dev libncurses5-dev libnss3-dev libpng-dev libreadline-dev libsqlite3-dev libssl-dev matlab-support nodejs npm nvidia-cuda-toolkit nvidia-detect nvidia-driver nvidia-settings pkg-config python3-pip python3-venv simplescreenrecorder tcpdump ./teams_1.4.00.7556_amd64.deb texstudio vim w3m zip zlib1g-dev ./zoom_amd64.deb
-</pre><p>Listing all packages installed with <code>apt</code>.</p><ul></ul><li><code>script</code> is used to grab screen output to the typescript file (simply redirecting stdout from <code>apt</code> doesn't work)</li><li><a href="https://stackoverflow.com/a/18000433/2397327"><code>sed</code> is used to replace the ANSI color codes in the terminal output</a></li><pre>$ script -c "apt list --installed" \
-	&& sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" typescript
-
-acl/stable,now 2.2.53-4 amd64 [installed,automatic]
+}</style><link rel="icon" href="/res/favicon.png"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head><body><h1>Jonathan Lam</h1><p>EE/CS @ The Cooper Union</p><nav><a href="/">Home</a> | <a href="/faq">FAQ</a> | <a href="/contact">Contact</a> | <a href="/projects">Projects</a> | <a href="/res/resume.pdf" target="_blank">Resume</a> | <a href="http://files.lambdalambda.ninja">Files</a> | <a href="/blog">Blog</a> | <a href="http://eis.lambdalambda.ninja">EiS</a></nav><hr><h2>Blog</h2><h3>Installed packages on a (fairly) new Debian install</h3><p>On Mon Apr 19 2021 17:31:25 GMT-0400 (Eastern Daylight Time)</p><p><a href="/blog">Return to blog</a></p><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.23.0/prism.min.js" integrity="sha512-YBk7HhgDZvBxmtOfUdvX0z8IH2d10Hp3aEygaMNhtF8fSOvBZ16D/1bXZTJV6ndk/L/DlXxYStP8jrF77v2MIg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.23.0/plugins/autoloader/prism-autoloader.min.js" integrity="sha512-zc7WDnCM3aom2EziyDIRAtQg1mVXLdILE09Bo+aE1xk0AM2c2cVLfSW9NrxE5tKTX44WBY0Z2HClZ05ur9vB6A==" crossorigin="anonymous"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.23.0/themes/prism-tomorrow.min.css" integrity="sha512-vswe+cgvic/XBoF1OcM/TeJ2FW0OofqAVdCZiEYkd6dwGXthvkSFWOoGGJgS2CW70VK5dQM5Oh+7ne47s74VTg==" crossorigin="anonymous"/><style>pre {
+	padding: .5rem !important;
+	line-height: 1 !important;
+}
+code {
+	line-height: 1 !important;
+	font-size: 0.75rem !important;
+	tab-size: 8 !important;
+}</style><p>I recently reinstalled Debian 10 (buster, i.e., the stable version) due to a dependency disaster stemming from an accidental upgrade from bullseye to bullseye/sid that upgraded my CUDA version which caused incompatibility with my 8-yo Nvidia card...</p><p>I've been using this new system for a few days already, but I thought it'd be interesting to store all the packages somewhere for me to reflect on. Of course, most things are installed with apt. The only exceptions are MATLAB, the IntelliJ's (CLion, IDEA Community, PyCharm, WebStorm, and GoLand), and Python 3.8 (to install a newer pip version needed for TensorFlow 2).</p><h4>Listing packages <em>manually</em> installed with <code>apt</code></h4><pre><code class="language-bash">grep 'apt install' /var/log/apt/history.log \
+	| cut -f 4- -d ' ' - \
+	| sed 's/ /\n/'\
+	| sort</code></pre><p>Output:</p><pre><code class="language-">bison build-essential cifs-utils cmake ./code_1.55.2-1618307277_amd64.deb curl curl ./discord.deb evince feh flex fonts-ibm-plex gdb git golang ./google-chrome-stable_current_amd64.deb htop jq libbz2-dev libffi-dev libgdbm-dev libncurses5-dev libnss3-dev libpng-dev libreadline-dev libsqlite3-dev libssl-dev matlab-support nodejs npm nvidia-cuda-toolkit nvidia-detect nvidia-driver nvidia-settings pkg-config python3-pip python3-venv simplescreenrecorder tcpdump ./teams_1.4.00.7556_amd64.deb texstudio vim w3m zip zlib1g-dev ./zoom_amd64.deb
+</code></pre><p>Pretty much as expected. All the manually installed packages are there fore school in some way or another.</p><h4>Listing all packages installed with <code>apt</code>.</h4><ul></ul><li><code>script</code> is used to grab screen output to the typescript file (simply redirecting stdout from <code>apt</code> doesn't work)</li><li><a href="https://stackoverflow.com/a/18000433/2397327"><code>sed</code> is used to replace the ANSI color codes in the terminal output</a></li><pre><code class="language-bash">script -c "apt list --installed" \
+	&& sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" typescript</code></pre><p>Output:</p><pre><code class="language-">acl/stable,now 2.2.53-4 amd64 [installed,automatic]
 adduser/stable,now 3.118 all [installed]
 adwaita-icon-theme/stable,now 3.30.1-1 all [installed,automatic]
 alsa-utils/stable,now 1.1.8-2 amd64 [installed,automatic]
@@ -1968,4 +1972,4 @@ zenity/stable,now 3.30.0-2 amd64 [installed,automatic]
 zip/stable,now 3.0-11+b1 amd64 [installed]
 zlib1g-dev/stable,now 1:1.2.11.dfsg-1 amd64 [installed]
 zlib1g/stable,now 1:1.2.11.dfsg-1 amd64 [installed]
-zoom/now 5.6.13632.0328 amd64 [installed,local]</pre><hr><p>&copy; Copyright 2021 Jonathan Lam</p></body></html>
+zoom/now 5.6.13632.0328 amd64 [installed,local]</code></pre><hr><p>&copy; Copyright 2021 Jonathan Lam</p></body></html>

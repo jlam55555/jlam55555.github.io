@@ -1,21 +1,34 @@
-style pre {max-width:100%;white-space:pre-wrap;}
+include ../mixins/codestyle
 
 p I recently reinstalled Debian 10 (buster, i.e., the stable version) due to a dependency disaster stemming from an accidental upgrade from bullseye to bullseye/sid that upgraded my CUDA version which caused incompatibility with my 8-yo Nvidia card...
 
 p I've been using this new system for a few days already, but I thought it'd be interesting to store all the packages somewhere for me to reflect on. Of course, most things are installed with apt. The only exceptions are MATLAB, the IntelliJ's (CLion, IDEA Community, PyCharm, WebStorm, and GoLand), and Python 3.8 (to install a newer pip version needed for TensorFlow 2).
 
-p Listing packages manually installed with #[code apt]
-pre.
-	$ grep 'apt install' /var/log/apt/history.log \
-	| cut -f 4- -d ' ' - \
-	| sed 's/ /\n/'\
-	| sort
+h4 Listing packages #[em manually] installed with #[code apt]
+pre
+	code(class='language-bash').
+		grep 'apt install' /var/log/apt/history.log \
+			| cut -f 4- -d ' ' - \
+			| sed 's/ /\n/'\
+			| sort
+p Output:
+pre
+	code(class='language-').
+		bison build-essential cifs-utils cmake ./code_1.55.2-1618307277_amd64.deb curl curl ./discord.deb evince feh flex fonts-ibm-plex gdb git golang ./google-chrome-stable_current_amd64.deb htop jq libbz2-dev libffi-dev libgdbm-dev libncurses5-dev libnss3-dev libpng-dev libreadline-dev libsqlite3-dev libssl-dev matlab-support nodejs npm nvidia-cuda-toolkit nvidia-detect nvidia-driver nvidia-settings pkg-config python3-pip python3-venv simplescreenrecorder tcpdump ./teams_1.4.00.7556_amd64.deb texstudio vim w3m zip zlib1g-dev ./zoom_amd64.deb
 
-	bison build-essential cifs-utils cmake ./code_1.55.2-1618307277_amd64.deb curl curl ./discord.deb evince feh flex fonts-ibm-plex gdb git golang ./google-chrome-stable_current_amd64.deb htop jq libbz2-dev libffi-dev libgdbm-dev libncurses5-dev libnss3-dev libpng-dev libreadline-dev libsqlite3-dev libssl-dev matlab-support nodejs npm nvidia-cuda-toolkit nvidia-detect nvidia-driver nvidia-settings pkg-config python3-pip python3-venv simplescreenrecorder tcpdump ./teams_1.4.00.7556_amd64.deb texstudio vim w3m zip zlib1g-dev ./zoom_amd64.deb
+p Pretty much as expected. All the manually installed packages are there fore school in some way or another.
 
-p Listing all packages installed with #[code apt].
+
+h4 Listing all packages installed with #[code apt].
 ul
 li #[code script] is used to grab screen output to the typescript file (simply redirecting stdout from #[code apt] doesn't work)
 li #[a(href='https://stackoverflow.com/a/18000433/2397327') #[code sed] is used to replace the ANSI color codes in the terminal output]
+
 pre
-	include ../res/posts/5_apt_out.txt
+	code(class='language-bash').
+		script -c "apt list --installed" \
+			&& sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g" typescript
+p Output:
+pre
+	code(class='language-')
+		include ../res/posts/5_apt_out.txt
