@@ -1,6 +1,7 @@
 // serve the webpage built in ./docs
 const express = require('express');
 const app = express();
+const path = require('path');
 
 const BUILDDIR = 'docs';
 const PORT = 5000;
@@ -9,7 +10,7 @@ const PORT = 5000;
 app.use(express.static(BUILDDIR));
 
 app.get('**', (req, res) => {
-    res.sendFile(`${__dirname}/docs/404.html`);
+    res.sendFile(path.resolve('docs/404.html'));
 })
 
 // listen on port 5000

@@ -1,11 +1,11 @@
 extends layout
 
 block content
-    h2 Blog
+	h2 Blog
 
-    each post in data.reverse()
-        unless post.destination === '/'
-            div
-                a(href="/blog/" + post.destination)
-                    h3= post.title
-                p= new Date(post.date).toString()
+	each post in data.reverse()
+		unless post.destination === '/'
+			div
+				a(href="/blog/" + post.destination)
+					h3= post.title
+				p= new Date(post.date).toString()

@@ -31,3 +31,7 @@
   destination: 6
   title: 'New TypeRacer Record: 163wpm'
   date: 2021-04-20T11:56:01-04:00
+- template: ../posts/7
+  destination: 7
+  title: Pug Shenanigans
+  date: 2021-04-20T15:54:03-04:00
