@@ -33,3 +33,8 @@
   destination: 5
   title: Installed packages on a (fairly) new Debian install
   date: 2021-04-19T17:31:25-04:00
+- template: blogpost
+  dataSrc: posts/6.pug
+  destination: 6
+  title: 'New TypeRacer Record: 163wpm'
+  date: 2021-04-20T11:56:01-04:00

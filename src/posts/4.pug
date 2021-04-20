@@ -3,46 +3,44 @@ include ../mixins/codestyle
 p I felt compelled to write about this because I couldn't figure this out on my own in the three years of using MATLAB.
 
 p In the MATLAB examples, you'll often see something along the lines of:
-pre
-	code(class='language-matlab').
-		clc;
-		clear;
-		close all;
++precode('matlab').
+	clc;
+	clear;
+	close all;
 
-		t = 1:10;
-		x = t.^2;
-		y = sin(t);
+	t = 1:10;
+	x = t.^2;
+	y = sin(t);
 
-		figure;
-		hold on;
-		plot(t, x);
-		plot(t, y);
-		hold off;
-		grid on;
+	figure;
+	hold on;
+	plot(t, x);
+	plot(t, y);
+	hold off;
+	grid on;
 p (This particular example is nonsense -- don't run it.)
 
 p This has always left me wondering: what the heck is #[code(class='language-matlab') figure], or #[code(class='language-matlab') hold on], or #[code(class='language-matlab') grid on], in terms of the grammar of MATLAB? Are they functions? Special keywords? Some sort of functor-like object? It makes me insecure in the same way as Ruby or Groovy made me feel with optional parentheses -- but this was easily resolved by looking up something along the lines of "Ruby optional parentheses." A Google search for "MATLAB optional parentheses" doesn't even bring up the correct term for this phenomenon on the first search page (first ten results): "command syntax."
 
 p It turns out the above example is exactly equivalent to:
-pre
-	code(class='language-matlab').
-		clc();
-		clear();
-		close('all');
++precode('matlab').
+	clc();
+	clear();
+	close('all');
 
-		t = 1:10;
-		x = t.^2;
-		y = sin(t);
+	t = 1:10;
+	x = t.^2;
+	y = sin(t);
 
-		figure();
-		hold('on');
-		plot(t, x);
-		plot(t, y);
-		hold('off');
-		grid('on');
+	figure();
+	hold('on');
+	plot(t, x);
+	plot(t, y);
+	hold('off');
+	grid('on');
 p After looking at the transformed output, the basic rule should be fairly easy to tell. This "command syntax" is the same as a function call, where the arguments are space-delimited (rather than comma-delimited), and are passed in as character arrays.
-p It's important to note that the parameters are always converted to character arrays before the function invocation, so #[code(class='language-matlab') grid 'on'] and #[code(class='language-matlab') grid on] are equivalent. Another result of this is that command syntax doesn't work with named symbols: #[code(class='language-matlab') stem x] will result in #[code(class='language-matlab') stem('x')], which is (probably) not what you intend to compute.
-p Another potential complication is that this can introduce grammatical ambiguities. The example stated in the documentation is #[code(class='language-matlab') ls ./a]: if it is unknown whether #[code(class='language-matlab') ls] is a function (in which this would mean the function call #[code(class='language-matlab') ls('./a')]) or a variable (in which this would mean the elementwise division #[code(class='language-matlab') ls ./ a]), then MATLAB has to do some guessing.
+p It's important to note that the parameters are always converted to character arrays before the function invocation, so #[code(class='language-matlab') grid 'on'] and #[+code('matlab') grid on] are equivalent. Another result of this is that command syntax doesn't work with named symbols: #[+code('matlab') stem x] will result in #[+code('matlab') stem('x')], which is (probably) not what you intend to compute.
+p Another potential complication is that this can introduce grammatical ambiguities. The example stated in the documentation is #[+code('matlab') ls ./a]: if it is unknown whether #[+code('matlab') ls] is a function (in which this would mean the function call #[+code('matlab') ls('./a')]) or a variable (in which this would mean the elementwise division #[+code('matlab') ls ./ a]), then MATLAB has to do some guessing.
 
 p I'm not a fan of multiple syntax unless there's a good reason to allow it. Golang is a great example of constraining the syntax so that there's only one way to a given simple action, and it keeps the language wonderfully disambiguous and easy to learn, at the cost of a #[em little] concision. On the other hand, some languages like Javascript and Scala offer different syntaxes to separate imperative and functional approaches. I think the potential confusion in this MATLAB syntax is too high for the little convenience it offers (and same goes for many of Ruby-like optional syntaxes)#[sup 1].
 
