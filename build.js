@@ -71,7 +71,9 @@ const buildDir = (module, buildDest) => {
           data = yaml.parse(data);
           break;
         case 'pug':
-          data = pug.compile(data)();
+          data = pug.compile(data, {
+            filename: `${SRCDIR}/${dataSrc}`
+          })();
           break;
         // TODO: can add other special parsing types (e.g., JSON)
       }
@@ -82,6 +84,7 @@ const buildDir = (module, buildDest) => {
 
     console.log(`Reading template file ${templateFile}...`);
     const templateFileHtml = pug.renderFile(templateFile, {
+      filename: templateFile,
       ...page,
       data: data
     });
