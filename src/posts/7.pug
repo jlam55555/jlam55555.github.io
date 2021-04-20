@@ -1,4 +1,129 @@
 extends blogpost
 
 block post
-	p (Empty blog post)
+	+codestyle
+
+	p I recently #[a(href='/blog/1') wrote about how this website's build system is implemented]. One of the more-or-less arbitrary design choices was to use the Pug (formerly Jade) templating engine. A templating engine is used to generate HTML from template files, which allow you to incorporate some scripting logic. In my case, it helps greatly with the generating all the static HTML for this website on the server-side: it removes a lot of the redundancy, performs some nice tasks like a simple minification, and allows for some nice scripting tasks like those I'll discuss here.
+
+	p There are a good number of templating engine options. Some popular ones I'm aware of are EJS (an ERB-like Javascript solution), Mustache, Handlebars (an extension to Mustache but popular on its own), and Liquid (the Ruby-based engine used in Jekyll). There are also templates used in frameworks like Angular and React that are deeply integrated into their frameworks (i.e., Angular's components and directives, and React's JSX). There are probably more, but I'm not too knowledgeable or up-to-date in the subject -- this post will focus on endeavors in Pug specifically. Personally, I've used Jade and Handlebars in the past, and I like the SASS-like simplicity of Jade/Pug (the other options adhere more strongly to the traditional XML-like syntax, which feels tedious to me). The ultimate choice of Pug was arbitrary.
+
+	h4 Including files: a common use case
+	p From this point on, everything will refer exclusively to Pug. However, it is not limited to Pug, and you can probably do many of the same things in other templating engines.
+
+	p Pug is the HTML equivalent of SASS. They both:
+	ul
+		li use a Pythonic whitespace-sensitive syntax
+		li offer mixins and extending templates
+		li are often used server-side to generate static code (HTML/CSS) and can use custom JS variables and logic
+
+	p You don't need much to have a fairly powerful syntax. At the beginning, all this website required was the use of templates so that the template wouldn't have to be copied onto each page.
+
+	+precode('pug').
+		// layout.pug
+		doctype html
+		html
+		    head
+			link(rel='icon' href='favicon.ico')
+		    body
+		        h1 This is a common header
+
+		        block content
+
+	+precode('pug').
+		// index.pug
+		extends layout
+
+		block content
+		    This is the homepage!
+
+	p So when we render #[code index.pug], it'll automatically include all the code from the layout template and include the block content where the placeholder is. Pretty simple.
+
+	p This extends nicely for multiple levels of subclassing. This allows the creation of "sublayouts." In the case of this website, I needed a overall layout template for the website, and a layout for all the blog posts that also follows the overall layout template. Then we have:
+
+	+precode('pug').
+		// blogpostlayout.pug
+		extends layout
+
+		block content
+		    h1= post.title
+		    block post_content
+
+	+precode('pug').
+		// aspecificblogpost.pug
+		extends blogpostlayout
+
+		block post_content
+		    p This is a blog post
+		    p Lorem ipsum ...
+
+	p This simple setup sufficed for the first few posts, but very soon I began to wonder if I could do better.
+
+	h4 Motiviation for Mixins
+	p One task that I had to do in a few blog posts (such as this one) is to create code snippets. This requires loading an extra Javascript and CSS files, so I would rather not include it in every blog post, but only the blog posts that require it. One way to do this is to dump the code in another pug file and simply include this. In the case of using prism.js (as is the case for this website):
+
+	+precode('pug').
+		// mixins/syntax_highlighter.pug
+		script(src='path/to/prism.js')
+		link(rel='stylesheet' href='path/to/prism.css')
+		style // custom extra CSS styles
+
+	+precode('pug').
+		// someblogpost.pug
+		extends blogpostlayout
+
+		block post_content
+		    include mixins/syntax_highlighter
+
+		    pre
+		        code(class='language-matlab').
+		            clc; clear; close all;
+
+	p This works, but there are still a few pain points. Having to manually include the required mixin files (by name) from each blog post is both brittle and inconvenient, as is the hardcoding in the specific code format required by prism.js. We can move the #[code include] statements into the blog post layout file and abstract library-specific code to mixins. This has the effect of shortening code, making it less brittle to library changes, and decreasing redundancy. This looks something like:
+
+	+precode('pug').
+		// mixins/syntax_highlighter.pug
+		mixin codestyle
+		    script(src='path/to/prism.js')
+		    link(rel='stylesheet' href='path/to/prism.css')
+		    style // custom extra CSS styles
+
+		mixin precode(language)
+		    pre
+		        code(class='language-' + language).
+		            block
+
+	+precode('pug').
+		// blogpostlayout.pug
+		extends layout
+
+		block content
+		    include mixins/syntax_highlighter
+
+		    h1= post.title
+		    block post_content
+
+	+precode('pug').
+		// someblogpost.pug
+		extends blogpostlayout
+
+		block post_content
+		    +codestyle
+
+		    +precode('matlab').
+		        clc; close all; clear;
+
+	p Much cleaner. We've abstracted extra functionality to mixins that conditionally include the library (#[code +codestyle]) and generate library-like code (#[code +precode]). Now, hypothetically, were we to switch from prism.js to highlight.js, it would be almost effortless. This also incurs no cost to the user, as the generated code is the same, and libraries are conditionally included.
+
+	p This demonstrates a painless design pattern that can be used for any library or non-library reusable components. My blog post layout file currently has the following includes:
+
+	+precode('pug').
+		include mixins/codestyle
+		include mixins/imglink
+		include mixins/mathjax
+		include mixins/footnote
+
+	p where #[code codestyle] is for syntax highlighting with prism and #[code mathjax] is for including the MathJaX library. #[code imglink] and #[code footnote] are custom reusable components.
+
+	h4 Automatic footnotes: a mixin case study
+
+	p TODO (also TODO: make refs link to footnote)
