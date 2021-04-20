@@ -1,0 +1,14 @@
+- let footnotes = [];
+
+// inspiration taken from https://codepen.io/Zoxon/pen/WyqdBb
+mixin footnote(tst)
+	-const old_buf = pug_html;
+	-pug_html = '';
+	block
+	-footnotes.push(pug_html);
+	-pug_html = old_buf;
+	sup= footnotes.length
+
+mixin write_footnotes
+	each footnote, index in footnotes
+		p #[sup!= (index+1) + '. ' + footnote]

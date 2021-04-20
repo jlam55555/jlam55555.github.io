@@ -10,7 +10,7 @@ block post
 	h4 File I/O (from MATLAB)
 	p This topic doesn't entirely follow the theme here, but it'll be included for completeness of external MATLAB interfaces. This is a common task and should be covered within a general MATLAB tutorial.
 	p From within MATLAB we often need to read files containing some data (whether a standard image/audio/video data format, or MATLAB's internal memory dump format), and write out the signal to a file.
-	p Luckily, MATLAB makes it fairly easy to read and write a good range of common data formats without any client-side frustration dealing with compression or encoding methods. Commonly, you'll be dealing with audio and images, for which the following methods will be helpful #[sup 1]:
+	p Luckily, MATLAB makes it fairly easy to read and write a good range of common data formats without any client-side frustration dealing with compression or encoding methods. Commonly, you'll be dealing with audio and images, for which the following methods will be helpful #[+footnote Using #[a(href='https://prismjs.com/') prismjs] as a syntax highlighter. Historically, I've used highlight.js a lot, but it seems that this one is also pretty good.]:
 	+precode('matlab').
 		% audio represented by a 1-D string of samples
 		[Y, Fs] = audioread(filename);
@@ -36,7 +36,7 @@ block post
 	p The output *.mat file is an opaque binary data format much like Python's #[code pickle] or Go's #[code gob] output formats.
 
 	h4 Running a MATLAB file as a script
-	p A few months ago, I was delighted that I could run MATLAB from the command line #[sup 2]. This solution isn't perfect, but it allows you to run MATLAB work without opening the IDE.
+	p A few months ago, I was delighted that I could run MATLAB from the command line #[+footnote Another step up is to use a separate editor for your MATLAB files as well! You can change the default text editor in MATLAB from Home &gt; Preferences &gt; Editor/Debugger to the editor of your choice, e.g., ViM. Or you can simply edit the MATLAB file in an editor of your choice, and MATLAB will auto-sync the file when you return to the MATLAB IDE.]. This solution isn't perfect, but it allows you to run MATLAB work without opening the IDE.
 	+precode('bash').
 		# full MATLAB engine in terminal
 		matlab -nodisplay
@@ -67,7 +67,7 @@ block post
 	h4 Building apps using #[+code('matlab') appdesigner]
 	p TODO: transition
 
-	p MATLAB has "Apps," which "typically consist of a graphical user interface, code that performs the underlying actions, associated data, and any other supporting files," according to #[a(href='https://www.mathworks.com/discovery/matlab-apps.html') the documentation]. An example widely used by us EE majors is the Filter Designer app (#[+code('matlab') filterDesigner]) from the Signal Processing Toolkit. Apps are basically nicely-packaged GUI applications #[sup 3].
+	p MATLAB has "Apps," which "typically consist of a graphical user interface, code that performs the underlying actions, associated data, and any other supporting files," according to #[a(href='https://www.mathworks.com/discovery/matlab-apps.html') the documentation]. An example widely used by us EE majors is the Filter Designer app (#[+code('matlab') filterDesigner]) from the Signal Processing Toolkit. Apps are basically nicely-packaged GUI applications #[+footnote Another cool thing I've noticed is that the apps and the App Designer work in the online version of MATLAB!].
 
 	p With only a few lines of handwritten code, I was able to develop the following MATLAB app:
 	+imglink('3_lineapp.png', 'Screenshot of simple designed MATLAB app')
@@ -97,10 +97,3 @@ block post
 	p Overall, I think it's a cool idea and I love the power of having the ease of MATLAB development and the niceties of a native app. Unfortunately, it seems like there's still some way to go with performance and bugginess -- the UI updates are extremely slow, sometimes lagging for up to half a minute on the simple tutorial app for unknown reasons. The boot time is also as atrocious as that of the regular MATLAB IDE, which makes sense but is aggravating. Sometimes the UIAxes glitch and only show a black interface, so that restarting the app is the only remedy.
 
 	p I did have a talk with my manager at MathWorks and it seems like they're really pushing these apps, so I'm excited to see if I can help with some of these problems!
-
-	p
-		sup 1. Using #[a(href='https://prismjs.com/') prismjs] as a syntax highlighter. Historically, I've used highlight.js a lot, but it seems that this one is also pretty good.
-	p
-		sup 2. Another step up is to use a separate editor for your MATLAB files as well! You can change the default text editor in MATLAB from Home &gt; Preferences &gt; Editor/Debugger to the editor of your choice, e.g., ViM. Or you can simply edit the MATLAB file in an editor of your choice, and MATLAB will auto-sync the file when you return to the MATLAB IDE.
-	p
-		sup 3. Another cool thing I've noticed is that the apps and the App Designer work in the online version of MATLAB!

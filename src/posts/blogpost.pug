@@ -4,6 +4,7 @@ block content
     include ../mixins/codestyle
     include ../mixins/imglink
     include ../mixins/mathjax
+    include ../mixins/footnote
 
     h2 Blog
     h3= title
@@ -12,3 +13,5 @@ block content
         a(href="/blog") Return to blog
 
     block post
+
+    +write_footnotes
