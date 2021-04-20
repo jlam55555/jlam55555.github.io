@@ -1,4 +1,4 @@
-style pre {max-width:100%;white-space:pre-wrap;}
+include ../mixins/synhigh
 
 p (This is in preparation for my upcoming MATLAB seminar lecture, because the next prepared lecture doesn't follow the schedule of the corequisite class.)
 p I've never enjoyed having to open the MATLAB IDE in order to be able to run A MATLAB script. Even a warm start on a SSD takes over a dozen seconds for the UI to open and become usable (there's an initial few-second delay between the UI becoming visible and when it becomes responsive to UI events and running MATLAB commands). At least a command-line interface to start off batch scripts would be useful, and ideally a language SDK. Luckily MATLAB has these tools, but it doesn't seem as though they're widely advertised. (I was previously unaware of most of the following topics until I had to search for topics to cover for the seminar.)
@@ -7,53 +7,57 @@ p This post will cover a few ways to handle external data from MATLAB, and call 
 h4 File I/O (from MATLAB)
 p This topic doesn't entirely follow the theme here, but it'll be included for completeness of external MATLAB interfaces. This is a common task and should be covered within a general MATLAB tutorial.
 p From within MATLAB we often need to read files containing some data (whether a standard image/audio/video data format, or MATLAB's internal memory dump format), and write out the signal to a file.
-p Luckily, MATLAB makes it fairly easy to read and write a good range of common data formats without any client-side frustration dealing with compression or encoding methods. Commonly, you'll be dealing with audio and images, for which the following methods will be helpful:
-pre.
-	% audio represented by a 1-D string of samples
-	[Y, Fs] = audioread(filename);
-	audiowrite(filename, Y, Fs);
+p Luckily, MATLAB makes it fairly easy to read and write a good range of common data formats without any client-side frustration dealing with compression or encoding methods. Commonly, you'll be dealing with audio and images, for which the following methods will be helpful #[sup 1]:
+pre
+	code(class='language-matlab').
+		% audio represented by a 1-D string of samples
+		[Y, Fs] = audioread(filename);
+		audiowrite(filename, Y, Fs);
 
-	% images represented by a 3-D array (H x W x channels)
-	A = imread(filename);
-	imwrite(A, filename);
-p Of course, there are many other options to play around with that you can explore with #[code help #[em fnname]]. For example, you can use remote URIs in addition to local paths!
+		% images represented by a 3-D array (H x W x channels)
+		A = imread(filename);
+		imwrite(A, filename);
+p Of course, there are many other options to play around with that you can explore with #[code(class='language-matlab') help #[em fnname]]. For example, you can use remote URIs in addition to local paths!
 p (In my experience, you're less prone to having any issues if you use "simpler" formats such as .wav for audio files and .tiff or .bmp (raw, uncompressed bitmaps) for image files, as I've sometimes had issues with color channels on other image types without fiddling with color options. YMMV.)
 
 p For arbitrary variables that you want to save to a file, you can use the save and load commands. For example:
-pre.
-	%% saves workspace to dataFile.mat
-	clear;
-	A = 4;
-	B = 6;
-	save dataFile;
+pre
+	code(class='language-matlab').
+		%% saves workspace to dataFile.mat
+		clear;
+		A = 4;
+		B = 6;
+		save dataFile;
 
-	%% restores workspace from dataFile.mat
-	clear;
-	load dataFile;
+		%% restores workspace from dataFile.mat
+		clear;
+		load dataFile;
 p The output *.mat file is an opaque binary data format much like Python's #[code pickle] or Go's #[code gob] output formats.
 
 h4 Running a MATLAB file as a script
-p A few months ago, I was delighted that I could run MATLAB from the command line #[sup 1]. This solution isn't perfect, but it allows you to run MATLAB work without opening the IDE.
-pre.
-	# full MATLAB engine in terminal
-	matlab -nodisplay
+p A few months ago, I was delighted that I could run MATLAB from the command line #[sup 2]. This solution isn't perfect, but it allows you to run MATLAB work without opening the IDE.
+pre
+	code(class='language-bash').
+		# full MATLAB engine in terminal
+		matlab -nodisplay
 
-	# MATLAB with reduced feature set (e.g., no figures)
-	matlab -nodisplay -nojvm
+		# MATLAB with reduced feature set (e.g., no figures)
+		matlab -nodisplay -nojvm
 
-	# run a command
-	matlab -nodisplay -r "display(2+3);quit;"
+		# run a command
+		matlab -nodisplay -r "display(2+3);quit;"
 p This approach isn't perfect: (afaik) there's no way to turn off the MATLAB text greeting message nor the prompt, which makes it a pretty poor language to script with directly. And it takes almost as much time as booting the GUI without the #[code -nojvm] option. Note that without with #[code -nodisplay] set but #[code -nojvm] not set, you can still create figures and save them to files, but they will not show as windows; setting the #[code -nojvm] option disables the ability to work with figures.
 p If you want to run a MATLAB (*.m) file or call a shell command, the MATLAB commands are the same as what you'd do from the command window:
-pre.
-	% run a MATLAB file
-	run('path/to/matlab/file.m')
+pre
+	code(class='language-matlab').
+		% run a MATLAB file
+		run('path/to/matlab/file.m')
 
-	% call a shell script
-	system('whoami');
+		% call a shell script
+		system('whoami');
 
-	% call a shell script, save stdout to variable
-	output = strip(evalc('system("whoami");'));
+		% call a shell script, save stdout to variable
+		output = strip(evalc('system("whoami");'));
 p MATLAB from the terminal has been personally useful for me when I've been working on a MATLAB script in a group using VSCode live share, so that anyone can run the MATLAB script from the command line. But other than obscure use cases like this, anything more complex than launching MATLAB scripts from the shell or vice versa is pretty awkward, I/O-wise.
 p For more robust scripting, that's where the MATLAB Engine API come into play.
 
@@ -61,23 +65,24 @@ h4 MATLAB Engine API
 
 p TODO: haven't learnt this yet
 
-h4 Building apps using #[code appdesigner]
+h4 Building apps using #[code(class='language-matlab') appdesigner]
 p TODO: transition
 
-p MATLAB has "Apps," which "typically consist of a graphical user interface, code that performs the underlying actions, associated data, and any other supporting files," according to #[a(href='https://www.mathworks.com/discovery/matlab-apps.html') the documentation]. An example widely used by us EE majors is the Filter Designer app (#[code filterDesigner]) from the Signal Processing Toolkit. Apps are basically nicely-packaged GUI applications.
+p MATLAB has "Apps," which "typically consist of a graphical user interface, code that performs the underlying actions, associated data, and any other supporting files," according to #[a(href='https://www.mathworks.com/discovery/matlab-apps.html') the documentation]. An example widely used by us EE majors is the Filter Designer app (#[code(class='language-matlab') filterDesigner]) from the Signal Processing Toolkit. Apps are basically nicely-packaged GUI applications #[sup 3].
 
 p With only a few lines of handwritten code, I was able to develop the following MATLAB app:
 img(src='/res/posts/3_lineapp.png'
 	style='max-width:100%'
 	alt='Screenshot of simple designed app')
 
-p I won't go into the details, because #[a(href='https://www.mathworks.com/help/matlab/creating_guis/create-a-simple-app-or-gui-using-app-designer.html') the tutorial] covers it well, and because the app designer generates most of the code anyways. All I had to do was run #[code appdesigner] to start the App Designer wizard, choose the "2-Panel App with Auto-Reflow" layout option, add the two sliders and drawing axis, and add callbacks for each slider that update the plot.
+p I won't go into the details, because #[a(href='https://www.mathworks.com/help/matlab/creating_guis/create-a-simple-app-or-gui-using-app-designer.html') the tutorial] covers it well, and because the app designer generates most of the code anyways. All I had to do was run #[code(class='language-matlab') appdesigner] to start the App Designer wizard, choose the "2-Panel App with Auto-Reflow" layout option, add the two sliders and drawing axis, and add callbacks for each slider that update the plot.
 
 p The entire generated MATLAB source is as follows:
 pre
-	include ../res/posts/3_app.m
+	code(class='language-matlab')
+		include ../res/posts/3_app.m
 
-p Once you're done creating the app, there's a few things you can do. You can export it to a *.m file, so that you can launch it from MATLAB just like calling a function (in this case, #[code line_exported()]). In the App Designer menubar, there are three additional options under "Share":
+p Once you're done creating the app, there's a few things you can do. You can export it to a *.m file, so that you can launch it from MATLAB just like calling a function (in this case, #[code(class='language-matlab') line_exported()]). In the App Designer menubar, there are three additional options under "Share":
 ul
 	li MATLAB App: Create an app installation file to share your app with MATLAB users
 	li Web App: Create a deployed web app using MATLAB Compiler
@@ -88,8 +93,9 @@ p The first option generates a *.mlappinstall file so that anyone with MATLAB ca
 p The other two options were much more intriguing to me, so I went and installed the required MATLAB Compiler toolbox. I tried compiling to a standalone desktop application. It turns out that this compiles to a standalone ELF binary, but it still requires special MATLAB dynamically-linked libraries called the MATLAB Compiler Runtime (MCR). The MCR can be downloaded for free from the MATLAB website (a hefty 3.7GB download). I suppose this means that you can run a MATLAB Compiler binary for free, even if developing it costs a MATLAB license.
 
 p Finally, now that we have the binary and the MCR, we just need to tell the linker where to find these MCR, because this will most likely not be in the standard location (e.g., #[code /usr/lib]), you will have to manually add the library to #[code $LD_LIBRARY_PATH]. In my case, this looks something like:
-pre(style='overflow-wrap:break-word').
-	$ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/MATLAB/MATLAB_Runtime/v910/runtime/glnxa64:/usr/local/MATLAB/MATLAB_Runtime/v910/bin/glnxa64:/usr/local/MATLAB/MATLAB_Runtime/v910/sys/os/glnxa64:/usr/local/MATLAB/MATLAB_Runtime/v910/sys/opengl/lib/glnxa64
+pre
+	code(class='language-bash').
+		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/MATLAB/MATLAB_Runtime/v910/runtime/glnxa64:/usr/local/MATLAB/MATLAB_Runtime/v910/bin/glnxa64:/usr/local/MATLAB/MATLAB_Runtime/v910/sys/os/glnxa64:/usr/local/MATLAB/MATLAB_Runtime/v910/sys/opengl/lib/glnxa64
 
 p At this point, I could run the binary like any other Linux executable. I did not try out the web app option, but its name is self-explanatory.
 
@@ -97,4 +103,9 @@ p Overall, I think it's a cool idea and I love the power of having the ease of M
 
 p I did have a talk with my manager at MathWorks and it seems like they're really pushing these apps, so I'm excited to see if I can help with some of these problems!
 
-sup 1. Another step up is to use a separate editor for your MATLAB files as well! You can change the default text editor in MATLAB from Home &gt; Preferences &gt; Editor/Debugger to the editor of your choice, e.g., ViM. Or you can simply edit the MATLAB file in an editor of your choice, and MATLAB will auto-sync the file when you return to the MATLAB IDE.
+p
+	sup 1. Using #[a(href='https://prismjs.com/') prismjs] as a syntax highlighter. Historically, I've used highlight.js a lot, but it seems that this one is also pretty good.
+p
+	sup 2. Another step up is to use a separate editor for your MATLAB files as well! You can change the default text editor in MATLAB from Home &gt; Preferences &gt; Editor/Debugger to the editor of your choice, e.g., ViM. Or you can simply edit the MATLAB file in an editor of your choice, and MATLAB will auto-sync the file when you return to the MATLAB IDE.
+p
+	sup 3. Another cool thing I've noticed is that the apps and the App Designer work in the online version of MATLAB!
