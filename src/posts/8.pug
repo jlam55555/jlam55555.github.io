@@ -1,0 +1,35 @@
+extends blogpost
+
+block post
+	+codestyle
+
+	p I #[a(href='/blog/6') recently broke my record in TypeRacer], so I thought I'd write a script to show my results over time. Here's it is.
+
+	p This is actually my first time using a web scraper. BeautifulSoup is pretty nice.
+
+	p The numerical running means and "running maxima" is not the most efficient, but it shouldn't be too bad with only a few thousand data points. The larger bottleneck is whether typeracerdata.com's server's can keep up for users with a large number of races.
+
+	p As a stress test, I tried running the script on #[a(href="https://data.typeracer.com/pit/profile?user=keegant") keegant], the user with the most TypeRacer races. Roughly speaking#[+footnote These estimates were performed by anxiously watching htop, hoping that I wouldn't run out of RAM], the HTML from typeracerdata.com took around 7 minutes and ate up 4.5GB of RAM, and the extra numpy arrays took up an extra 0.6GB and the processing (running mean and maxima) took about a second. See the output in the results section.
+
+	p The end result definitely isn't perfect or complex, but it is pretty fun to see the progression over time. A possible improvement is that the horizontal axis is time rather than number of races (this would require parsing and storing the date values, which are also available on typeracerdata.com). The TypeRacer Discord server has a bot that allows you to view results as a function of either number of races or time, but (afaik) it doesn't give you control over the moving average or plot running maxima.
+
+	h4 Usage:
+
+	+precode('bash').
+		python3 scrape.py [USERNAME]
+
+	h4 Source:
+
+	+precode('python')
+		include ../res/posts/8_scrape.py
+
+	h4 Output:
+
+	p Sample: my scores (username "jlam55555")
+	+imglink('6_history.png', 'Sample outputted plot')
+
+	p Sample: the creator of TypeRacer (username "typeracer")
+	+imglink('8_history_typeracer.png', 'Another sample outputted plot')
+
+	p Sample: the user with the most races on TypeRacer (username "keegant")
+	+imglink('8_history_keegant.png', 'Another sample outputted plot')

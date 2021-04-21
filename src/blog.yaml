@@ -35,3 +35,7 @@
   destination: 7
   title: pugjs shenanigans
   date: 2021-04-20T15:54:03-04:00
+- template: ../posts/8
+  destination: 8
+  title: TypeRacer scraper in Python
+  date: 2021-04-21T00:16:36-04:00
