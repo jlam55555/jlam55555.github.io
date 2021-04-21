@@ -1,14 +1,18 @@
 - let footnotes = [];
 
 // inspiration taken from https://codepen.io/Zoxon/pen/WyqdBb
-mixin footnote(tst)
+mixin footnote
 	-const old_buf = pug_html;
 	-pug_html = '';
 	block
 	-footnotes.push(pug_html);
 	-pug_html = old_buf;
-	sup= footnotes.length
+	-const fid = footnotes.length;
+	sup(id='footnote-' + fid + '-indicator')
+		a(href='#footnote-' + fid)= fid
 
 mixin write_footnotes
-	each footnote, index in footnotes
-		p #[sup!= (index+1) + '. ' + footnote]
+	each footnote, fid in footnotes
+		p(id='footnote-' + (fid+1))
+			sup #[a(href='#footnote-' + (fid+1) + '-indicator')= (fid+1) + '.']
+				!=' ' + footnote

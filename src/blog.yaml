@@ -29,9 +29,9 @@
   date: 2021-04-19T17:31:25-04:00
 - template: ../posts/6
   destination: 6
-  title: 'New TypeRacer Record: 163wpm'
+  title: 'New TypeRacer record: 163wpm'
   date: 2021-04-20T11:56:01-04:00
 - template: ../posts/7
   destination: 7
-  title: Pug Shenanigans
+  title: pugjs shenanigans
   date: 2021-04-20T15:54:03-04:00

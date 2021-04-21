@@ -16,7 +16,7 @@ block post
 		li offer mixins and extending templates
 		li are often used server-side to generate static code (HTML/CSS) and can use custom JS variables and logic
 
-	p You don't need much to have a fairly powerful syntax. At the beginning, all this website required was the use of templates so that the template wouldn't have to be copied onto each page.
+	p You don't need much to have a fairly powerful syntax. At the beginning, all this website required was the use of templates so that the template wouldn't have to be copied onto each page#[+footnote Inconsequential note: I use tabs rather than spaces in my source code, but the examples are displayed with four spaces for the sake of narrow screens.].
 
 	+precode('pug').
 		// layout.pug
@@ -126,4 +126,84 @@ block post
 
 	h4 Automatic footnotes: a mixin case study
 
-	p TODO (also TODO: make refs link to footnote)
+	p In #[a(href='/blog/3') an earlier post] I found the need for footnotes#[+footnote Like this]. I did this manually at first:
+	+precode('pug').
+		// someblogpost.pug
+		// ...
+		p Lorem ipsum dolor sit amet#[sup 1], consectetur ...
+		// ...
+		p
+		    sup 1 Dummy text.
+
+	p But of course this is very tedious to do, especially if you have to renumber something. The coupling of footnote indicator and footnote is very loose -- it's all just messy.
+
+	p It would be great if we could have LaTeX-like citations: something like:
+	+precode('latex').
+		% loremipsum.tex
+		Lorem ipsum dolor sit amet\footnote{Dummy text}, consectetur ...
+
+	p The context is kept close to the comment, and all is well. My first approach was the following:
+	+precode('pug').
+		// mixins/footnote.pug
+		-let footnotes = [];
+
+		// used to create an auto-numbered footnote
+		mixin footnote
+		    -footnotes.push(block);
+		    sup= footnotes.length
+
+		// called by blogpostlayout to dump footnote at bottom
+		mixin print_footnotes
+		    each footnote, fid in footnotes
+		        p
+		            sup= (fid+1) + '. ' + footnote
+
+	+precode('pug').
+		// blogpostlayout.pug
+		// ...
+		include mixins/footnote
+		// ...
+
+		block post_content
+		+print_footnotes
+
+	+precode('pug').
+		// someblogpost.pug
+		// ...
+		Lorem ipsum dolor sit amet&#35;[+footnote Dummy text], consectetur ...
+
+	p This is the general idea. We see again here the implicit #[+code('pug') block] keyword used in the mixin, which is used to store the tag content of the mixin. I naively attempted to store that block variable into the array #[+code('pug') footnotes] and print it out.
+
+	p As things turn out, #[+code('pug') block] doesn't simply get text-replaced with the rendered tag content. It actually ends up evaluating to a function that outputs something along the lines of:
+
+	+precode('js').
+		pug_html += '<div>The tag contents</div>';
+		pug_html += '<div>as a series of</div>';
+		pug_html += '<div>lines like this</div>';
+
+	p It seems #[code('js') pug_html] is a global string in which the entire compiled HTML is (linearly) built. Taking inspiration from a #[a(href='https://codepen.io/Zoxon/pen/WyqdBb') CodePen by Velichko Konstantin]#[+footnote Alternatively, there is some discussion on GitHub and a more verbose workaround #[a(href='https://github.com/pugjs/pug/issues/3235') here]. I think the CodePen example is more elegant.], we can hijack the outputted code by modifying the mixin like so:
+
+	+precode('pug').
+		// footnote.pug
+		mixin footnote
+		    // save prior generated HTML
+		    -const old_buf = pug_html;
+		    -pug_html = '';
+
+		    // emit lines of code that append to pug_html
+		    block
+
+		    // save hijacked code
+		    -footnotes.push(pug_html);
+
+		    // restore normal operation
+		    -pug_html = old_buf;
+
+		    // emit footnote indicator superscript (auto-numbered)
+		    sup= footnotes.length
+
+	p This works as originally expected.
+
+	p At some later point, I decided that it would be cool for each footnote indicator superscript to link to its respective footnote and vice versa, Wikipedia style, and it was trivial to add this into the mixin.
+
+	p And that's it! I was surprised at how fun and extensible HTML could feel with Pug.
