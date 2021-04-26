@@ -39,3 +39,7 @@
   destination: 8
   title: TypeRacer scraper in Python
   date: 2021-04-21T00:16:36-04:00
+- template: ../posts/9
+  destination: 9
+  title: Scraping Twitter tweet contents by ID using Selenium
+  date: 2021-04-25T17:57:25-04:00

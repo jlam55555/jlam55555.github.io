@@ -1,0 +1,39 @@
+extends blogpost
+
+block post
+	+codestyle
+
+	p It turns out that scraping Twitter tweets is not as simple as I had originally thought it to be. Twitter tweets seemed to me to be a pretty common source for NLP tasks, but the restrictions imposed by the platform make it slightly more annoying. Some of the troubles encountered were#[+footnote An additional apparent challenge is that the URL of a tweet to scrape contains both the username of the tweeter and the tweet ID; however, it turns out that tweet IDs are UUIDs and #[a(href='https://stackoverflow.com/a/30287049/2397327') putting any username in the correct spot will work].]:
+
+	ol
+		li Firstly, there are some #[a(href='https://blog.ldodds.com/2017/05/19/can-you-publish-tweets-as-open-data/') restrictions on what data can be published about tweets]. Notably, loosely speaking, only tweet IDs can be stored in a public dataset, and not their contents. This makes the use of a Twitter API or scraping necessary for accessing tweets.
+
+		li Secondly, a Twitter tweet URL's webpage is not static, but its contents are loaded dynamically using Javascript after the page load#[+footnote This seems to be a (relatively) recent development. There are still many old scraping tools out there that were broken by this change, such as #[a(href='https://github.com/sebinsua/scrape-twitter') scrape-twitter (deprecated, NPM)]. More info #[a(href='https://stackoverflow.com/q/65403350/2397327') here].] Thus a simple HTML request and scrape (e.g., via BeautifulSoup) won't work. (The change seems to have happened circa December 2020.. You actually need to simulate a browser opening the page. Hence the use of Selenium webdriver, a Python-based#[+footnote I wouldn't usually use Python, but it was the weapon of choice for this particular project. I want to try out Puppeteer at some point, since it is JS-based and is supposed to be more performant.] web-automation tool.
+
+		li The obvious alternative to scraping Twitter webpages is to use their APIs, but this is rate-limited and require signing up for a developer account. This is a little more work and there is the possibility of Twitter rejecting your registration request or terminating your developer account if they suspect abuse of the API. (The rate limits are fairly good, but I misunderstood it from the documentation at first; this will be discussed later.)
+
+		li The CSS classes are randomly generated, so it is not immediately clear what to scrape from the webpage.
+
+		li There are a few libraries out there that scrape Twitter to avoid the API rate limits, but none of them seem to be able to grab tweet contents by ID. Rather, they seem to be able to grab tweets by a general search, by user ID, etc. I don't know what the cause of this is (nor do I want to dig through the dread that Python source code is), but it makes my particular use case extremely elusive. So I thought I'd do it myself.
+
+	p The first issue to address is the final one. By messing around in the Chrome DevTools, I was able to locate the tweet contents using the query:
+
+	+precode('css').
+		[data-testid=tweet] ~ div > div
+
+	p In words: the tweet (text) empirically seems to always be located inside a #[+code('html') &lt;div&gt;], which is the immediate child of another #[+code('html') &lt;div&gt;] element that is the immediate sibling of an element with attribute #[+code('css') data-testid="tweet"]. (This tag always seems to be contained within an #[+code('html') &lt;article&gt;] element, but that part seems unnecessary for the selector to work.)
+
+	p At first, I tried scraping a tweet by simply loading a request to the page and scraping for that element using BeautifulSoup, but as mentioned previously, this will not work because the Tweet contents are loaded dynamically after page load with Javascript.
+
+	p So the general idea becomes: load the tweet webpage with a browser emulator like Selenium, and keep querying that selector until it is found (and up to a certain number of retries). This leads to the following ugly but working code. (This requires a working installation of Selenium and the corresponding browser driver.)
+
+	+precode('python')
+		include ../res/posts/9_scrape_tweets.py
+
+	p In the end, this only scrapes a quote every 1-2 seconds. I tried parallelizing it with a few #[+code('python') mp.Process] instances, each with their own webdriver, and a #[+code('python') mp.Queue] to distribute the requests, but more than a few webdriver instances (~24) runs me out of RAM and a curious phenomenon causes many of the web requests to drop with more parallel instances. I'm not sure what the latter problem is caused by, but I guess it might be an issue with too many outgoing requests from a single network device, or perhaps some restriction by Twitter -- I'm not sure#[+footnote If this is truly the case, with some free time an expensive solution might be to spin up a good large fleet of AWS Lambdas or EC2 instances to distribute the requests so the requests wouldn't all be from the same host. This probably isn't too different from a DDoS attack.].
+
+	p Since that was ultimately a failure, I turned to tools using the API. The particular dataset I was using comprises approximately 300,000 tweets. Looking at the #[a(href='https://developer.twitter.com/en/docs/twitter-api/rate-limits') Twitter v2 API rate limits], we see that there are only 900 requests per fifteen minutes (averaging one request per second), or 86400 per day. I thought that would mean 86,400 tweets per day, but the #[a(href='https://developer.twitter.com/en/docs/twitter-api/tweets/lookup/api-reference/get-tweets') GET /2/tweets] endpoint allows you to request up to 100 tweets per request, for a total of 8.64 million tweets per day.
+
+	p So I signed up for a Twitter developer account#[+footnote I signed up for an academic (student) version, which has the standard rate limits. It seems that academic researchers (post-grad) are allowed to get higher rate limits with proper verification.], and used the #[a(href='https://github.com/DocNow/hydrator') hydrator] Electron app to handle the API requests and rate-limiting to grab the tweets in less than an hour (three-and-some 15-minute spurts of 900 requests of 100 tweets each). The result was roughly 900MB of data, mostly metadata that I didn't need. Stripping down the data to only the tweet text content and IDs, it became 60MB of data.
+
+	p In conclusion, the API turned out to be more than plenty#[+footnote ... for this dataset; however, a related dataset to the one I'm using has over 1.2 billion tweets, which would take over four months to download at the API rate limit. Gladly, we're not using that dataset.]. I don't think the above code snippet will ever be useful, but it was fun learning how to use Selenium and touch upon scraping a valuable source of NLP data.
