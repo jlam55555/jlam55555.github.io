@@ -43,3 +43,7 @@
   destination: 9
   title: Scraping Twitter tweet contents by ID using Selenium
   date: 2021-04-25T17:57:25-04:00
+- template: ../posts/10
+  destination: 10
+  title: Using xterm
+  date: 2021-04-27T15:53:04-04:00

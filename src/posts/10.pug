@@ -1,0 +1,26 @@
+extends blogpost
+
+block post
+	+codestyle
+
+	p I don't see many people using #[a(href='https://invisible-island.net/xterm/xterm.html') xterm] as the terminal emulator in a general *nix install. I think most people use the default terminal emulator that comes bundled with the desktop environment, like xfce4-terminal or konsole (KDE). While xterm is lacking in some of the fancier features like tabbing#[+footnote Of course, there are always #[a(href='https://askubuntu.com/a/565465/433872') workarounds].], I like how simple and standard it is (the standard terminal emulator for X). It is nice to be able to switch to another desktop environment (e.g., when debugging a friend's code) and be immediately familiar with the terminal shortcuts.
+
+	p That being said, the conventions are not very similar to other common terminal emulators, so this is a list for my own remembering.
+
+	ul
+		li There are configuration menus when you <kbd>Ctrl</kbd>+Right/left/middle click. These are, respectively, "Main Options," "VT Options," and "VT Fonts." I find that the original font size on a high-resolution screen is too small, so I usually start by upping the resolution.
+
+		li You can set xterm options by editing #[+code('') ~/.Xresources] file. there are a number of options that are documented on the manpages, although I find the #[a(href='https://wiki.archlinux.org/index.php/Xterm#Configuration') ArchWiki page] covers the main options and is easier to read. My #[+code('') ~/.Xresources] is very simple:
+		+precode('').
+			! choose a font and font size you like
+			xterm*faceName: IBM Plex Mono
+			xterm*faceSize: 11
+
+			! white background
+			xterm*foreground: rgb:00/00/00
+			xterm*background: rgb:ff/ff/ff
+		| After setting your configuration, run #[+code('bash') xrdb -load ~/.Xresources] to update the X settings. Then open a new instance of xterm, and it should have the new settings.
+
+		li xterm uses the cut/selection buffer rather than the main clipboard (ref #[a(href='https://askubuntu.com/a/356032/433872') this], #[a(href='https://askubuntu.com/a/627175/433872') this]). This means that to copy/paste, select the text you want to copy, and use either <kbd>Shift</kbd>+<kbd>Insert</kbd> or middle click to paste#[+footnote I found this strange coming from <kbd>Ctrl</kbd>+<kbd>C</kbd>/<kbd>Ctrl</kbd>+<kbd>V</kbd>, but it actually requires fewer keystrokes because the copying is implicit every time you select any text. And if you use middle click, pasting only takes one press rather than a key combination.]. (The source and destination can be any combination of xterm or other applications in X.)
+
+		li Keyboard scroll using <kbd>Shift</kbd>+<kbd>Page Up/Down</kbd>#[+footnote Perhaps not as important, but I use this a lot because my mouse scrollwheel is broken].

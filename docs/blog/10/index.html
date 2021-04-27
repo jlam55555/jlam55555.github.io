@@ -1,0 +1,25 @@
+<!DOCTYPE html><html><head><title>jlam | Using xterm</title><style>html {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0.5rem;
+}
+body {
+	max-width: 400pt;
+	margin: 0 auto;
+	padding: 0;
+}</style><link rel="icon" href="/res/favicon.png"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head><body><h1>Jonathan Lam</h1><p>EE/CS @ The Cooper Union</p><nav><a href="/">Home</a> | <a href="/faq">FAQ</a> | <a href="/contact">Contact</a> | <a href="/projects">Projects</a> | <a href="/res/resume.pdf" target="_blank">Resume</a> | <a href="http://files.lambdalambda.ninja">Files</a> | <a href="/blog">Blog</a> | <a href="http://eis.lambdalambda.ninja">EiS</a></nav><hr><!-- inspiration taken from https://codepen.io/Zoxon/pen/WyqdBb--><h2>Blog</h2><h3>Using xterm</h3><p>On Tue Apr 27 2021 15:53:04 GMT-0400 (Eastern Daylight Time)</p><p><a href="/blog">Return to blog</a></p><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.23.0/prism.min.js" integrity="sha512-YBk7HhgDZvBxmtOfUdvX0z8IH2d10Hp3aEygaMNhtF8fSOvBZ16D/1bXZTJV6ndk/L/DlXxYStP8jrF77v2MIg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.23.0/plugins/autoloader/prism-autoloader.min.js" integrity="sha512-zc7WDnCM3aom2EziyDIRAtQg1mVXLdILE09Bo+aE1xk0AM2c2cVLfSW9NrxE5tKTX44WBY0Z2HClZ05ur9vB6A==" crossorigin="anonymous"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.23.0/themes/prism-tomorrow.min.css" integrity="sha512-vswe+cgvic/XBoF1OcM/TeJ2FW0OofqAVdCZiEYkd6dwGXthvkSFWOoGGJgS2CW70VK5dQM5Oh+7ne47s74VTg==" crossorigin="anonymous"><style>pre {
+	padding: .5rem !important;
+	line-height: 1 !important;
+}
+code {
+	line-height: 1 !important;
+	font-size: 0.75rem !important;
+	tab-size: 8 !important;
+}
+</style><p>I don't see many people using <a href="https://invisible-island.net/xterm/xterm.html">xterm</a> as the terminal emulator in a general *nix install. I think most people use the default terminal emulator that comes bundled with the desktop environment, like xfce4-terminal or konsole (KDE). While xterm is lacking in some of the fancier features like tabbing<sup id="footnote-1-indicator"><a href="#footnote-1">1</a></sup>, I like how simple and standard it is (the standard terminal emulator for X). It is nice to be able to switch to another desktop environment (e.g., when debugging a friend's code) and be immediately familiar with the terminal shortcuts.</p><p>That being said, the conventions are not very similar to other common terminal emulators, so this is a list for my own remembering.</p><ul><li>There are configuration menus when you <kbd>Ctrl</kbd>+Right/left/middle click. These are, respectively, "Main Options," "VT Options," and "VT Fonts." I find that the original font size on a high-resolution screen is too small, so I usually start by upping the resolution.</li><li>You can set xterm options by editing <code class="language-">~/.Xresources</code> file. there are a number of options that are documented on the manpages, although I find the <a href="https://wiki.archlinux.org/index.php/Xterm#Configuration">ArchWiki page</a> covers the main options and is easier to read. My <code class="language-">~/.Xresources</code> is very simple:</li><pre><code class="language-">! choose a font and font size you like
+xterm*faceName: IBM Plex Mono
+xterm*faceSize: 11
+
+! white background
+xterm*foreground: rgb:00/00/00
+xterm*background: rgb:ff/ff/ff</code></pre>After setting your configuration, run <code class="language-bash">xrdb -load ~/.Xresources</code> to update the X settings. Then open a new instance of xterm, and it should have the new settings.<li>xterm uses the cut/selection buffer rather than the main clipboard (ref <a href="https://askubuntu.com/a/356032/433872">this</a>, <a href="https://askubuntu.com/a/627175/433872">this</a>). This means that to copy/paste, select the text you want to copy, and use either <kbd>Shift</kbd>+<kbd>Insert</kbd> or middle click to paste<sup id="footnote-2-indicator"><a href="#footnote-2">2</a></sup>. (The source and destination can be any combination of xterm or other applications in X.)</li><li>Keyboard scroll using <kbd>Shift</kbd>+<kbd>Page Up/Down</kbd><sup id="footnote-3-indicator"><a href="#footnote-3">3</a></sup>.</li></ul><p id="footnote-1"><sup><a href="#footnote-1-indicator">1.</a> Of course, there are always <a href="https://askubuntu.com/a/565465/433872">workarounds</a>.</sup></p><p id="footnote-2"><sup><a href="#footnote-2-indicator">2.</a> I found this strange coming from <kbd>Ctrl</kbd>+<kbd>C</kbd>/<kbd>Ctrl</kbd>+<kbd>V</kbd>, but it actually requires fewer keystrokes because the copying is implicit every time you select any text. And if you use middle click, pasting only takes one press rather than a key combination.</sup></p><p id="footnote-3"><sup><a href="#footnote-3-indicator">3.</a> Perhaps not as important, but I use this a lot because my mouse scrollwheel is broken</sup></p><hr><p>&copy; Copyright 2021 Jonathan Lam</p></body></html>
