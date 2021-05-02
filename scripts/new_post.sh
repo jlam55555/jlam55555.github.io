@@ -4,9 +4,9 @@
 # get post id
 id=$(($(cat src/blog.yaml\
 	|grep destination:\
-	|sort\
-	|tail -n 1\
-	|awk '{print $2;}') + 1))
+	|awk '{print $2;}'\
+	|sort -n\
+	|tail -n 1) + 1))
 
 
 # get post id from stdin
