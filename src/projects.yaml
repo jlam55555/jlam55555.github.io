@@ -1,17 +1,16 @@
 Commissioned projects:
+  Cooper Union EOYS 2021:
+    anchor: eoys2021
+    year: 2021
+    desc: Online presence for School of Engineering EOYS during COVID-19 pandemic.
+    links:
+      Coming soon: '#'
   Maroon and Gold Labs:
     anchor: mag_labs
     year: 2019
     desc: Maroon and Gold Labs incubator for Cooper students. Created on Strikingly.
     links:
       See it: https://www.maroonandgoldlabs.org/home
-  myGUT X22 and RespHealth X21:
-    anchor: mygut_resphealth
-    year: 2018
-    desc: Gastrointestinal and upper respiratory take-home pathogen panels at Maverick Scientific (former Maverick Labs of Florida).
-    links:
-      RespHealth X21: https://resphealthx21.com/
-      myGUT X22: https://mygutx22.com/
   Safe Rides of Redding and Easton Web-App:
     anchor: safe_rides
     year: 2018
@@ -20,18 +19,35 @@ Commissioned projects:
       See it: https://safe-rides-redding-easton.herokuapp.com/
       Source: https://github.com/jlam55555/srre-client
 School projects (EE/CS):
+  Color organ implementation:
+    anchor: color_organ
+    year: 2021
+    desc: 'A color organ is a speaker with lights that light up when certain frequencies are played. We implemented a very simple version, mainly comprising a set of filters lighting up LEDs for three frequency bands, and a power amplifier to drive the speakers. (a.k.a. SSSSS: Seventies-Style Sight and Sound System)'
+    links:
+      Report: http://files.lambdalambda.ninja/reports/20-21_spring/ece394_color_organ_report.lam_lee.pdf
+      Presentation: http://files.lambdalambda.ninja/reports/20-21_spring/ece394_color_organ_presentation.lam_lee.pdf
+      Video: http://files.lambdalambda.ninja/reports/20-21_spring/ece394_color_organ_video.lam_lee.mp4
+  Canny edge detector in CUDA:
+    anchor: canny
+    year: 2021
+    desc: The canny algorithm is a common multi-stage algorithm for edge detection. This is implemented on CUDA and compared to a single-threaded CPU version. Optimizations for several of the stages from Luo and Duraiswami (2008) are implemented and compared to the naive versions.
+    links:
+      Source: https://github.com/jlam55555/cuda-canny
+      Report: http://files.lambdalambda.ninja/reports/20-21_spring/ece453_canny_cuda.pdf
+      Presentation: http://files.lambdalambda.ninja/reports/20-21_spring/ece453_canny_cuda_presentation.pdf
   C99 compiler:
     anchor: compiler
     year: 2021
-    desc: A (poor) C99 compiler for the compilers class. Aims to implement most of the C99 standard. Compiler was built using the standard compiler tools flex (lex) and bison (yacc). Successive assignments included lexing; parsing (expressions, declarations, statements); quad generation; and target code generation. (WIP)
+    desc: A (poor) C99 compiler for the compilers class. Aims to implement a reasonable chunk of the C99 standard. Compiler was built using the standard compiler tools flex (lex) and bison (yacc). Successive assignments included lexing; parsing (expressions, declarations, statements); quad generation; and target code generation. Builds working but very unoptimized x86_64 target code (no time to learn register allocation, so all temporaries are memory-backed).
     links:
-      Source: https://github.com/jlam55555/ece466-compiler
+      Source: https://github.com/jlam55555/c99-compiler
   Cloud convex hull:
     anchor: convex_hull
     year: 2021
-    desc: A convex hull cloud service, built on AWS in order to be scalable, highly-available, and performant. (WIP)
+    desc: A convex hull cloud service, built on AWS in order to be scalable, highly-available, and performant. Built serverless on top of S3, Lambda, and API Gateway. Uses <a href='https://github.com/markus-wa/quickhull-go'>@markus-wa/quickhull-go</a> for a 3-D Golang QuickHull (convex hull) implementation. Front-end powered by Vue, back-end (lambdas) written in Golang. (Also wrote a 2-D quickhull implementation and failed to write a complete 3-D quickhull implementation, included in the source repository.)
     links:
       Source: https://github.com/jlam55555/cloud-convex-hull
+      Presentation: http://files.lambdalambda.ninja/reports/20-21_spring/ece465_cloud_convex_hull_presentation.pdf
   Parallel graph coloring:
     anchor: graph_color
     year: 2021
