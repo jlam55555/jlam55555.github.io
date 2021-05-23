@@ -6,6 +6,6 @@ block content
 	each post in data.reverse()
 		unless post.destination === '/'
 			div
+				span!= new Date(post.date).toLocaleDateString() + ' &mdash; '
 				a(href="/blog/" + post.destination)
-					h3= post.title
-				p= new Date(post.date).toString()
+					h3(style='display:inline')= post.title
