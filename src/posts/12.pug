@@ -1,0 +1,97 @@
+extends blogpost
+
+block post
+	+codestyle
+
+	p I've been a casual ViM user for some time now (6 years?), and it's a great experience. I love to work in the terminal and I love to type, and it worked fast on my first laptop when full IDEs were too painfully slow. The command mode and the movement keys are quickly intuitive, and you only have to learn a few major commands to be working efficiently. Of course, IDEs and other software support ViM-like editing and navigation#[+footnote Most IDEs have plugins for ViM-mode editing; the hjkl-navigation system works on Google Drive and jk-scrolling is common in system utilities like less or man; people have created many applications, like #[a(href='https://www.qutebrowser.org/') qutebrowser] with ViM-bindings].
+
+	p But I have a need to use Scheme Lisp to study #[a(href='https://mitpress.mit.edu/sites/default/files/sicp/index.html') SICP], and it (like many other editors) doesn't historically#[+footnote In this world of abundant software, people have of course filled the void; there are ViM equivalents of many of the SLIME environment (see #[a(href='https://susam.in/blog/lisp-in-vim-with-slimv-or-vlime/') slimv and vlime], but I wanted to try my hand at the acclaimed SLIME (and Emacs in general).] #[+footnote The only dedicated Lisp editor I know of is DrRacket for Racket and Schemes] have advanced support for Lisp. The go-to environment for many Lisp-ers, in the longstanding tradition of GNU and Lisp, is Emacs. It has a popular development environment for CL called SLIME: the Superior Lisp Interaction Mode for Emacs.
+
+	h4 General reactions
+
+	p My first reaction to Emacs is that it opens in its own window like #[code gvim], even if you call it from a terminal emulator. You can run it in a terminal emulator with the no-window command: #[code emacs -nw], but this may cause some problems#[+footnote In particular, Emac's key bindings may overlap with that of the terminal emulator. I noticed this immediately with <kbd>C-h</kbd>, which is the prefix for all of the help commands in Emacs, but is linked to the Backspace character in xterm. You can make make <kbd>C-h</kbd> (<kbd>Bksp</kbd>) act as a regular backspace using #[code M-x normal-erase-is-backspace-mode], but then you lose the backspace ability. There's probably another way to get around this (fiddling with your terminal settings to unassociate Backspace and <kbd>C-h</kbd>?) but I haven't found out yet. YMMV -- I notice that I don't have this problem in xfce4-terminal (another GUI-mode terminal emulator) or in the virtual terminals (the text-mode terminals <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>F1</kbd> through <kbd>Ctrl</kbd>+Alt</kbd>+<kbd>F6</kbd>). I figure it's easier to avoid the trouble and use the dedicated Emacs window.].
+
+	p My second opinion is captured by Randall Munroe perfectly:
+
+	+imglinkext('https://imgs.xkcd.com/comics/real_programmers.png', 'Obligatory xkcd')
+
+	p Seriously, there are a lot of shortcuts#[+footnote Two fun commands I discovered while writing this post are #[code M-x eww] and #[code M-x m]. You know, when you want to send your code as mail or open Stack Overflow in Emacs. Eww can even display images!]. Some other notes:
+
+	ul
+		li Despite there being many more commands than what ViM has to offer, there are still a number of relatively common operations that I had hoped were easily accessible but require some composition of simpler commands. For example, the ViM command <kbd>o</kbd> (insert new line below the current line and move the cursor to it) is most easily performed out-of-the-box with <kbd>C-c Enter</kbd>#[+footnote As far as I know, without explicitly mapping the command to some key combination.].
+
+		li Watch out for #[a(href='https://wiki.c2.com/?EmacsPinky') Emacs pinky]. It's a real problem as much as other repetitive strain problems like RSI in the wrist. This goes to show how often the command keys are used. Perhaps worse is that many of the commands are not placed in easy-to-reach positions, but rather are given keys corresponding to a command hierarchy and roughly semantic keys -- not having the navigation commands on the homerow really makes me appreciate ViM's navigation system and command mode in general.
+
+		li One of the benefits of the roughly semantic key placement is that it is easy to remember (without muscle memory). For example, this makes it easier for me to use it with two different keyboard layouts. (The ViM navigation, on the other hand, completely loses its ergonomic benefit without remapping.)
+
+		li Emacs is part of the GNU ecosystem, and many of the commands, especially the navigation commands, are very similar. E.g., the navigation commands in #[code bash], #[code w3m], and #[code info] are all the same as Emacs commands. (This has made me much more comfortable with bash.)
+
+	h4 For the complete beginner
+
+	p The most important resource for the beginner is the tutorial. Luckily, Emacs has a lot of help resources. On first opening Emacs, there's a link to the tutorial, which feels very similar to the #[code vimtutor] command. A few notes for the complete beginner:
+
+	ul
+
+		li Learn the notation right away. Commands are usually in the form of a sequence of keys, often with modifiers. E.g., #[kbd C-h t] means #[kbd Ctrl]+#[kbd h] followed by #[kbd t] (this opens the tutorial). The Meta key (Alt key) is often also used, for example #[kbd C-M-\] means #[kbd Ctrl]+#[kbd Meta]+#[kbd \]. (I've already been using this notation throughout this article.)
+
+		li Get familiar with the help resources. The help resources mostly begin with #[kbd C-h]. For example, to learn what a keyboard command does, use #[kbd C-h c [keycombo#[!='&rsqb;']]. Each key combination is mapped to an (elisp) command, so this will give the name of the corresponding function. The inverse function is #[kbd C-h w [function#[!='&rsqb;']] -- this gives the keyboard combination mapped to this elisp function, if any. To learn more about an function, use #[kbd C-h f [function#[!='&rsqb;']]. To learn more about or to set an elisp variable, use #[kbd C-h v [variable#[!='&rsqb;']]. To get a list of all help commands, use #[kbd C-h ?].
+
+		li Similar to the above, learn how to use the Info pages. These are a GNU-backed alternative to the manpages, and deeply tied into Emacs. This can be found using #[kbd C-h i], which brings up a version of Info embedded within Emacs. Info has its own tutorial, and many of its navigation commands are similar to Emacs.
+
+		li Given how many commands there are, there is also a considerable hierarchy for the commands. The help commands being prefixed with #[kbd C-h] is one example; another is that file or buffer-related commands are listed under #[kbd C-x]. Some packages use a common prefix, such as #[kbd C-c] for SLIME/geiser and #[kbd C-x g] for magit.
+
+	h4 Extensibility with elisp
+
+	p Like every good ol' hackable piece of software, Emacs is built upon its own customization DSL, Emacs Lisp (elisp)! No other piece of software comes close with such a complete scripting language dedicated for its customization -- vimscript and other languages with the same purpose feel awfully narrow-minded in comparison. You can even write standalone scripts in elisp, as it is a regular Lisp.#[+footnote Some popular IDEs do allow for extensions via plugins, such as Atom (JS) and JetBrains IDEs (Kotlin). Emacs still has some leg up just because of how deeply elisp is integrated and how much can be customized, and because Lisp allows updating elisp code while emacs is running. However, the enormous community and industry support for plugins in these more mainstream editors makes them better to get more efficient in a short amount of time.]
+
+	p I hinted at the existence of elisp before when mentioning that every keyboard shortcut is mapped to a function in elisp. In this way, Emacs just feels like a program written in elisp, and the behavior of the program can be changed and extended by changing or adding more elisp. Due to the interpreted nature of Lisp, it is trivial to add new code to a running program, and thus to add new packages or modify elisp code on the fly.
+
+	p Many elisp functions can be called from the editor directly, either by a keyboard shortcut or equivalently by using #[kbd M-x [command#[!='&rsqb;']]#[+footnote When you press #[kbd M-x], the cursor appears in an area called the #[em minibuffer] at the bottom of the Emacs window, right underneath the #[em modeline].]. (Recall that you can find the function corresponding to a keyboard shortcut and vice versa using #[kbd C-h c [keycombo#[!='&rsqb;']] and #[kbd C-h w [command#[!='&rsqb;']], respectively.) There are some functions (e.g., helper functions) that cannot be called directly from the editor; functions that can be called directly from the editor have to be declared interactive. There are also many variables that can be used to customize features and packages.
+
+	p One place you'll probably end up writing elisp code is the #[code ~/.emacs] file, which is run on Emacs startup. Other elisp code can be found in Emacs and package files with the #[code .el] extension that are located in the #[code load-path] variable.
+
+	h4 The package experience
+
+	p The packages are great. Installing these few packages really makes me feel the extensibility of Emacs.
+
+	p Before mentioning any of these packages, I'd first like to make a note about modes in Emacs. When editing a buffer (file), you always have a major mode equipped, as well as any number of minor modes. The major mode dictates the general type of the buffer -- for example, there are major modes for file types like Lisp, LaTeX, Term (for a terminal buffer created with #[code M-x term]), and a generic catchall major mode called Fundamental. A minor mode implements a feature that can be toggled on/off independently of other major and minor modes. Examples include the #[code fci-mode] (for a column indicator similar to ViM's colorcolumn) and #[code linum-mode] (for line numbers). The major and a subset of the minor modes#[+footnote Since there are usually many minor modes enabled by default, many are hidden, such as #[code fci-mode] and #[code linum-mode]. Only "major" minor modes are shown, i.e., the ones you install via packages.] are shown in the modeline at the bottom of the Emacs window (just above the minibuffer). The mode string is indicated in parentheses, and may look something like:
+
+	+precode('').
+		(Scheme Chicken Paredit/A)
+		(Lisp Paredit adoc SLIME)
+		(Fundamental)
+
+	p The most obvious effect of installing a new package is that it introduces new major and/or minor modes. Below I'll list the few that I got started with. My particular use case was that I wanted a development environment for Scheme (for #[em SICP]) and CL (for #[em Practical Common Lisp]).
+
+	p The other thing to know before getting started with packages in Emacs is how to get them. Emacs supports ELPA (Emacs Lisp Package Archive) packages, which usually come from two major repositories: GnuELPA (enabled by default) and MELPA (has to be added manually). All of the packages listed below come from MELPA. To add MELPA to the list of package reporitories, you'll want to add the following to your Emacs config file (#[code ~/.emacs]):
+
+	+precode('elisp').
+		(require 'package)
+		(add-to-list 'package-archives
+		             '("melpa" . "https://melpa.org/packages/"))
+
+	p With the config file buffer still open, do #[code M-x ev-b] to run the file (eval buffer), #[code M-x package-refresh-contents] to fetch the package lists from the MELPA repository, and #[code M-x package-install RET [package#[!='&#93;'] RET] to install a package.
+
+	h5 SLIME and geiser
+
+	p SLIME -- the Superior Lisp Interaction Mode for Emacs -- lives up to its (flamboyant) name. It introduces a REPL major mode and several minor modes that makes Emacs really feel like an IDE rather than just a text editor: you can easily switch between the REPL and the buffer, autodoc symbols as you type them, evaluate the current definition under your cursor, etc. It feels really slick and I haven't encountered any bugs yet.
+
+	p geiser is the Scheme equivalent of SLIME. Like SLIME, it supports several variants of the Scheme (Chez, Chibi, Chicken, Gambit, Gauche, Guile, Kawa, MIT, Racket, and Sktlos). I was using Chez and my experience was mixed -- there seems to be problems with using Geiser's compliation functions for latest version of Chez (9.5.4) so I had to install 9.4. Even then, there are still some problems when compiling a script after entering debug mode, but this goes away after restarting the REPL. It's manageable at least. The latest versions of Chicken Scheme and Guile Scheme, which I also had installed on my computer, seemed to work OOTB without a problem, but I didn't do anything in depth outside of with Chez.
+
+	h5 ParEdit
+
+	p You can't do be efficient in Lisp without a good way to manage your parens. ParEdit introduces a minor mode for "performing structured editing of S-expression data." This means that your parens will always#[+footnote Most commands when paredit is enabled won't let you break the balanced-ness of your parens, #[a(href='https://stackoverflow.com/a/26248310/2397327') #[code kill-region] and #[code quoted-insert] can either break or fix your parens while in paredit mode].] be balanced! As opposed to the sloppy method of having dangling, broken parens as you work, this method is defensive and also allows you to perform "structural navigation" through sexprs, such as moving forward or backward over one complete sexpr. (It also works on square and curly braces, quotes, and even has the #[code paredit-comment-dwim] smart commenting tool!)
+
+	p It really feels like magic once you start using it, and the associated terminology (#[a(href='https://www.emacswiki.org/emacs/ParEdit#h5o-6') "slurpage and barfage"]) feels magical too.
+
+	h5 Magit
+
+	p I've used this package for one day and it already feels like a Magical Git. Considering how much I already love the git CLI, I was surprised I could love something more. When you enter the Magit major mode, my gut reaction is it feels ViM-like with its single letter commands (e.g., #[kbd c] for commit or #[kbd s] to stage), and yet it's able to show you multiple buffers easily and neatly using ediff, which has all of Emacs's navigational and buffer-management utilities. Now I can do #[code git status] even more frequently than I could before simply by opening the magit buffer.
+
+	h4 Closing remarks
+
+	p One thing I didn't mention at all was the Emacs-ViM rivalry. It didn't come up at all from Internet searches when I was learning Emacs commands. On the contrary, I didn't see any mention of ViM except when explicitly searching for Emacs equivalents of certain ViM commands (perhaps this is closer to the nature of the rivalry?). There is a ViM emulation mode for Emacs called #[a(href='https://github.com/emacs-evil/evil') Evil], whose name is a suggestive of the rivalry but the purpose indicates that ViM has some goods that Emacs can use. Converely, as mentioned in an earlier footnote, there have also been attempts to bring some of Emacs to ViM, such as the ports of SLIME. The rivalry seems good-natured at the very least.
+
+	p Even with ViM, which is relatively simple, I was still learning new shortcuts or tricks every now and then for six years. With Emacs, I think I can count on learning how to become more productive for an entire lifetime. Moreover, many actions are still uncomfortable today but I feel somewhat confident that with some time, this discomfort can all be scripted away in elisp or shortcuts can be found through practice.
+
+	p It's early to tell, but I think I'll really like Emacs. It's been a steep learning curve, and I expect there to continue to be a steep learning curve, but the number of cool and efficiency-boosting features in this little piece of software is incredible. I think the coolest thing is to be able to have major modes for non-text buffers (such as Magit or the SLIME REPL), which allows you to interact with and navigate many different programs as if they were files.#[+footnote Perhaps this is another manifestation of the "everything is a file" from Unix philosophy?] Details like #[a(href='https://www.gnu.org/software/emacs/manual/html_node/emacs/Shift-Selection.html') shift-selection] and image support, which ViM misses, makes Emacs feel like it lies on the boundary between text editor and full-blown IDE.

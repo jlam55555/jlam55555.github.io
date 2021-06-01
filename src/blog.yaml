@@ -51,3 +51,7 @@
   destination: 11
   title: Group project pet peeves
   date: 2021-05-02T11:28:35-04:00
+- template: ../posts/12
+  destination: 12
+  title: First thoughts on Emacs
+  date: 2021-05-23T20:09:53-04:00

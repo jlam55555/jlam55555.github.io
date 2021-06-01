@@ -6,3 +6,6 @@ scratch
 
 # Node files
 node_modules
+
+# Temporary files
+*~

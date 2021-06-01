@@ -1,4 +1,6 @@
+mixin imglinkext(src, alt)
+    a(href=src target='_blank' title='click to open in new tab')
+        img(src=src alt=alt style='max-width:100%;')
+
 mixin imglink(src, alt)
-	-src = '/res/posts/' + src
-	a(href=src target='_blank' title='click to open in new tab')
-		img(src=src alt=alt style='max-width:100%;')
+    +imglinkext('/res/ports/' + src, alt)
