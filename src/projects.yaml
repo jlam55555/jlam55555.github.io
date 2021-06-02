@@ -2,9 +2,10 @@ Commissioned projects:
   Cooper Union EOYS 2021:
     anchor: eoys2021
     year: 2021
-    desc: Online presence for School of Engineering EOYS during COVID-19 pandemic.
+    desc: 'Online presence for School of Engineering 2021 EOYS during COVID-19 pandemic. Performed technical advising: hosting & domain name (w/ GitHub Pages), Vue/Vite framework setup, Bootstrap integration.'
     links:
-      Coming soon: '#'
+      See it: https://engineeringeoys.cooper.edu/
+      Source: https://github.com/evo2000/EOYS
   Maroon and Gold Labs:
     anchor: mag_labs
     year: 2019
