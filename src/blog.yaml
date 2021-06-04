@@ -55,3 +55,7 @@
   destination: 12
   title: First thoughts on Emacs
   date: 2021-05-23T20:09:53-04:00
+- template: ../posts/13
+  destination: 13
+  title: Assorted thoughts on typography and typing
+  date: 2021-06-03T23:48:15-04:00
