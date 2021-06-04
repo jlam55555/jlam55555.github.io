@@ -8,8 +8,8 @@ mixin footnote
 	-footnotes.push(pug_html);
 	-pug_html = old_buf;
 	-const fid = footnotes.length;
-	sup(id = 'footnote-' + fid + '-indicator')
-	a(href = '#footnote-' + fid) = fid
+	sup(id='footnote-' + fid + '-indicator')
+		a(href='#footnote-' + fid)= fid
 
 mixin write_footnotes
 	if footnotes.length
