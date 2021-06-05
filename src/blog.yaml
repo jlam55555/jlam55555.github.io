@@ -67,3 +67,7 @@
   destination: 15
   title: Site updates
   date: 2021-06-05T12:44:57-04:00
+- template: ../posts/16
+  destination: 16
+  title: Emacs kill ring (is hackable!)
+  date: 2021-06-05T13:42:41-04:00

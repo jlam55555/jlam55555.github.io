@@ -1,0 +1,80 @@
+extends blogpost
+
+block post
+	+codestyle
+
+	p (In Emacs,) I was copying (killing/yanking) Lisp code from a Lisp-mode buffer into a Fundamental-mode buffer and noticed that the code was still syntax-highlighted. Moreover, when editing the code, the text remained colored but new text was not appopriately colored.
+
+	p I was able to find #[a(href='https://stackoverflow.com/a/17515621/2397327') the answer to this] pretty quickly, and I think it's an excellent example of how extensible Emacs is.
+
+	p To summarize the kill/yank behavior to the unaware, Emacs has two ways of deleting text. One is a true "delete," which removes the text and forgets about it. The second way is "killing" text, which removes the text and remembers it, so you can "yank" it back at some later time.#[+footnote These quoted terms might sound strange, but they're Emacs jargon.] There is also the option to save text without deleting so that it can be yanked back later. These form the common text-editing operations commonly known as delete, cut, paste, and copy, respectively.
+
+	p The only issue I have with this is that the default shortcuts are not very consistent. An article #[a(href='https://www.gonsie.com/blorg/delete-v-kill.html') "Emacs Delete vs. Kill"] goes into some of the different delete/kill combinations you could possibly want (e.g., kill to next word, delete backwards a paragraph). Unlike ViM, which has fixed movement modifiers, the Emacs defaults are just there to start you off with what is probably most useful (with the ability to configure shortcuts later as needed). Some of the useful defaults I've found:
+	ul
+		li #[kbd C-d] or #[kbd Del]: #[code delete-char] (delete next character)
+		li #[kbd C-w]: #[code kill-region] (cut selection)
+		li #[kbd C-Bksp]: #[code backword-kill-word] (cut previous word)
+		li #[kbd M-w]: #[code kill-ring-save] (copy)
+		li #[kbd M-@ C-w]: #[code mark-word kill-region] (cut next word)
+		li #[kbd C-y]: #[code yank] (paste)
+	p In general, I don't use #[code delete-region] (there isn't a default keybinding to it anyways), because the kill commands are more convenient and you can yank back the killed text. Killing/yanking also works with the system clipboard, so it works with outside applications as well (more on this later). When yanking back text, you can choose an older kill with #[kbd M-y] (#[code yank-pop]).
+
+	p The question is, where does the killed or copied data get stored? Paraphrasing the above answer, it gets stored in a linked list called the #[code kill-ring]. It is a linked list so that you can yank back older kills.
+
+	p The equivalent of #[code kill-ring] in ViM are "registers," described in #[a(href='https://www.brianstorti.com/vim-registers/') this article]#[+footnote Also, ViM's terminology differs slightly from Emacs. In ViM, "yank" (#[kbd y] command) means copy, "delete" (#[kbd d]) means cut, and "paste" (#[kbd p]) means paste. I think this terminology makes more sense.]. This makes ViM equally capable when it comes to plugins in this regard as Emacs, but you're limited to using Vimscript as opposed to Elisp. I'm sure there are ways to get the system clipboard in other applications as well, but this probably involves some obscure library function. For example, JetBrains editors have a ton of functionality, but plugin developers may have to search deep to find some obscure API like #[a(href='https://github.com/JetBrains/intellij-community/blob/master/platform/editor-ui-api/src/com/intellij/openapi/ide/CopyPasteManager.java') #[code com.intellij.openapi.ide.CopyPasteManager]]. In some less-featured plugin environments, it may be impossible to fetch or modify the clipboard/kill ring.
+
+	p Compare those with the Emacs kill ring, which is a global linked list variable.
+
+	p Not a specialized data container like ViM registers, and not buried deep in some API that may limit your functionality. This is the epitome of a hackable editor.#[+footnote Of coure, then it's up to you not to break the editor, but it's all in the spirit of hacking. But Emacsites#[+footnote The correct term for a member of the Church of Emacs, according to #[a(href='https://stallman.org/extra/church.html') according to St. Ignucius himself].#[+footnote These nested footnotes appear out-of-order because they are implemented in a very simple way.]], with their #[a(href='https://www.emacswiki.org/emacs/DoWhatIMean') dwim] ways, strongly defend their claims to advanced and accessible configurability.] Moreover, you can easily find it using the help commands (#[kbd C-h v kill-ring], or in the notes for #[code kill-region]) -- I probably would've looked here next if I couldn't find the answer online.
+
+	p In other words, you can view and modify the kill ring very easily, both because it is so accessible and using a common linked list format. Which brings us back to the original question -- why does killing copy text style? We can look at the kill ring with #[kbd C-h v kill-ring] to see what is actually being stored.
+
+	p Killing regular text will do what you might expect. For example, if I kill some parts of the previous sentence, the kill ring may look something like:
+	+precode('elisp').
+		("expect" "lar text will do what y" "Killing regular")
+
+	p But if I go into a Lisp buffer (that is syntax-highlighted) and kill the following text:
+	+precode('scheme').
+		(define (compose f g)
+		  ;; returns the composition (f o g). Assumes f, g take one argument
+		  (lambda (x) (f (g x))))
+
+	p then the following entry is prepended to the kill ring:
+	+precode('elisp').
+		#("(define (compose f g)
+		  ;; returns the composition (f o g). Assumes f, g take one argument
+		  (lambda (x) (f (g x))))
+		" 0 1
+		(fontified t)
+		1 7
+		(face font-lock-keyword-face fontified t)
+		7 9
+		(fontified t)
+		9 16
+		(face font-lock-function-name-face fontified t)
+		16 24
+		(fontified t)
+		24 27
+		(face font-lock-comment-delimiter-face fontified t)
+		27 91
+		(face font-lock-comment-face fontified t)
+		91 94
+		(fontified t)
+		94 100
+		(face font-lock-keyword-face fontified t)
+		100 117
+		(fontified t))
+
+	p It becomes pretty clear then that the #[a(href='https://www.emacswiki.org/emacs/TextProperties') text properties] get killed and yanked along with the text.#[+footnote I assume all rich-text clipboard material serialize their data in a similar way, but I haven't looked into it. But I imagine this Lisp representation to be fairly organic amongst clipboard rich-text serialization methods.] From the above link, we learn that text properties are buffer metadata and not part of the buffer, and thus will not get saved like the rest of the buffer. Reloading the non-syntax highlighted file (e.g., with #[kbd C-x C-v RET]) will remove the syntax highlighting. Or, as the like suggests, we can implement a new command that removes the text properties from the selected region:
+	+precode('elisp').
+		(defun remove-display-text-property (start end)
+		  "Remote all text properties from START to END.
+		This is useful when copying stuff with a display property set
+		from elsewhere."
+		  (interactive "r")
+		  (set-text-properties start end nil))
+
+	p Ok, I lied a little. We inspected the kill ring variable to see why syntax highlighting is being killed/yanked, but you're not actually supposed to modify the kill ring directly, for the reasons specified in the descripion of #[code kill-ring]:
+	blockquote
+		p List of killed text sequences. Since the kill ring is supposed to interact nicely with cut-and-paste facilities offered by window systems, use of this variable should interact nicely with ‘interprogram-cut-function’ and ‘interprogram-paste-function’.  The functions ‘kill-new’, ‘kill-append’, and ‘current-kill’ are supposed to implement this interaction; you may want to use them instead of manipulating the kill ring directly.
+	p There is a little bit of an interface to this data structure because of the complexities related to copy/paste to/from other applications#[+footnote I appreciate this feature, since I've never had a good experience copying text from ViM to another application.]. But I would argue that having the kill ring as a transparent variable gives you a window into how the kill/yank procedures operate. With this window, it is easier to extend and debug this functionality.
