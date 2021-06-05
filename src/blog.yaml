@@ -71,3 +71,7 @@
   destination: 16
   title: Emacs kill ring (is hackable!)
   date: 2021-06-05T13:42:41-04:00
+- template: ../posts/17
+  destination: 17
+  title: Brain dump 1
+  date: 2021-06-05T17:20:39-04:00

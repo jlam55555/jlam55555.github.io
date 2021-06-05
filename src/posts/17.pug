@@ -1,0 +1,77 @@
+extends blogpost
+
+block post
+	+codestyle
+
+	p I used to have "brain dump" posts on my old blog, and I figure I'll do it again here. The reasoning behind this is that there are many small fragments of (hopefully interesting) thought that get built up. The process of doing the research necessary to form a blog post into a complete idea is especially prone to spawning these tidbits of unfinished thought.
+
+	hr
+	h4 Actor and Lisper: Shiro Kawai
+	p Some website I looked at recently (probably looking something up about Emacs) using was built in Gauche Scheme, one of the distros I hadn't heard much about. The developer is named Shiro Kawai, which I thought was an interesting name#[+footnote "shiro" = white and "kawaii" = cute in Japanese, although it's probably something different for a name.].
+
+	p The most interesting fact about him is that he is a professional programmer and actor. I don't really think I've seen many programmers do much else (#[a(href="https://data.typeracer.com/pit/text_info?id=3811095") relevant quote]), especially in the arts. What's more, he wrote #[a(href="https://news.ycombinator.com/item?id=24096046") some papers] about how he uses Scheme in movie production. According to #[a(href="https://usesthis.com/interviews/shiro.kawai/") his interview on #[em Uses This]], he coding preference is Lisp (CL, Clojure, and Gauche of course) and these come up both in hobbyist and professional contexts. And he uses Emacs.
+
+	p Seems like a really cool guy.
+
+	hr
+	h4 Org mode and project explorer for Emacs
+	p These are two plugins I'd like to try.
+
+	p #[a(href="https://orgmode.org/") Org mode] seems impressively popular. It's an Emacs package that provides a notetaking (Org-anization) major mode for Emacs. In the context in which I saw it (coming up later in this brain dump), it was being used to generate a website with its publish feature. It's large enough that they use the term #[a(href="https://orgmode.org/worg/") Worg] (World of Org). From a quick glance it seems like a plaintext markup language like Markdown, but with Emacs features like embedded code snippet "panes" (I'm not sure what the correct term would be). Seem like a high learning curve though, with the number of features it seems to offer.
+
+	p Another thing I've been looking at is #[a(href="https://github.com/sabof/project-explorer") project-explorer] which does exactly what you think it does. I haven't tried this out either, but it looks very appealing as I'm not totally navigating buffers and windows#[+footnote What Emacs calls "windows," i.e., the panels that each contain a buffer in the Emacs editor. What I usually think of as a "window" Emacs calls a "frame."] in Emacs yet. My mode of navigation mostly comprises #[kbd C-x o] and #[kbd C-x b], which is really inefficient with more than three buffers (usually I'm cross-referencing many more files than that) or when a term-mode buffer is open (then the #[kbd C-x] prefixes become #[kbd C-c] prefixes].
+
+	hr
+	h4 Vimscript vs. Emacs
+	p When I was writing the two recent posts about Emacs (#[a(href='/blog/12/') here], #[a(href='/blog/16') here]), comparison to ViM was a frequent topic. I found a lot of good opinions about Emacs and ViM, but #[a(href='https://www.quora.com/What-is-possible-in-Vimscript-but-not-in-Emacs-LISP/answer/Christopher-F-Clark-1') this post by Christopher Clark] was well put.
+	blockquote
+		p!= '&hellip;'
+
+		p Vimscript encapsulates the Vim commands (much like Emacs keyboard macros do) and they have a certain logic to them, as someone recently wrote they are designed to be “composable” their are verbs and nouns and they are generally used as pairs “dh” is delete-backward-character and the order is consistent. This is a really good feature of the Vi command set.
+
+		p In Emacs lisp (elisp), you need to know the name of the command, it is probably close to delete-backward-character but the details can vary as in is it forward-search or search-forward. Even though I have used elisp for years and use it on an at least weekly if not always daily basis, I still find myself looking up some of the names if I haven’t used them is over a couple of days.
+
+		p The running joke is that there is an Emacs command that does anything you want, you just have to know the obscure key combination that invokes it. Emacs people call that control-meta-cokebottle. However, that is equally true of elisp. There is probably an elisp package that does what you want, you just have to know which one it is and then what the function name in it is. The names are rarely consistent and many are only composable in the sense that all programming languages are.
+
+		p!= '&hellip;'
+
+		p However, some of the functions are 100s of lines long. My ask yes-or-no function is an example of that, because it has some “dwim” (do what I mean) aspects. Thus, my version of emacs has tens of thousands of lines of customization to make it work exactly what I want (and I actually have some old code that isn’t even incorporated in my current environment that is better than what I currently use, e.g. code that makes the kill ring indefinitely deep).
+
+		p The relevant joke is APL is a diamond (bright, shiny, and hard) and it is nearly impossible to extend APL. Lisp is a ball of mud. You can add anything to a ball of mud and it is still a ball of mud. My emacs .init file is roughly proof of that.
+
+		p!= '&hellip;'
+
+		p As many have said, Emacs is not an editor it is a lisp interpreter (language environment) that just happens to do editing.
+
+	hr
+	h4 Words of Wisdom
+	p Some terminology/techniques I learnt from work. I don't think any of these are proprietary so they can be shared here.
+	ul
+		li Sprint retrospective: A part of the Agile process. At the end of a sprint, do some meta reflection. Honestly, it feels very blunt and awkward, but if it works it works. (We actually did something similar in our club meetings for IEEExACM, but I didn't know it was called a retrospective.)
+		li RCA (Root Cause Analysis): a formal method of problem solving used to address some issue (e.g., a workflow issue) to prevent it from happening again. Sounds like the STAR (Stop. Think. Act. Reflect.) method from high school wellness classes, and also extremely blunt.
+		li code smell: from Wikipedia: "characteristic in the source code of a program that possibly indicates a deeper problem."
+		li LCM (Launch Control Meeting): a meeting with the higher-ups to determine whether a new feature should be added shortly before a release. The closer the release or the larger the feature, the higher the risks (e.g., bugs).
+
+	p Not from work, but some other terms I've recently acquired.
+	ul
+		li perspicuous: from Google (Oxford Languages) "(of an account or representation) clearly expressed and easily understood; lucid; (of a person) able to give an account or express an idea clearly." I am clearly not pespicuous in the second sense of the term, although I am always trying to get better.
+		li tranclusion: the inclusion of one file into another by hypertext reference (think of a LaTeX #[code \input] command).
+		li technical debt: from Wikipedia, "a concept in software development that reflects the implied cost of additional rework caused by choosing an easy (limited) solution now instead of using a better approach that would take longer." The analogy continues with the concept of "interest" if the technical debt remains unpaid.
+		li opportunity cost: the cost of making one choice as opposed to the alternative. Even if the current choice doesn't incur any real cost, the alternative may give some benefit, which makes the chosen choice relative costly.
+
+	hr
+	h4 A very similar website, by Yann Esposito
+	p During one of my searches about Emacs and ViM, I stumbled across #[a(href='http://yannesposito.com/Scratch/en/blog/Learn-Vim-Progressively/') "Learn Vim Progressively"] by Yann Esposito. I wasn't really looking for that post, but I immediately noticed that the website had a very similar feel to mine. The centered, narrow column of text; the plain text and minimal styling; the consistent simple header and footer across pages -- it felt very similar to this site. Going back to the #[a(href="http://yannesposito.com/") homepage] of the site, there are also posts about how the site was (statically) generated. #[a(href="http://yannesposito.com/Scratch/en/blog/01_nanoc/") originally, it was built on the framework called nanoc]. #[a(href="http://yannesposito.com/posts/0001-new-blog/index.html") The newer edition is based on the Org mode publish tool] (this is how I encountered Org mode originally) and #[a(href="http://yannesposito.com/posts/0017-static-blog-builder/index.html") uses a Makefile to selectively build pages]#[+footnote In comparison, my very simple static website generator is probably much simpler than Org-publish, and I have yet to see how it would play with Makefiles due to its nested nature. But this is probably coming soon as the number of blog posts increases.].
+
+	p In the last link, Yann puts forward some of the design guidelines for his website, which are basically a superset of mine. I was mostly focused on performance, readability, and consistency. Yann also proposes respecting privacy (no dependencies on external CSS/JS) and generates RSS (which I haven't done (yet)). He also describes his website as theme-switchable and frugal, and these also apply to my website even if they weren't conscious decisions.
+
+	p The subject of some of the other blog posts include Haskell, Git, Vim, jQuery, so it seems like we have a lot in common! Like Shiro, it would be really cool to meet Yann.
+
+	hr
+	h4 My .emacs
+
+	p This is after of using Emacs for the first time, so I can imagine that this'll grow pretty long eventually. It's currently mostly configuring packages, but I expect that there'll be custom keybindings and functions there in due time.
+	+precode('elisp')
+		include ../res/posts/17_.emacs
+
+	p Another thing I would like to try with Emacs (but not directly related to .emacs) is to use an #[a(href='https://www.gnu.org/software/emacs/manual/html_node/emacs/Emacs-Server.html') Emacs server]. It seems like you'll be able to have a long-term Emacs session open without needing to keep the application (visibly) open, just like many IDEs do.
