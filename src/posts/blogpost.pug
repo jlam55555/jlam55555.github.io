@@ -1,17 +1,32 @@
 extends ../templates/layout
 
 block content
-    include ../mixins/codestyle
-    include ../mixins/imglink
-    include ../mixins/mathjax
-    include ../mixins/footnote
+	include ../mixins/codestyle
+	include ../mixins/imglink
+	include ../mixins/mathjax
+	include ../mixins/footnote
 
-    h2 Blog
-    h3= title
-    p On #{new Date(date).toLocaleString()}
-    p
-        a(href="/blog") Return to blog
+	// styles for blog posts
+	style.
+		kbd {
+			background-color: #eee;
+			padding: 0 3px;
+			border: 1px solid black;
+			border-radius: 2px;
+		}
+		blockquote {
+			margin: 0;
+			background-color: #eee;
+			padding: 1px 1em;
+		}
 
-    block post
+	h2 Blog
+	h3= title
+	p On #{new Date(date).toLocaleString()}
+	p
+		a(href="/blog") Return to blog
+	hr
 
-    +write_footnotes
+	block post
+
+	+write_footnotes

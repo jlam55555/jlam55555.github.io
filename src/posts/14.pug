@@ -1,0 +1,128 @@
+extends blogpost
+
+block post
+	+codestyle
+
+	p There was a really interesting exercise from #[em SICP]#[+footnote #[em Structure and Interpretation of Computer Programs]]:
+
+	blockquote
+		p #[a(href='https://mitpress.mit.edu/sites/default/files/sicp/full-text/book/book-Z-H-14.html') SICP Exercise 2.6]:
+		p In case representing pairs as procedures wasn't mind-boggling enough, consider that, in a language that can manipulate procedures, we can get by without numbers (at least insofar as nonnegative integers are concerned) by implementing 0 and the operation of adding 1 as
+
+		+precode('scheme').
+			(define zero (lambda (f) (lambda (x) x)))]
+
+			(define (add-1 n)
+			  (lambda (f) (lambda (x) (f ((n f) x)))))
+
+		p This representation is known as Church numerals, after its inventor, Alonzo Church, the logician who invented the  calculus.
+
+		p Define #[code one] and #[code two] directly (not in terms of #[code zero] and #[code add-1]). (Hint: Use substitution to evaluate #[code (add-1 zero)]). Give a direct definition of the addition procedure + (not in terms of repeated application of #[code add-1]).
+
+	p Firstly, here are some function composition primitives (from section 1.3 exercises). Their functionality should be fairly clear by inspection, and their relevance will soon be apparent.
+	+precode('scheme').
+		(define (identity x)
+		  ;; identity function
+		  x)
+
+		(define (double f)
+		  ;; composes a function with itself
+		  (lambda (x)
+		    (f (f x))))
+
+		(define (compose f g)
+		  ;; returns the composition (f o g)
+		  (lambda (x) (f (g x))))
+
+		(define (n-fold-compose f n)
+		  ;; generalized version of double: returns the function
+		  ;; obtained by composing f with itself n times. Assumes n>=0
+		  (if [zero? n]
+		      identity
+		      (let iter ([n n])
+			(if [= n 1]
+			    f
+			    (compose f (iter (1- n)))))))
+
+	p Secondly, I like to annotate and namespace the examples from the book.
+
+	+precode('scheme').
+		(define church-zero
+		  ;; Church numeral implementation of 0
+		  (lambda (f)
+		    (lambda (x) x)))
+
+		(define (church-1+ n)
+		  ;; Church numeral implementation of 1+
+		  (lambda (f)
+		    (lambda (x)
+		      (f ((n f) x)))))
+
+	p #[code zero] is a procedure that always returns the identity function, so it is the same as writing:
+	+precode('scheme') (define (church-zero f) identity)
+	p We immediately see that each "number" is a mapping into the space of procedures. We also see (from the definition of #[code church-1+]) that the domain of this mapping is necessarily also a procedure. I.e., each Church numeral is a mapping from functions to functions.#[+footnote The terms mapping, procedure, and function are used interchangeably here. The first is used in math, the second in SICP, and the third in the general programming sense.]
+
+	p The implementation of 1 in this function space is derived from the definitions of #[code church-zero] and #[code church-1+].
+	+precode('scheme').
+		(define (church-one f)
+		  (lambda (x)
+		    (f x)))
+		;;; simplify:
+		(define (church-one f) f)
+		;;; simplify:
+		(define church-one identity)
+
+	p We can apply the same method to derive #[code church-two], the implementation of 2 in this representation:
+	+precode('scheme').
+		(define church-two
+		  (lambda (f)
+		    (lambda (x)
+		      (f (f x)))))
+		;;; simplify:
+		(define (church-two f)
+		  (lambda (x)
+		    (f (f x))))
+		;;; simplify:
+		(define church-two double)
+
+	p From this, the pattern starts to become clear: the Church numeral representation of a nonnegative integer #[em n] is the #[em n]-fold function composition operator.
+
+	p The question asks us to write an explicit procedure for the sum of two Church numerals #[em a] and #[em b]. With the pattern above, we expect this to return the (#[em a]+#[em b])-fold composition operator.
+	+precode('scheme').
+		(define (church-add a b)
+		  ;; add two Church numerals
+		  (lambda (f)
+		    (lambda (x)
+		      ((a f) ((b f) x)))))
+
+	p Similarly, we can define a multiplication in this scheme, which returns the #[em ab]-fold composition operator.
+	+precode('scheme').
+		(define (church-multiply a b)
+		  ;; multiply two Church numerals
+		  (lambda (f)
+		    (lambda (x)
+		      ((a (b f)) x))))
+
+	p At this point, we've defined a bijection between the nonnegative integers and the Church numerals.#[+footnote I recently finished my first Algebra class, so I want to elaborate a little. The nonnegative integers form a semiring (a ri#[em n]g without #[em n]egatives, i.e., a rig or subring). We define the Church numeral n' to be the n-fold composition operator, and this automatically defines a bijective map g defined by g(n)=n'. Using the definitions of the Church addition and multiplication, and bootstrapping off of the properties of the integers, we can trivially prove two more facts: Church numerals also form a rig, and g is a subring homomorphism (a subring isomorphism.) I'm not sure if these facts are interesting though.]
+
+	p Then we can write functions that convert each nonnegative integer to its (unique) Church numeral representation and vice versa. For the forward direction, we perform #[em n]-fold composition on a function. For the backwards direction, we see how many times the Church numeral composes the #[code 1+] function with itself, which very naturally reveals the corresponding integer.
+	+precode('scheme').
+		(define (fx->church n)
+		  ;; nonnegative integer to corresponding Church numeral
+		  (lambda (f)
+		    (n-fold-compose f n)))
+
+		(define (church->fx n)
+		  ;; Church numeral to corresponding integer
+		  ((n 1+) 0))
+
+	p We can do a quick check to see that these work:
+	+precode('scheme').
+		> (map church->fx (list church-zero church-one church-two))
+		(0 1 2)
+		> (church->fx (fx->church 512))
+		512
+
+	p As the name suggests, the Church numerals were invented by Alonzo Church, founder of lambda calculus and pioneer of computability theory, as a theoretical way to encode any data in the form of the primitives of lambda calculus: functions. Even without knowing lambda calculus notation, the Church numeral arithmetic in lambda calculus notation on #[a(href='https://en.wikipedia.org/wiki/Church_encoding') the Wikipedia page for Church encoding] are clearly equivalent to my Scheme definitions:
+	+imglink('14_church_lambda.png', 'Church numeral arithmetic in lambda calculus notation')
+	p Of course, Lisp was heavily influenced by lambda calculus, so this is hardly surprising. But I still find it very cool!

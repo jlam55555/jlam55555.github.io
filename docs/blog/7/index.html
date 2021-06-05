@@ -7,16 +7,27 @@ body {
 	max-width: 400pt;
 	margin: 0 auto;
 	padding: 0;
-}</style><link rel="icon" href="/res/favicon.png"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head><body><h1>Jonathan Lam</h1><p>EE/CS @ The Cooper Union</p><nav><a href="/">Home</a> | <a href="/contact">Contact</a> | <a href="/experience">Experience</a> | <a href="/res/resume.pdf" target="_blank">Resume</a> | <a href="http://files.lambdalambda.ninja">Files</a> | <a href="/blog">Blog</a></nav><hr><!-- inspiration taken from https://codepen.io/Zoxon/pen/WyqdBb--><h2>Blog</h2><h3>pugjs shenanigans</h3><p>On 4/20/2021, 3:54:03 PM</p><p><a href="/blog">Return to blog</a></p><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.23.0/prism.min.js" integrity="sha512-YBk7HhgDZvBxmtOfUdvX0z8IH2d10Hp3aEygaMNhtF8fSOvBZ16D/1bXZTJV6ndk/L/DlXxYStP8jrF77v2MIg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.23.0/plugins/autoloader/prism-autoloader.min.js" integrity="sha512-zc7WDnCM3aom2EziyDIRAtQg1mVXLdILE09Bo+aE1xk0AM2c2cVLfSW9NrxE5tKTX44WBY0Z2HClZ05ur9vB6A==" crossorigin="anonymous"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.23.0/themes/prism-tomorrow.min.css" integrity="sha512-vswe+cgvic/XBoF1OcM/TeJ2FW0OofqAVdCZiEYkd6dwGXthvkSFWOoGGJgS2CW70VK5dQM5Oh+7ne47s74VTg==" crossorigin="anonymous"><style>pre {
+}</style><link rel="icon" href="/res/favicon.png"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head><body><h1>Jonathan Lam</h1><p>EE/CS @ The Cooper Union</p><nav><a href="/">Home</a> | <a href="/contact">Contact</a> | <a href="/experience">Experience</a> | <a href="/res/resume.pdf" target="_blank">Resume</a> | <a href="http://files.lambdalambda.ninja">Files</a> | <a href="/blog">Blog</a></nav><hr><!-- inspiration taken from https://codepen.io/Zoxon/pen/WyqdBb--><!-- styles for blog posts--><style>kbd {
+	background-color: #eee;
+	padding: 0 3px;
+	border: 1px solid black;
+	border-radius: 2px;
+}
+blockquote {
+	margin: 0;
+	background-color: #eee;
+	padding: 1px 1em;
+}
+</style><h2>Blog</h2><h3>pugjs shenanigans</h3><p>On 4/20/2021, 3:54:03 PM</p><p><a href="/blog">Return to blog</a></p><hr><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.23.0/prism.min.js" integrity="sha512-YBk7HhgDZvBxmtOfUdvX0z8IH2d10Hp3aEygaMNhtF8fSOvBZ16D/1bXZTJV6ndk/L/DlXxYStP8jrF77v2MIg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.23.0/plugins/autoloader/prism-autoloader.min.js" integrity="sha512-zc7WDnCM3aom2EziyDIRAtQg1mVXLdILE09Bo+aE1xk0AM2c2cVLfSW9NrxE5tKTX44WBY0Z2HClZ05ur9vB6A==" crossorigin="anonymous"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.23.0/themes/prism-tomorrow.min.css" integrity="sha512-vswe+cgvic/XBoF1OcM/TeJ2FW0OofqAVdCZiEYkd6dwGXthvkSFWOoGGJgS2CW70VK5dQM5Oh+7ne47s74VTg==" crossorigin="anonymous"><style>pre {
 	padding: .5rem !important;
 	line-height: 1 !important;
 }
-code {
+code.fancy-code {
 	line-height: 1 !important;
 	font-size: 0.75rem !important;
 	tab-size: 8 !important;
 }
-</style><p>I recently <a href="/blog/1">wrote about how this website's build system is implemented</a>. One of the more-or-less arbitrary design choices was to use the Pug (formerly Jade) templating engine. A templating engine is used to generate HTML from template files, which allow you to incorporate some scripting logic. In my case, it helps greatly with the generating all the static HTML for this website on the server-side: it removes a lot of the redundancy, performs some nice tasks like a simple minification, and allows for some nice scripting tasks like those I'll discuss here.</p><p>There are a good number of templating engine options. Some popular ones I'm aware of are EJS (an ERB-like Javascript solution), Mustache, Handlebars (an extension to Mustache but popular on its own), and Liquid (the Ruby-based engine used in Jekyll). There are also templates used in frameworks like Angular and React that are deeply integrated into their frameworks (i.e., Angular's components and directives, and React's JSX). There are probably more, but I'm not too knowledgeable or up-to-date in the subject -- this post will focus on endeavors in Pug specifically. Personally, I've used Jade and Handlebars in the past, and I like the SASS-like simplicity of Jade/Pug (the other options adhere more strongly to the traditional XML-like syntax, which feels tedious to me). The ultimate choice of Pug was arbitrary.</p><h4>Including files: a common use case</h4><p>From this point on, everything will refer exclusively to Pug. However, it is not limited to Pug, and you can probably do many of the same things in other templating engines.</p><p>Pug is the HTML equivalent of SASS. They both:</p><ul><li>use a Pythonic whitespace-sensitive syntax</li><li>offer mixins and extending templates</li><li>are often used server-side to generate static code (HTML/CSS) and can use custom JS variables and logic</li></ul><p>You don't need much to have a fairly powerful syntax. At the beginning, all this website required was the use of templates so that the template wouldn't have to be copied onto each page<sup id="footnote-1-indicator"><a href="#footnote-1">1</a></sup>.</p><pre><code class="language-pug">// layout.pug
+</style><p>I recently <a href="/blog/1">wrote about how this website's build system is implemented</a>. One of the more-or-less arbitrary design choices was to use the Pug (formerly Jade) templating engine. A templating engine is used to generate HTML from template files, which allow you to incorporate some scripting logic. In my case, it helps greatly with the generating all the static HTML for this website on the server-side: it removes a lot of the redundancy, performs some nice tasks like a simple minification, and allows for some nice scripting tasks like those I'll discuss here.</p><p>There are a good number of templating engine options. Some popular ones I'm aware of are EJS (an ERB-like Javascript solution), Mustache, Handlebars (an extension to Mustache but popular on its own), and Liquid (the Ruby-based engine used in Jekyll). There are also templates used in frameworks like Angular and React that are deeply integrated into their frameworks (i.e., Angular's components and directives, and React's JSX). There are probably more, but I'm not too knowledgeable or up-to-date in the subject -- this post will focus on endeavors in Pug specifically. Personally, I've used Jade and Handlebars in the past, and I like the SASS-like simplicity of Jade/Pug (the other options adhere more strongly to the traditional XML-like syntax, which feels tedious to me). The ultimate choice of Pug was arbitrary.</p><h4>Including files: a common use case</h4><p>From this point on, everything will refer exclusively to Pug. However, it is not limited to Pug, and you can probably do many of the same things in other templating engines.</p><p>Pug is the HTML equivalent of SASS. They both:</p><ul><li>use a Pythonic whitespace-sensitive syntax</li><li>offer mixins and extending templates</li><li>are often used server-side to generate static code (HTML/CSS) and can use custom JS variables and logic</li></ul><p>You don't need much to have a fairly powerful syntax. At the beginning, all this website required was the use of templates so that the template wouldn't have to be copied onto each page<sup id="footnote-1-indicator"><a href="#footnote-1">1</a></sup>.</p><pre><code class="fancy-code language-pug">// layout.pug
 doctype html
 html
     head
@@ -25,28 +36,28 @@ html
         h1 This is a common header
 
         block content
-</code></pre><pre><code class="language-pug">// index.pug
+</code></pre><pre><code class="fancy-code language-pug">// index.pug
 extends layout
 
 block content
     This is the homepage!
-</code></pre><p>So when we render <code>index.pug</code>, it'll automatically include all the code from the layout template and include the block content where the placeholder is. Pretty simple.</p><p>This extends nicely for multiple levels of subclassing. This allows the creation of "sublayouts." In the case of this website, I needed a overall layout template for the website, and a layout for all the blog posts that also follows the overall layout template. Then we have:</p><pre><code class="language-pug">// blogpostlayout.pug
+</code></pre><p>So when we render <code>index.pug</code>, it'll automatically include all the code from the layout template and include the block content where the placeholder is. Pretty simple.</p><p>This extends nicely for multiple levels of subclassing. This allows the creation of "sublayouts." In the case of this website, I needed a overall layout template for the website, and a layout for all the blog posts that also follows the overall layout template. Then we have:</p><pre><code class="fancy-code language-pug">// blogpostlayout.pug
 extends layout
 
 block content
     h1= post.title
     block post_content
-</code></pre><pre><code class="language-pug">// aspecificblogpost.pug
+</code></pre><pre><code class="fancy-code language-pug">// aspecificblogpost.pug
 extends blogpostlayout
 
 block post_content
     p This is a blog post
     p Lorem ipsum ...
-</code></pre><p>This simple setup sufficed for the first few posts, but very soon I began to wonder if I could do better.</p><h4>Motiviation for Mixins</h4><p>One task that I had to do in a few blog posts (such as this one) is to create code snippets. This requires loading an extra Javascript and CSS files, so I would rather not include it in every blog post, but only the blog posts that require it. One way to do this is to dump the code in another pug file and simply include this. In the case of using prism.js (as is the case for this website):</p><pre><code class="language-pug">// mixins/syntax_highlighter.pug
+</code></pre><p>This simple setup sufficed for the first few posts, but very soon I began to wonder if I could do better.</p><h4>Motiviation for Mixins</h4><p>One task that I had to do in a few blog posts (such as this one) is to create code snippets. This requires loading an extra Javascript and CSS files, so I would rather not include it in every blog post, but only the blog posts that require it. One way to do this is to dump the code in another pug file and simply include this. In the case of using prism.js (as is the case for this website):</p><pre><code class="fancy-code language-pug">// mixins/syntax_highlighter.pug
 script(src='path/to/prism.js')
 link(rel='stylesheet' href='path/to/prism.css')
 style // custom extra CSS styles
-</code></pre><pre><code class="language-pug">// someblogpost.pug
+</code></pre><pre><code class="fancy-code language-pug">// someblogpost.pug
 extends blogpostlayout
 
 block post_content
@@ -55,7 +66,7 @@ block post_content
     pre
         code(class='language-matlab').
             clc; clear; close all;
-</code></pre><p>This works, but there are still a few pain points. Having to manually include the required mixin files (by name) from each blog post is both brittle and inconvenient, as is the hardcoding in the specific code format required by prism.js. We can move the <code>include</code> statements into the blog post layout file and abstract library-specific code to mixins. This has the effect of shortening code, making it less brittle to library changes, and decreasing redundancy. This looks something like:</p><pre><code class="language-pug">// mixins/syntax_highlighter.pug
+</code></pre><p>This works, but there are still a few pain points. Having to manually include the required mixin files (by name) from each blog post is both brittle and inconvenient, as is the hardcoding in the specific code format required by prism.js. We can move the <code>include</code> statements into the blog post layout file and abstract library-specific code to mixins. This has the effect of shortening code, making it less brittle to library changes, and decreasing redundancy. This looks something like:</p><pre><code class="fancy-code language-pug">// mixins/syntax_highlighter.pug
 mixin codestyle
     script(src='path/to/prism.js')
     link(rel='stylesheet' href='path/to/prism.css')
@@ -65,7 +76,7 @@ mixin precode(language)
     pre
         code(class='language-' + language).
             block
-</code></pre><pre><code class="language-pug">// blogpostlayout.pug
+</code></pre><pre><code class="fancy-code language-pug">// blogpostlayout.pug
 extends layout
 
 block content
@@ -73,7 +84,7 @@ block content
 
     h1= post.title
     block post_content
-</code></pre><pre><code class="language-pug">// someblogpost.pug
+</code></pre><pre><code class="fancy-code language-pug">// someblogpost.pug
 extends blogpostlayout
 
 block post_content
@@ -81,19 +92,19 @@ block post_content
 
     +precode('matlab').
         clc; close all; clear;
-</code></pre><p>Much cleaner. We've abstracted extra functionality to mixins that conditionally include the library (<code>+codestyle</code>) and generate library-like code (<code>+precode</code>). Now, hypothetically, were we to switch from prism.js to highlight.js, it would be almost effortless. This also incurs no cost to the user, as the generated code is the same, and libraries are conditionally included.</p><p>This demonstrates a painless design pattern that can be used for any library or non-library reusable components. My blog post layout file currently has the following includes:</p><pre><code class="language-pug">include mixins/codestyle
+</code></pre><p>Much cleaner. We've abstracted extra functionality to mixins that conditionally include the library (<code>+codestyle</code>) and generate library-like code (<code>+precode</code>). Now, hypothetically, were we to switch from prism.js to highlight.js, it would be almost effortless. This also incurs no cost to the user, as the generated code is the same, and libraries are conditionally included.</p><p>This demonstrates a painless design pattern that can be used for any library or non-library reusable components. My blog post layout file currently has the following includes:</p><pre><code class="fancy-code language-pug">include mixins/codestyle
 include mixins/imglink
 include mixins/mathjax
 include mixins/footnote
-</code></pre><p>where <code>codestyle</code> is for syntax highlighting with prism and <code>mathjax</code> is for including the MathJaX library. <code>imglink</code> and <code>footnote</code> are custom reusable components.</p><h4>Automatic footnotes: a mixin case study</h4><p>In <a href="/blog/3">an earlier post</a> I found the need for footnotes<sup id="footnote-2-indicator"><a href="#footnote-2">2</a></sup>. I did this manually at first:</p><pre><code class="language-pug">// someblogpost.pug
+</code></pre><p>where <code>codestyle</code> is for syntax highlighting with prism and <code>mathjax</code> is for including the MathJaX library. <code>imglink</code> and <code>footnote</code> are custom reusable components.</p><h4>Automatic footnotes: a mixin case study</h4><p>In <a href="/blog/3">an earlier post</a> I found the need for footnotes<sup id="footnote-2-indicator"><a href="#footnote-2">2</a></sup>. I did this manually at first:</p><pre><code class="fancy-code language-pug">// someblogpost.pug
 // ...
 p Lorem ipsum dolor sit amet<sup>1</sup>, consectetur ...
 // ...
 p
     sup 1 Dummy text.
-</code></pre><p>But of course this is very tedious to do, especially if you have to renumber something. The coupling of footnote indicator and footnote is very loose -- it's all just messy.</p><p>It would be great if we could have LaTeX-like citations: something like:</p><pre><code class="language-latex">% loremipsum.tex
+</code></pre><p>But of course this is very tedious to do, especially if you have to renumber something. The coupling of footnote indicator and footnote is very loose -- it's all just messy.</p><p>It would be great if we could have LaTeX-like citations: something like:</p><pre><code class="fancy-code language-latex">% loremipsum.tex
 Lorem ipsum dolor sit amet\footnote{Dummy text}, consectetur ...
-</code></pre><p>The context is kept close to the comment, and all is well. My first approach was the following:</p><pre><code class="language-pug">// mixins/footnote.pug
+</code></pre><p>The context is kept close to the comment, and all is well. My first approach was the following:</p><pre><code class="fancy-code language-pug">// mixins/footnote.pug
 -let footnotes = [];
 
 // used to create an auto-numbered footnote
@@ -106,20 +117,20 @@ mixin print_footnotes
     each footnote, fid in footnotes
         p
             sup= (fid+1) + '. ' + footnote
-</code></pre><pre><code class="language-pug">// blogpostlayout.pug
+</code></pre><pre><code class="fancy-code language-pug">// blogpostlayout.pug
 // ...
 include mixins/footnote
 // ...
 
 block post_content
 +print_footnotes
-</code></pre><pre><code class="language-pug">// someblogpost.pug
+</code></pre><pre><code class="fancy-code language-pug">// someblogpost.pug
 // ...
 Lorem ipsum dolor sit amet&#35;[+footnote Dummy text], consectetur ...
-</code></pre><p>This is the general idea. We see again here the implicit <code class="language-pug">block</code> keyword used in the mixin, which is used to store the tag content of the mixin. I naively attempted to store that block variable into the array <code class="language-pug">footnotes</code> and print it out.</p><p>As things turn out, <code class="language-pug">block</code> doesn't simply get text-replaced with the rendered tag content. It actually ends up evaluating to a function that outputs something along the lines of:</p><pre><code class="language-js">pug_html += '<div>The tag contents</div>';
+</code></pre><p>This is the general idea. We see again here the implicit <code class="fancy-code language-pug">block</code> keyword used in the mixin, which is used to store the tag content of the mixin. I naively attempted to store that block variable into the array <code class="fancy-code language-pug">footnotes</code> and print it out.</p><p>As things turn out, <code class="fancy-code language-pug">block</code> doesn't simply get text-replaced with the rendered tag content. It actually ends up evaluating to a function that outputs something along the lines of:</p><pre><code class="fancy-code language-js">pug_html += '<div>The tag contents</div>';
 pug_html += '<div>as a series of</div>';
 pug_html += '<div>lines like this</div>';
-</code></pre><p>It seems <code js>pug_html</code> is a global string in which the entire compiled HTML is (linearly) built. Taking inspiration from a <a href="https://codepen.io/Zoxon/pen/WyqdBb">CodePen by Velichko Konstantin</a><sup id="footnote-3-indicator"><a href="#footnote-3">3</a></sup>, we can hijack the outputted code by modifying the mixin like so:</p><pre><code class="language-pug">// footnote.pug
+</code></pre><p>It seems <code js>pug_html</code> is a global string in which the entire compiled HTML is (linearly) built. Taking inspiration from a <a href="https://codepen.io/Zoxon/pen/WyqdBb">CodePen by Velichko Konstantin</a><sup id="footnote-3-indicator"><a href="#footnote-3">3</a></sup>, we can hijack the outputted code by modifying the mixin like so:</p><pre><code class="fancy-code language-pug">// footnote.pug
 mixin footnote
     // save prior generated HTML
     -const old_buf = pug_html;
