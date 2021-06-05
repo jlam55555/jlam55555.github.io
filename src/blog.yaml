@@ -63,3 +63,7 @@
   destination: 14
   title: Church numerals in Scheme
   date: 2021-06-05T00:51:47-04:00
+- template: ../posts/15
+  destination: 15
+  title: Site updates
+  date: 2021-06-05T12:44:57-04:00

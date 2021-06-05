@@ -1,0 +1,14 @@
+extends blogpost
+
+block post
+	p Minor site improvements within the last week:
+
+	ul
+		li "Enforce HTTPS" option checked in GitHub Pages (not sure why this wasn't checked before, maybe it's a new feature?)
+		li Some stylistic changes for blog posts:
+		ul
+			li Multiline code snippeds with dark background look okay, but is a little intrusive (decreases legibility) when there's dark background inline -- now prefer regular, non-colored #[code= '<code>'] for inline snippets.
+			li Footnotes changed from #[code= '<sup>'] to #[code= '<small>'] so that line spacing is correct.
+			li Footnote section and post body delimited with #[code= '<hr>']s.
+			li Custom styles added to #[code= '<blockquote>'] and #[code= '<kbd>'] tags.
+			li Non-styled code blocks now not smaller than surrounding font. (Is true for styled code snippets.)
