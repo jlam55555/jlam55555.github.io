@@ -75,3 +75,7 @@
   destination: 17
   title: Brain dump 1
   date: 2021-06-05T17:20:39-04:00
+- template: ../posts/18
+  destination: 18
+  title: Notes from SICP
+  date: 2021-06-05T20:21:15-04:00

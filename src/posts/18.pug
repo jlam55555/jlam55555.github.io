@@ -1,0 +1,95 @@
+extends blogpost
+
+block post
+	+codestyle
+
+	p Notes spawned off of reading #[em Structure and Interpretation of Computer Programs]. I've been following along with the exercises, and my work can be found #[a(href='https://github.com/jlam55555/sicp') here]. Small notes will be included in the comments, but larger and marginally-related discussions will be posted here. This post may grow as I continue throughout the course.
+
+	hr
+	h4 Free vs. bound variables
+	p I never saw these variables in a language like C, because there are no nested functions. With arbitrarily nested functions and function values, this becomes important.
+
+	p Bound variables are variables that are declared as parameters of some function or closure (i.e., a #[code define] procedure or #[code let] statement in Scheme). The process of assigning a bound variable by a formal parameter is called binding or capturing the variable. A variable that is not bound is called free.#[+footnote The definition of free and bound may become a little harder to define if variables can be bound not at the beginning of some closure: it would be free up to its definition, at which point it would be bound. I'm not sure if this is technically correct but this is my understanding of it.]
+
+	p In laymen's terms, a free variable is one that is defined in some outside scope, while a bound variable has a definition in the local scope. (In C, with only no nested functions, free variables are necessarily global.)
+
+	p A free variable can be thought of as a "slot" that should be filled by some variable in some outer scope. (This will come up again in the next section.)
+
+	p Bound variables, since they are newly defined in the scope, can be arbitrarily named as long as they do not shadow any of the free variables.
+
+	hr
+	h4 Lexical vs. dynamic scope
+	p What is the "outer scope" that a free variable comes from? In lexical (static) binding, a free variable is found in the enclosing scope of the defining instance of a closure. In dynamic binding, a free variable is found in the scope of a procedure at runtime.
+
+	p Consider the following example in Scheme, a language with lexical binding:
+	+precode("scheme").
+		(define (f1 x)
+		  (lambda (y)
+		    (+ x y)))
+
+		(define f2
+		  (lambda (y)
+		    (+ x y)))
+
+		(define f3 (f1 1))
+
+		(let ((x 2))
+		  (f3 3)      ; 4
+		  (f2 3))     ; exception: variable x is not bound
+
+	p In this example, the value of #[code x] in the lambda in #[code f1] is bound to the formal parameter of #[code f1]. Thus #[code x] is bound to #[code 1] in #[code f3]. In #[code f2], however, Scheme is searching for a definition of #[code x] in the enclosing scope, the global scope. Since there is no #[code x] defined in the global scope, it throws an exception.
+
+	p Now consider the following code from Elisp, a language with dynamic binding.
+	+precode('elisp').
+		(defun f1 (x)
+		  (lambda (y)
+		    (+ x y)))
+
+		(defun f2 (y)
+		  (+ x y))
+
+		(defvar f3 (f1 1))
+
+		(let ((x 2))
+		  (funcall f3 3)  ; 5
+		  (f2 3))         ; 5
+
+	p Now, both produce the same result. Both the #[code x] in #[code f1] and #[code f2] are dynamically-bound free variables, which means they will look for a definition of #[code x] in the runtime context. Both functions are called within the body of the #[code let] statement that binds #[code x], so #[code x] is bound to #[code 2] in both cases.
+
+	p Almost all languages use lexical binding, as it is easier for a compiler to optimize (name resolution happens at compile-time rather than runtime) and allows for variable capture via closures. However, dynamic binding doesn't require storage of free variables for a function (one of the difficulties of Lisp-1's, mentioned later) and allows you to pass variables without explicit parameter-binding (see #[a(href="https://www.gnu.org/software/emacs/emacs-paper.html#SEC17") Richard Stallman's explanation of why Emacs uses dynamic binding]). Elisp is one of the few languages that implement dynamic binding. The concept also goes under the name of early/late binding or lexical/dynamic scoping.
+
+	p More information about lexical vs. dynamic scoping (as well as how to emulate lexical scoping in a dynamically-scoped language) can be found on the #[a(href="https://www.emacswiki.org/emacs/DynamicBindingVsLexicalBinding") Emacs wiki], and another thought example is found in #[a(href="https://stackoverflow.com/a/22395580/2397327") this Stack Overflow answer].
+
+	hr
+	h4 Closures as an abstract data type (ADT)
+	p This follows immediately from the discussion of lexical scoping#[+footnote The concept of capturing variables contradicts dynamic scoping.]. Each closure in a lexically-scoped language has to store its free variables, or else they will go out of scope and disappear.
+
+	p In other words, each closure acts as a storage of all its free variables. We can exploit this to implement#[+footnote A more appropriate word might be "emulate" rather than "implement," because this is not as efficient as native data structures without any extra baggage that closures require.] composite data structures using only closures. #[em SICP] does exactly this in section 2.1:
+	+precode('scheme').
+		(define (cons x y)
+		  (define (dispatch m)
+		    (cond ((= m 0) x)
+			  ((= m 1) y)
+			  (else (error 'cons "input not 0 or 1"))))
+		  dispatch)
+
+		(define (car z) (z 0))
+		(define (cdr z) (z 1))
+
+	p I think this is brilliant#[+footnote Not directly related to closures, but still related to representing data as functions: the exercise that follows this example about Church numerals is even more fascinating. I wrote about them in #[a(href='/blog/14') this blog post].].
+
+	hr
+	h4 Lisp-1 vs. Lisp-2
+	p The superficial difference is that Lisp-1's have a single namespace (for functions and variables), while Lisp-2's have (at least) two namespaces. Scheme is a Lisp-1, while Common Lisp and Elisp are Lisp-2's.
+
+	p A Lisp-1 works nicely in the context of #[em SICP], especially as we try to build abstractions and think of "functions as data." The book tries to emphasize the fact that the line between procedures and data is thin, and we can even implement data as functions (e.g., closures as an ADT and #[a(href='/blog/14' Church numerals)]). With functions as the primitives of lambda calculus, it seems natural not to separate them from other primitive type.
+
+	p However, this leads to implementation difficulties. This is briefly mentioned in #[em SICP] #[a(href="https://mitpress.mit.edu/sites/default/files/sicp/full-text/book/book-Z-H-12.html#footnote_Temp_123") in section 1.3]:
+	blockquote
+		p Lisp, unlike other common programming languages, awards procedures full first-class status. This poses challenges for efficient implementation, but the resulting gain in expressive power is enormous.
+
+		p #[em (in a footnote)] The major implementation cost of first-class procedures is that allowing procedures to be returned as values requires reserving storage for a procedure's free variables even while the procedure is not executing. In the Scheme implementation we will study in section 4.1, these variables are stored in the procedure's environment.
+
+	p A discussion of the differences (with several good references in the comments, most notably #[a(href="http://www.nhplace.com/kent/Papers/Technical-Issues.html") "Technical Issues of Separation in Function Cells and Value Cells"] and #[em Lisp in Small Pieces]), can be found #[a(href='https://stackoverflow.com/a/4579608/2397327') here].
+
+	p tl;dr: Scheme's abstractions of "functions as data" makes for a difficult efficient implementation (Lisp-1). So some implementations of Lisp (Lisp-2), such as CL, create a separation between function and data values.
