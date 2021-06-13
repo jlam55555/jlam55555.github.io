@@ -1,0 +1,95 @@
+extends blogpost
+
+block post
+	+codestyle
+
+	p (Based on reading 2.4-5 of SICP)
+
+	p Chapter 2 of SICP moved quickly. Sections 2.1-3 were relatively straightforward: they introduce the idea of complex data and data abstractions, with plenty of interesting examples#[+footnote Such as: procedural implementation of #[code cons], Church numerals, the picture language, interval arithmetic, the accumulate/filter/map list primitives, a concise n-queens problem built on those primitives, symbolic differentiation, three representations of the set data structure, and Huffman encoding.]. But it felt a little same-old-same-old: we start from the basics and build up from there. We did it with procedures, now we do it with data, so it was more interesting in the first chapter#[+footnote But part of the author's intention was to show that procedural and data abstractions were not all that different, and in particular show that procedures can act as data, as I've mentioned multiple times prior.]. But in the latter two sections of the chapter, there were many ideas that snuck in before I knew they were happening. So I'll use this space to sort out my thoughts.
+
+	h4 Introducing polymorphism
+	p In Section 2.3, we were introduced to the concept of using symbols to "tag" data with type information.
+	+precode('scheme').
+		(define (tag-attach type-tag contents)
+		  ;; attach a tag to a datum
+		  (cons type-tag contents))
+
+		(define (tag-type datum)
+		  ;; type selector for a tagged datum
+		  (if [pair? datum]
+		      (car datum)
+		      (error 'tag-type "bad tagged datum" datum)))
+
+		(define (tag-contents datum)
+		  ;; contents selector for a tagged datum
+		  (if [pair? datum]
+		      (cdr datum)
+		      (error 'tag-contents "bad tagged datum" datum)))
+	p With type information, we can act upon heterogeneous data with the same interface. This is useful in 2.3 when we have a function that recursively deals with trees: we need to differentiate between an internal tree node and a leaf node in the Huffman encoding example. In this example, we require only two types to effectively deal with trees, and we can simply switch on the data type to perform the needed action.
+	p However, things quickly get more complicated. Section 2.4 is called "Multiple representations of abstract data." Previously, we had already observed that most data structures can be defined by the interface they present, rather than its internal representation: a #[code cons] requires a #[code car] and #[code cdr] interface, but it can be implemented straightforwardly as a record or by using closures. SICP uses the example of complex numbers, because the two common representations -- a (real, imaginary) rectangular representation, or a (magnitude, angle) polar representation -- are both practical: for example, addition is easier with the first representation and multiplication with the latter.
+	p The main question raised by this section is: how can we support both implementations at once with a single interface? We want the implementation-dependent interface to be:
+	+precode('scheme').
+		(make-cplx-from-real-imag x y)
+		(make-cplx-from-mag-ang r a)
+		(cplx-real-part z)
+		(cplx-imag-part z)
+		(cplx-magnitude z)
+		(cplx-angle z)
+	p This creates an abstraction barrier upon which we can define operations (a higher-level interface) on complex numbers that depend only on these selectors, and not on the internal representation. For example, the basic arithmetic operations can be defined like so:
+	+precode('scheme').
+		(define (cplx+ z1 z2)
+		  (make-cplx-from-real-imag (+ (cplx-real-part z1)
+		                               (cplx-real-part z2))
+		                            (+ (cplx-imag-part z1)
+					       (cplx-imag-part z2))))
+	p and likewise for the other operators. Up until now, we only have one "version" of each function. We would implement #[code cplx-real-part] based on some internal representation or another. We could hot-swap different internal representations by redefining all of the implementation-dependent interface procedures. But this only allows us to have one implementation of a data structure to be in use at a time. But, as mentioned earlier, we may find it useful to have different internal implementations share the same interface. In other words, we want to introduce #[em polymorphism]: #[code cplx-real-part] should call the rectangular version if applied to a complex number implemented using the rectangular representation, and likewise for the polar implementation.
+
+	p Since we can't actually define multiple versions of a procedure in Scheme#[+footnote Because Scheme have typed procedures or method overloading.], we have to emulate one. The simplest method is to attach a type to each parameter (we do this using the tagging mention mentioned earlier) and switch on the argument type.
+	+precode('scheme').
+		(define (cplx-real-part z)
+		  (cond ([eq? (tag-type z) 'rectangular]
+			 (cplx-real-part-rectangular (tag-contents z)))
+			([eq? (tag-type z) 'polar]
+			 (cplx-real-part-polar (contents z)))
+			(else
+			 (error cplx-real-part "Unknown type" (tag-type z))))
+	p This works, but it's inconvenient and brittle. We have to write out the conditional in every function, and if we wanted to add another internal representation of a complex number, we'd have to redefine the whole procedure with the longer conditional.
+	p A better solution is a dispatching system. For each generic procedure, we still need to write an version for each internal implementation. If the procedure takes multiple arguments, then we need one version for each permutation of (argument) types that we need to support#[+footnote This, and methods to mitigate how many versions are neede, is discussed later.] We store all of these versions in a table, indexed by the argument types they support. We do this for every generic procedure, and store all these procedure versions in a lookup table indexed by the generic procedure type and the supported argument types. Then the process of invoking a polymorphic procedure involves the looking up and calling the specific implementation required for this set of arguments.
+	p I want to include the code, but there's too much to include here. You can refer to the book or my notes (#[a(href='https://github.com/jlam55555/sicp/blob/master/2.4/2.4.scm') 2.4]; #[a(href='https://github.com/jlam55555/sicp/blob/master/2.5/2.5.scm') 2.5]).
+	p Out of this system, we can #[em additively] extend this system with new operations or data types by adding the appropriate entries to the lookup table. This is as opposed to having to redefine the existing procedure in order to modify it (i.e., by hardcoding the new entry into the conditional statement).
+
+	h4 Extending this system to procedures with multiple arguments
+	p We now begin section 2.5: "Systems with generic operations," which builds upon this lookup-table model. In 2.4, we built up the complex number interface using two different representations of complex numbers. In 2.5, we have a more complex system: an arithmetic interface with multiple representations of algebraic structures (reals, rationals, complex numbers, polynomials, and rational functions). The base idea is mostly the same, but we introduce binary operators like #[code add] and #[code sub] that can plausibly take parameters of different algebraic structure types (e.g., a real and a complex).
+	p The naive approach to take is to define an implementation for each permutation of argument types (this was briefly mentioned earlier). However, this leads to disaster if the function supports multiple arguments that can be of multiple types. Even a binary procedure, in which each of the arguments can be one of N types, requires O(N^2) different implementations. In general, the growth rate of the number of implementations to write is O(N^M), where the function is M-ary.
+	p A second approach is to define a set of type #[em coercions]. A coercion is an implicit conversion from one type to another, and can be implemented as an ordinary procedure that is stored in the lookup table#[+footnote The authors use a separate lookup table for coercions, but I implemented it using the same lookup table. Conveniently, the lookup table already performs a lookup by two items (operation, argument-types), so we can change the interpretation for the key to be a (to-type, from-type) tuple.]. If a procedure is called with arguments that don't exactly match the argument list, the dispatcher will look for available coercions to change the argument lists into a suitable type. We may still need to write a coercion between every pair of types that can be converted to one another, but this is only O(N^2) with respect to the number of types N.
+	p To those accustomed to object-oriented programming, this may still seem silly. It may seem natural to define a hierarchy on types so that we have natural type conversions (upcasting). This makes sense if there is some sort of hierarchy, but it gets messier when multiple inheritance is allowed. If we allowed this, we may need to search an entire graph rather than a (linear) hierarchy to find the correct implementation.
+
+	h4 Aside: data-directed programming vs. message passing
+	p SICP notes that while the method we've built up of "dispatch operation based on data" (#[em "data-driven programming"]) is very powerful, it is not the only way to support an extensible, polymorphic interface. Instead, we can dispatch a #[em datum] with an action. Here is the example provided:
+	+precode('scheme').
+		(define (make-from-real-imag x y)
+		  (define (dispatch op)
+		    (cond ((eq? op 'real-part) x)
+			  ((eq? op 'imag-part) y)
+			  ((eq? op 'magnitude)
+			   (sqrt (+ (square x) (square y))))
+			  ((eq? op 'angle) (atan y x))
+			  (else
+			   (error "Unknown op -- MAKE-FROM-REAL-IMAG" op))))
+		  dispatch)
+	p We can then "call" the datum with the operation we want to perform on it. This "dispatch datum based on operation" method is called #[em "message passing"] -- to call a "method" on an "object," we "pass" the "object" a "message": the operation to perform#[+footnote There are a lot of air quotes here because I don't know what the formal names are.]. We already saw this method when implementing #[code cons] with a procedural implementation (message passing #[em is] the procedural implementation).
+	p Honestly, I'm not sure when this would be most useful, and I don't know of any languages that use this as a default mode for dispatch.
+
+	h4 The big picture
+	p Why is this important? What have we achieved?
+	p We've developed a simple typing system in a language that does not enforce typing. And we were able to configure this typing from the bottom up, without any constraints imposed by the language (e.g., without a builtin OOP framework). We can attach types to data, and interpret those types as we are processing the data.
+	p In particular, we created a simple polymorphic framework that allows type coercion. While we usually hear about polymorphism in the context of OOP, there is no mention of it here, nor do we say that one form of inheritance is best -- they are simply not the full picture. There is no single best way to implement typing, as the authors note in a footnote:
+	blockquote
+		p Developing a useful, general framework for expressing the relations among different types of entities (what philosophers call ``ontology'') seems intractably difficult. The main difference between the confusion that existed ten years ago and the confusion that exists now is that now a variety of inadequate ontological theories have been embodied in a plethora of correspondingly inadequate programming languages. For example, much of the complexity of object-oriented programming languages -- and the subtle and confusing differences among contemporary object-oriented languages -- centers on the treatment of generic operations on interrelated types. Our own discussion of computational objects in chapter 3 avoids these issues entirely. Readers familiar with object-oriented programming will notice that we have much to say in chapter 3 about local state, but we do not even mention ``classes'' or ``inheritance.'' In fact, we suspect that these problems cannot be adequately addressed in terms of computer-language design alone, without also drawing on work in knowledge representation and automated reasoning.
+	p In some of the most popular OOP languages like C++, Java, and Python, we have multiple inheritance and single-dispatch polymorphism, but that is not the only way to do things. For example, in our system we implement (a very simple form of) multiple-dispatch polymorphism. We can mess around with the features of the topology graph even when it isn't allowed (e.g., multiple subclassing isn't allowed in Java, but we can try to allow it) in a different language. We can use message passing as the underlying implementation for OOP and see what benefits it has to offer. And we have access to all of Lisp's best features, such as its powerful macro system (to make our own OOP a seamless part of Lisp syntax) and continuations.
+	p Here is #[a(href='https://www.gamedev.net/forums/topic/441248-isnt-sicp-just-reinventing-inheritance/3923677/') an illustrative from the gamedev.net forum]:
+	blockquote
+		p SICP is not about teaching features but general concepts, and Abelson and Sussman obviously don't think typical OO is general enough to qualify as a central concept. So they teach dispatch-on-type, which can easily be used to implement typical object systems, while the converse isn't true (see the need for the visitor and other 'patterns' in typical OO languages).
+		p Single-dispatch polymorphism and inheritance (python or C++ OO) is a specialised restriction of what is being taught here. Abelson and Sussman aim higher.
+
+	p Of course, there are some disadvantages when compared to other languages. In languages with builtin OOP support, we can have compile-time and run-time (dynamic) polymorphism, while in Lisp we are limited to the latter. Performance is clearly going to suffer. And those who use other high-level, multi-paradigm languages probably find the claim that Lisp is best suited to this task weak, because it could'be been done in Javascript or Python just as well. It's true -- modern languages have become very flexible and capable of Lisp's expressiveness. My only argument to this is that you will be overly influenced by the typing systems in those languages, and in this manner be limited. Maybe this is a weak argument, but there is no doubt that Lisp is #[em a] suitable tool for this task.

@@ -3,10 +3,10 @@ extends blogpost
 block post
 	+codestyle
 
-	p Notes spawned off of reading #[em Structure and Interpretation of Computer Programs]. I've been following along with the exercises, and my work can be found #[a(href='https://github.com/jlam55555/sicp') here]. Small notes will be included in the comments, but larger and marginally-related discussions will be posted here. This post may grow as I continue throughout the course.
+	p Notes spawned off of reading #[em Structure and Interpretation of Computer Programs]. I've been following along with the exercises, and my work can be found #[a(href='https://github.com/jlam55555/sicp') here]. More of these posts may follow.
 
 	hr
-	h4 Free vs. bound variables
+	h4 Free vs. bound variables (section 1.3)
 	p I never saw these variables in a language like C, because there are no nested functions. With arbitrarily nested functions and function values, this becomes important.
 
 	p Bound variables are variables that are declared as parameters of some function or closure (i.e., a #[code define] procedure or #[code let] statement in Scheme). The process of assigning a bound variable by a formal parameter is called binding or capturing the variable. A variable that is not bound is called free.#[+footnote The definition of free and bound may become a little harder to define if variables can be bound not at the beginning of some closure: it would be free up to its definition, at which point it would be bound. I'm not sure if this is technically correct but this is my understanding of it.]
@@ -18,7 +18,7 @@ block post
 	p Bound variables, since they are newly defined in the scope, can be arbitrarily named as long as they do not shadow any of the free variables.
 
 	hr
-	h4 Lexical vs. dynamic scope
+	h4 Lexical vs. dynamic scope (section 1.3)
 	p What is the "outer scope" that a free variable comes from? In lexical (static) binding, a free variable is found in the enclosing scope of the defining instance of a closure. In dynamic binding, a free variable is found in the scope of a procedure at runtime.
 
 	p Consider the following example in Scheme, a language with lexical binding:
@@ -61,7 +61,7 @@ block post
 	p More information about lexical vs. dynamic scoping (as well as how to emulate lexical scoping in a dynamically-scoped language) can be found on the #[a(href="https://www.emacswiki.org/emacs/DynamicBindingVsLexicalBinding") Emacs wiki], and another thought example is found in #[a(href="https://stackoverflow.com/a/22395580/2397327") this Stack Overflow answer].
 
 	hr
-	h4 Closures as an abstract data type (ADT)
+	h4 Closures as an abstract data type (ADT) (section 2.2)
 	p This follows immediately from the discussion of lexical scoping#[+footnote The concept of capturing variables contradicts dynamic scoping.]. Each closure in a lexically-scoped language has to store its free variables, or else they will go out of scope and disappear.
 
 	p In other words, each closure acts as a storage of all its free variables. We can exploit this to implement#[+footnote A more appropriate word might be "emulate" rather than "implement," because this is not as efficient as native data structures without any extra baggage that closures require.] composite data structures using only closures. #[em SICP] does exactly this in section 2.1:
