@@ -87,3 +87,7 @@
   destination: 20
   title: 'SICP notes: types of polymorphism'
   date: 2021-06-13T11:29:55-04:00
+- template: ../posts/21
+  destination: 21
+  title: 1000 races in Colemak
+  date: 2021-06-13T16:42:09-04:00
