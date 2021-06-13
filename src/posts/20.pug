@@ -1,0 +1,78 @@
+extends blogpost
+
+block post
+	+codestyle
+
+	p When writing #[a(href='/blog/19') the previous post], I realized that I didn't really understand what polymorphism or generic procedures are, and I was a little afraid to use the terms incorrectly. Here I will try to consolidate what I understand to be their definitions, and various subtypes of polymorphism, with my own examples.
+
+	p The problem I have with understanding these terms is that most definitions immediately jump to OOP as an example. While the OOP structure certainly has textbook examples in polymorphism, it is a bad definition for those who want to understand the general concept (i.e., in the spirit of #[em SICP]).
+
+	p First things first -- what is a #[em data type] (or simply "type")? We have to distinguish between an #[em abstract data type] (ADT) and a #[em concrete data type]. An ADT is a description of an interface of a particular kind of data, such as a stack or queue, but it can be implemented in several different ways by different concrete data types. In this post (as in the previous post#[+footnote We had to differentiate between different implementations of the complex number interface, and between several implementations of the algebraic field#[+footnote I.e., sets of objects that can be added, subtracted, multiplied, and divided commutatively. They used complex numbers, reals, rationals, polynomials, and rational functions.] interface.]), we'll potentially need to differentiate between multiple implementations of the same ADT. Note also that we are using the term "interface" very loosely -- unlike the very concrete meaning it has in Java and TypeScript and some other OOP languages, I mean it in the most general sense.
+
+	p Using Wikipedia's definition#[+footnote Most of these definitions will come from Wikipedia, but I'll try to explain the definitions in my own words.] #[em polymorphism] is "the provision of a single interface to entities of different types or the use of a single symbol to represent multiple different types." These might seem like two very different things, but we can invoke the wand of the Wizard Book and say that the boundary between procedures and data is somewhat fuzzy. Both provide an "interface"#[+footnote= 'The interface of a procedure is the set of arguments it takes and the values it returns, and the interface of a datum is the set of arguments it[s constructors and methods] take(s) and the values it[s selectors and methods] return(s).'], and if these interfaces can handle multiple types, then the procedure or datum is polymorphic.
+
+	p This is an extremely broad definition and it applies to many things. We can characterize polymorphism in several ways#[+footnote Of course, this list is neither absolute nor complete, and you may find many other characterizations online. This is only my own list based on the concepts that were useful for understanding the type concepts introduced in #[em SICP] 2.5. I also don't have a name for each characterization.]:
+	ul
+		li #[em Procedural vs. data]: This classification is most apparent from the definition. A procedure is polymorphic if a single function name can support several different data types as input. This may require several implementations (ad-hoc) or a single implementation (parametric or subtyping). Data can be parametric in two senses: it is a generic template that can store different types of data, such as container types (parametric); and when a single variable can act as if it is of a different type, usually a supertype (subtyping). Another way to understand data polymorphism is to use the message passing interpretation of an object#[+footnote #[em SICP] section 2.4], and say that an object is polymorphic if its dispatch method is polymorphic.
+		li
+			p #[em Ad-hoc vs. parametric vs. subtyping]: Ad-hoc and parametric polymorphism were the two major classes of polymorphisms described by Christopher Strachey in #[em Fundamental Concepts in Programming Languages]. Later, with the development of hierarchical polymorphism like the language Simula, the third class was added.
+			p #[em Ad-hoc polymorphism] occurs when multiple different implementations of a function are written to handle different types, and is the form commonly seen in method overloading. This is usually compile-time dispatch.
+			p #[em Parametric polymorphism] occurs when a single procedure or data type implementation can be written #[em generically] or "uniformly" but can handle different data types correctly. This is exemplified by what Java calls generics and what C++ calls templates. We write one method or class (type) that has a "type parameter" -- a placeholder for a type so that we can use this method or class with any concrete type that matches this type's parameter's interface#[+footnote This last point is a little dependent on implementation: in C++, templates are instantiated separately for each class it is compiled on, which is a pain point for the programmer because the template depends on the applied types. This breaks separate compilation. However, in Java, we can have separate compilation because the parameter type is enforced by restrictions on the type parameter. See more #[a(href='https://stackoverflow.com/a/35173219/2397327') here], and see the section in this post about duck typing.]. This is usually compile-time dispatch.
+			p Lastly, #[em subtype polymorphism] occurs when there is an inherent hierarchy of types, and a method implementation on a type can be shadowed (overridden) by an implementation on a subtype. When calling a method on an object, we need to determine which implementation to call. This is what I typically hear when talking about polymorphism, but it mostly is limited to OOP languages. This is usually dynamic dispatch.
+			p These definitions are not mutually disjoint. For example, we can have an overloaded method that overrides a superclass method in Java: here, it knows which of the overloaded method signatures to use at compile-time (ad-hoc), but it uses dynamic dispatch (subtype) on the object to know which implementation in the type hierarchy to call.
+			p If these definitions don't make that much sense to you, then #[a(href='https://en.wikipedia.org/wiki/Polymorphism_(computer_science)') the Wikipedia page on polymorphism] has a really good explanation of all three types.
+		li #[em Dynamic (run-time) vs. compile-time dispatch] This is when the correct implementation of a polymorphic interface is chosen, and has obvious implications on the performance and flexibility of polymorphism. If type can be inferred at compile-time (e.g., with method overloading or when using templates), we know which version of a function to call. But sometimes, we cannot infer the type of a variable at run-time, and this is common when using subclassing, with the following textbook example (using pidgeon Java):
+			+precode('java').
+				interface Parent {
+					func foo();
+				}
+				class Child1 implements Parent {
+					@Override
+					func foo() {
+						print("in child 1");
+					}
+				}
+				class Child2 implements Parent {
+					@Override
+					func foo() {
+						print("in child 2");
+					}
+				}
+				class Main {
+					func main() {
+						Parent[] p = {new Child1(), new Child2()};
+						p[0].foo();	// => "in child 1" 
+						p[1].foo();	// => "in child 2"
+					}
+				}
+			div In this example, we are calling the #[code foo()] method on an object of type #[code Parent], but we don't know which implementation of #[code Parent] (and thus which implementation of #[code foo]) should be called. (This fact is more obvious if the array #[code p] is generated at run-time, e.g., created with user input.) So the JVM has to dynamically find the correct implementation at run-time#[+footnote As far as I know, this is the way subclassing is implemented in other languages as well.]. Note that if we are prototyping a type system, as we do in #[em SICP], we cannot perform compile-time polymorphism (but that is also not our goal).
+		li #[em Single- vs. multi-dispatch] This deals with dynamic dispatch with procedural polymorphism#[+footnote This only applies when you have multiple arguments, which wouldn't happen with data polymorphism you consider the message-passing model with multiple operations ("messages"). But I don't have an example of this in mind.]. In OOP languages with subtype polymorphism, we usually see #[em single dispatch]: we call a method #[em on] an object, and the dynamic-dispatch polymorphism uses the object only (to decide which implementation to call) and not to any (other#[+footnote I say other because methods are usually implemented with an implicit #[code this] or #[code self] parameter, on which the polymorphism applies.]) parameters. But we may want a procedure to be polymorphic for multiple or all of its operands, and this is called #[em multiple dispatch.] We implemented a very basic form of multiple dispatch in #[em SICP] by simply iterating through all the possible coercions of all the arguments to try to find an appropriate conversion#[+footnote This has multiple problems but is a simple illustration of multiple dispatch.]. Some languages support multiple dispatch natively, such as Common Lisp, Julia, and Raku (Perl).
+
+	p To illustrate some of these examples in a less-conventional context, we can use the examples from #[em SICP], which use both ad-hoc and parametric (generic) polymorphism (although the authors do not use these names). Consider the following two functions from section 2.4:
+	+precode('scheme').
+		(define (cplx-real-part z)
+		  ;; get the real part of a number
+		  (cond ((cplx-rectangular? z) 
+			 (cplx-real-part-rectangular (contents z)))
+			((cplx-polar? z)
+			 (cplx-real-part-polar (contents z)))
+			(else (error 'cplx-real-part "Unknown type" z))))
+
+		(define (complex+ z1 z2)
+		  ;; add two complex numbers
+		  (make-from-real-imag (+ (cplx-real-part z1)
+					  (cplx-real-part z2))
+				       (+ (cplx-imag-part z1)
+					  (cplx-imag-part z2))))
+	p #[code cplx-real-part] uses ad-hoc dynamic single-dispatch polymorphism -- we define separate implementations to handle different types. In a language with overloading support, this would most likely be compile-time polymorphism. #[code complex+], on the other hand, is a generic function. Because #[code z1] and #[code z2] both implement the #[code cplx-real-part] and #[code cplx-imag-part] interface, we don't have to write multiple versions of #[code complex+]. Note that this is closely tied to the notion of #[em abstraction barriers], as Abelson and Sussman call it: because we define the lower-level interface #[code cplx-real-part] and #[code cplx-real-part], higher-level interfaces can use this interface generically. However, we do need to implement these for each underlying representation, and that is where the ad-hoc polymorphism comes in.
+	p Later on, in section 2.5 when Abelson and Sussman extend this system to another level of abstraction by implementing the arithmetic system, we see another level of ad-hoc polymorphism: each algebraic field must register their implementation of the add, subtract, multiply, and divide in the dispatch table. There, we implement a very simple version of multiple dispatch and the authors suggest a coercion and a hierarchy, which might introduce a subtype polymorphism system.
+	p One last important note to make about #[em SICP]'s suggested hierarchy system: unlike typical hierarchical systems where we look to a superclass for an implementation, in the most general sense we can also look to subclasses for an implementation. This would require narrowing (downcasting) the type to that of one of its subclasses (or perhaps it may not be considered a hierarchy at all, but some other type of relation) which is typically an error in hierarchical systems, but it is an alternative design#[+footnote See #[a(href='https://en.wikipedia.org/wiki/Is-a') is-a relationships]. I believe this is the typical semantic interpretation of subclassing, and in its perspective downcasting doesn't make sense. Downcasting also probably violates the Liskov substitution principle, but I don't know much about that.].
+
+	hr
+	h4 Miscellaneous topics
+	p Polymorphism was the main confusion point for me when looking up details of type systems, but here are some other notes that stemmed from writing the previous post:
+	ul
+		li #[a(href='https://en.wikipedia.org/wiki/Duck_typing') #[em Duck typing]] is another "implementation" of polymorphism. This means that we can handle objects without type restriction, and determine their effective type based on properties of the object. In particular, languages that allow untyped objects (such as Lisp, or Javascript, in which value acts like an dictionary and an object) tend to use duck typing. Related to a previous footnote, the C++ template system is actually implemented like a #[a(href='https://en.wikipedia.org/wiki/Duck_typing') compile-time duck-typing].
+		li I'm not really sure how variadic functions fit into the model of method overloading and overriding. I'm assuming that the variadic arguments form part of the method signature, but I have a vague thought that they can be used to make a statically-typed language a lot more dynamic. On an aside, I absolutely love the "dotted-tail" notation used for varargs in Scheme -- it feels as if the code is performing pattern-matching on expressions.
+		li Overloading vs. overriding. This was already covered, but the similarity of the names sometimes gets me. Overloading is a form of ad-hoc polymorphism, and overriding is a form of subtype polymorphism.
+		li Abelson and Sussman mention the difficulties of multiple inheritance, but some languages support it anyways, such as Python and C++. Java gets around this a little bit by introducing the interface language construct and allowing multiple inheritance of interfaces, but only single inheritance of another class. This means that each class can only have one upstream implementation of a method. However, interfaces make the language more bloated (makes the terms "subclassing" and "inheritance" mean separate ideas) and can be confusing for beginners when there's also abstract classes.

@@ -8,7 +8,7 @@ block post
 	p Chapter 2 of SICP moved quickly. Sections 2.1-3 were relatively straightforward: they introduce the idea of complex data and data abstractions, with plenty of interesting examples#[+footnote Such as: procedural implementation of #[code cons], Church numerals, the picture language, interval arithmetic, the accumulate/filter/map list primitives, a concise n-queens problem built on those primitives, symbolic differentiation, three representations of the set data structure, and Huffman encoding.]. But it felt a little same-old-same-old: we start from the basics and build up from there. We did it with procedures, now we do it with data, so it was more interesting in the first chapter#[+footnote But part of the author's intention was to show that procedural and data abstractions were not all that different, and in particular show that procedures can act as data, as I've mentioned multiple times prior.]. But in the latter two sections of the chapter, there were many ideas that snuck in before I knew they were happening. So I'll use this space to sort out my thoughts.
 
 	h4 Introducing polymorphism
-	p In Section 2.3, we were introduced to the concept of using symbols to "tag" data with type information.
+	p In Section 2.3, we were introduced to the concept of using symbols to "tag" data with type information. 
 	+precode('scheme').
 		(define (tag-attach type-tag contents)
 		  ;; attach a tag to a datum
@@ -25,6 +25,13 @@ block post
 		  (if [pair? datum]
 		      (cdr datum)
 		      (error 'tag-contents "bad tagged datum" datum)))
+	p This allows us to "box"#[+footnote Somewhat in the same sense as boxing/unboxing in Java.] any value into an "object" with an attached "type." When processing the boxed object, we extract (unbox) the value. Objects can then be boxed into more complicated objects to form more complex typed objects. For example, one example we see in section 2.5 is a pair that gets interpreted as a complex number in rectangular form, which is then tagged a second time as a complex number to hide the internal details to the generic arithmetic package. This object would look like
+	+precode('scheme') '(2 . 3)
+	to the rectangular complex arithmetic package,
+	+precode('scheme') '(rectangular . (2 . 3))
+	p to the complex arithmetic package, and
+	+precode('scheme') '(complex . (rectangular . (2 . 3)))
+	p to the generic arithmetic package. This boxing/unboxing	is a powerful abstraction technique.
 	p With type information, we can act upon heterogeneous data with the same interface. This is useful in 2.3 when we have a function that recursively deals with trees: we need to differentiate between an internal tree node and a leaf node in the Huffman encoding example. In this example, we require only two types to effectively deal with trees, and we can simply switch on the data type to perform the needed action.
 	p However, things quickly get more complicated. Section 2.4 is called "Multiple representations of abstract data." Previously, we had already observed that most data structures can be defined by the interface they present, rather than its internal representation: a #[code cons] requires a #[code car] and #[code cdr] interface, but it can be implemented straightforwardly as a record or by using closures. SICP uses the example of complex numbers, because the two common representations -- a (real, imaginary) rectangular representation, or a (magnitude, angle) polar representation -- are both practical: for example, addition is easier with the first representation and multiplication with the latter.
 	p The main question raised by this section is: how can we support both implementations at once with a single interface? We want the implementation-dependent interface to be:

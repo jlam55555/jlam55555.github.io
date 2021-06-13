@@ -61,7 +61,7 @@
   date: 2021-06-03T23:48:15-04:00
 - template: ../posts/14
   destination: 14
-  title: Church numerals in Scheme
+  title: 'SICP notes: Church numerals in Scheme'
   date: 2021-06-05T00:51:47-04:00
 - template: ../posts/15
   destination: 15
@@ -83,3 +83,7 @@
   destination: 19
   title: 'SICP notes: a simple type system'
   date: 2021-06-12T16:32:16-04:00
+- template: ../posts/20
+  destination: 20
+  title: 'SICP notes: types of polymorphism'
+  date: 2021-06-13T11:29:55-04:00
