@@ -95,3 +95,7 @@
   destination: 22
   title: 2000 races in Colemak
   date: 2021-06-27T00:27:52-04:00
+- template: ../posts/23
+  destination: 23
+  title: 'SICP notes: functional programming'
+  date: 2021-07-06T21:46:07-04:00
