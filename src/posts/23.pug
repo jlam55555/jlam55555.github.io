@@ -48,8 +48,31 @@ block post
 
 	p (Here, they use the word "assignments" as I used the word "mutation". They may call the use of #[code define] or #[code let] "binding" rather than "assignment.")
 
-	p TODO: is the definition intuitive?
+	p This definition surprised both Prof. S and me.
 
-	p TODO: Which one is more intuitive?
+	p Compare this to the description provided by Wikipedia:
 
-	p TODO: bring it back to the beginning
+	blockquote
+		p In computer science, functional programming is a programming paradigm where programs are constructed by applying and composing functions. It is a declarative programming paradigm in which function definitions are trees of expressions that map values to other values, rather than a sequence of imperative statements which update the running state of the program.
+		p In functional programming, functions are treated as first-class citizens, meaning that they can be bound to names (including local identifiers), passed as arguments, and returned from other functions, just as any other data type can. This allows programs to be written in a declarative and composable style, where small functions are combined in a modular manner.
+		p Functional programming is sometimes treated as synonymous with purely functional programming, a subset of functional programming which treats all functions as deterministic mathematical functions, or pure functions. When a pure function is called with some given arguments, it will always return the same result, and cannot be affected by any mutable state or other side effects. This is in contrast with impure procedures, common in imperative programming, which can have side effects (such as modifying the program's state or taking input from a user).
+
+	p This description (of non-pure FP) is somewhat closer to what I had in mind: composing functions and focused on expressions more than statements. It's probably closer to what Prof. S had in mind too, as we often map certain datatypes more than others, with #[code list] being the most basic type other than #[code cons]. This description also makes it sound like #[em SICP]'s definition is closer to a definition of #[em purely functional programming].
+
+	p I would argue that, given these definitions, immutability plays as much a role in functional programming than the composition of functions, the namesake of FP. I guess you could say that enforcing pure functions leads to immutability, and immutability leads to pure functions#[+footnote In a purely functional language like Haskell, pure functions are enforced. For example, in Haskell, non-pure functions due to I/O are "marked" with the #[code IO] monad. In a non-purely functional language, we enforce immutability in order to adhere to functional programming. Because Javascript or Scheme are not purely functional, we emulate functional programming by forcing the programmer to avoid mutation.]. And all of the other properties of FP are due to these core concepts.
+
+	p The antithesis of this would be, of course, imperative programming, which we can now define as code that mutates state. This idea comes bundled naturally with the idea of statements and highly linear code, which is often easier for people to reason about and for computers to use, at the cost of FP's idealism.
+
+	p Nowadays, the programming language world is not so black-and-white. All programming languages must allow mutation and impure functions if they are to be at all practical -- otherwise we couldn't have an efficient PRNG or even user input. We can then say that a purely functional programming language is one that only allows mutation in a very controlled and deliberate way, such as how Haskell handles side-effect inducing code (monads) explicitly.#[+footnote Haskell is the only purely functional language I know of without having to look up purely functional languages, which says something of their rarity.] There are still a number of low-level languages that are highly procedural (imperative) and widely used, such as Assembly (not really procedural), C, Rust, and Go (Go is not necessarily low-level, but keeps to single-paradigm simply to keep code simple and consistent). Many modern languages (e.g., Scala, Javascript, Python, Scheme) are now multi-paradigm, which generally means they support some degree of object-oriented and functional programming.
+	
+	p Now that many modern languages support some degree of functional programming, it simply feels like another option, and it's easy to take the imperative route instead, especially if it's the more familiar one.
+
+	p The final footnote in section 3.1 mentions that:
+	blockquote
+		p In view of [problems related to careless statement ordering in imperative programming], it is ironic that introductory programming is most often taught in a highly imperative style. This may be a vestige of a belief ... that programs that call procedures must inherently be less efficient than programs that perform assignments. ... Alternatively it may reflect a view that step-by-step assignment is easier for beginners to visualize than procedure call. Whatever the reason, it often saddles beginning programmers with "should I set this variable before or after that one" concerns that can complicate programming and obscure the important ideas.
+
+	p at which point Prof. S asked me if I thought that this was true. Is functional programming (e.g., in Scheme) better and/or easier for a beginner than imperative programming?
+
+	p My response was that I don't think it was easier for me at first, if only because I had a background in procedural and OOP programming before reading this book and the syntax felt alien to me. Now, it feels almost as natural as writing code in most languages, provided that equivalent libraries are provided and I don't have to deal directly with memory pointers or allocation. Perhaps it might be easier on mathematics students, because Scheme resembles lambda calculus and algebraic forms.
+
+	p But even if I can't reset my programming knowledge and start learning programming from scratch using this book, I definitely appreciate why the first two chapters were taught in a functional style. It seems that the authors are determined to show that FP is more fundamental to computation -- building up a complex computation from primitives -- and has its benefits over imperative programming that are often missing in the common introductory course to programming. And only when its readers have a foundation of functional paradigm is imperative programming revealed, in such a way that the reader can appreciate its glory and understand its flaws.

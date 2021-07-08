@@ -1,0 +1,23 @@
+extends blogpost
+
+block post
+	p Section 3.5 of #[em SICP] is about streams, and I found this section absolutely fascinating (after never really understanding what a stream was). Incidentally, I happened to start reading #[em A Gentle Introduction to Haskell] at the same time as reading this section, and it is extremely satisfying to see the idea of laziness coincide.
+
+	p Firstly, a quick review of the current place in #[em SICP]: chapter 1 covered procedural abstractions, chapter 2 covered data abstractions, sections 3.1-3 covered mutable state and the environment model (essentially imperative programming and how closures can be implemented), and section 3.4 covers concurrency. I think 3.4 is hastily thrown in, and it's also awkward because we aren't given the Scheme primitives to be able to implement the locking primitives. The only provided implementation is an implementation of #[code test-and-set!] on a uniprocessor; this would fail on a multiprocessor system (which most computers are nowadays, in which #[code test-and-set!] would normally be implemented as a hardware instruction (requiring a memory arbiter). 3.4 covers a lot of concurrency problems and approaches in summary, e.g., deadlocks and avoidance, memory barriers, "serializers" (what Java calls #[code synchronized] methods and what Tanenbaum calls "monitors" in #[em Modern Operating Systems]), locking primitives, and more. My opinion is that this material is better suited for a class in operating systems or distributed computing, and that the authors only hastily foisted it in here to demonstrate that imperative programming with mutation causes problems in the concurrent sense, or more generally, that introducing "time" into programs and variables, may be problematic. This also ties into the next section, in which streams are used to address the concurrency problem, as streams are "timeless."
+
+	p Okay, back to streams.
+
+	p implicit vs explicit operations
+
+	p terminal vs non-terminal operations
+
+	p using macros (versus using lambdas -- macros offer an efficiency that you can't have in other languages)
+
+	p haskell vs scheme laziness
+
+	p TODO: two criticisms of this section: esieve and no macros
+
+	p modeling things using streams rather than using imperative programming (random number generator, history)
+	p concurrent processing and race conditions
+
+	p philosophical: timelessness (extending in the memory dimension rather than the time dimension)

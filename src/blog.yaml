@@ -99,3 +99,15 @@
   destination: 23
   title: 'SICP notes: functional programming'
   date: 2021-07-06T21:46:07-04:00
+- template: ../posts/24
+  destination: 24
+  title: 'SICP notes: Haskell and CL are too powerful for SICP'
+  date: 2021-07-07T19:23:29-04:00
+- template: ../posts/25
+  destination: 25
+  title: 'SICP notes: streams'
+  date: 2021-07-07T21:49:33-04:00
+- template: ../posts/26
+  destination: 26
+  title: Brain dump 2
+  date: 2021-07-07T23:56:42-04:00
