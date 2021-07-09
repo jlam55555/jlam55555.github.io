@@ -1,15 +1,125 @@
 extends blogpost
 
 block post
+	+codestyle
+
 	p Section 3.5 of #[em SICP] is about streams, and I found this section absolutely fascinating (after never really understanding what a stream was). Incidentally, I happened to start reading #[em A Gentle Introduction to Haskell] at the same time as reading this section, and it is extremely satisfying to see the idea of laziness coincide.
 
 	p Firstly, a quick review of the current place in #[em SICP]: chapter 1 covered procedural abstractions, chapter 2 covered data abstractions, sections 3.1-3 covered mutable state and the environment model (essentially imperative programming and how closures can be implemented), and section 3.4 covers concurrency. I think 3.4 is hastily thrown in, and it's also awkward because we aren't given the Scheme primitives to be able to implement the locking primitives. The only provided implementation is an implementation of #[code test-and-set!] on a uniprocessor; this would fail on a multiprocessor system (which most computers are nowadays, in which #[code test-and-set!] would normally be implemented as a hardware instruction (requiring a memory arbiter). 3.4 covers a lot of concurrency problems and approaches in summary, e.g., deadlocks and avoidance, memory barriers, "serializers" (what Java calls #[code synchronized] methods and what Tanenbaum calls "monitors" in #[em Modern Operating Systems]), locking primitives, and more. My opinion is that this material is better suited for a class in operating systems or distributed computing, and that the authors only hastily foisted it in here to demonstrate that imperative programming with mutation causes problems in the concurrent sense, or more generally, that introducing "time" into programs and variables, may be problematic. This also ties into the next section, in which streams are used to address the concurrency problem, as streams are "timeless."
 
 	p Okay, back to streams.
 
-	p implicit vs explicit operations
+	hr
+	h4 Motivation for streams
+	p We've done a lot with LISt Processing in LISP. Many of our algorithms are performed on lists or arrays of data, and often we only access data sequentially. Sometimes we can formulate this as a loop (or as tail-call recursion in Scheme), but sometimes the algorithm is more easily formulated as a list operation (e.g., map, filter, reduce) or aggregate expression (e.g., sum, max) on some meaningful list of data (e.g., the integers from 1 to 100, the Fibonacci numbers). Sometimes these sequences are common infinite sequences, and you want to only need to get values on some condition (e.g., integers up to 2 million, the first 50 prime numbers).
+
+	p I tried to think of a creative example, but the example given in the book is great, if a little unrealistic. The proposed problem is to get the second prime in an interval. The naive way to do this, using list operations, is to generate the whole interval as a list, filter it for primes, and then choose the second value. But this generates an awfully large number of primes for which all but two (the first two) are important, and we may run of of memory if the interval is too large. An alternative approach is using iteration, but this is messy and we have to encode our logic into the loop.
+
+	p The imperative programmer will probably think that the loop formulation is natural and efficient, but the functional programmer sees that using composable list operations is more readable and modular and not inefficient. But efficiency does become a problem when dealing with large lists, especially in cases when we do not use the entirety of the list, because the list operations we know (e.g., map, filter) take the entire list as input, process the whole list, and then return either a new list or an aggregate value as output. The more operations used, and the larger the size of the unused list, the worse the performance. An infinite list would be impossible both in time and memory.
+
+	hr
+	h4 Benefits of streams
+	p This is where streams come in: we think of our algorithm as two operations: filtering by primes, and then retrieving the second value of the returned list. Ordinarily there may be many more operations in between. Since the input interval is arbitrarily large, we can think of it as infinite for our purposes. What we want to achieve is to only get as many primes as we need for this operation (2, as we want the second prime), and only get as many integers as we need (as many integers in the interval such that we retrieve two primes). In the example above, the second prime after 10000 is 10009, so we only need nine integers out of the input interval.
+
+	p An additional goal is to interleave the operation, so that we do not have to store the intermediate lists all in memory at one time. Consider a modified scenario, in which we perform N separate #[code map] operations before filtering by primes and getting the second element. Imagine that in this scenario, we need M elements of the input interval, rather than nine, before finding the second prime. Then, between each #[code map] operation, we generate an M-element list. If we can find a way to interleave the #[code map] operations (which we can do by composing the mapped functions, but imagine that we mixed in different operations like #[code map] and #[code filter] which cannot be combined into a single list operation), then we only need to store N elements concurrently in memory rather than M. (M is much larger than N.) Note that this doesn't decrease the number of operations, but it decreases the memory requirement.
+
+	p To achieve these (related) goals, we make the process "lazy": each of the intermediate lists only yield the next element "on demand." Another way to think of it is by working backwards: we know that we need exactly two primes, so we "ask" for two values from the primes list. The primes array then "asks" for elements of the integer list one at a time until we get two primes (asks 9 times). If there were more steps in this process, this "asking" process would continue. These "lazy" lists are then called streams. If we only "ask" for one value at a time from some list and have this "ask" propagate as needed in order to get the next value of that list, then the operations are naturally interleaved.
+
+	p These "lazy" lists are called "streams," and they are beautiful. We get (roughly) the performance of iteration and the elegance of chaining modular operations. We can operate on infinite lists, because we only get as many values as needed; and operations are interleaved, which means that the used values of the streams can be discarded after use#[+footnote Theoretically, but this will be performed by the garbage collector and the memory reclamation will not be perfect. I tested this out on infinite streams with Chez Scheme, and the garbage collection couldn't keep up with the "garbage disposal."].
+
+	p If the practical side doesn't wow you, then perhaps you'll appreciate the observation that we can represent infinite data structures, or how simple it is to implement streams, or the power of only a few generic, composable stream operations, or the concision of implicit definitions of infinite streams.
+
+	hr
+	h4 Stream implementation
+	p Of course, we can't use regular lists to implement a stream. Unlike other languages where lazy evaluation is implemented by default#[+footnote e.g., Haskell, where laziness is the norm and strictness is optional.], function parameters are evaluated in full before invoking the function (applicative order evaluation).
+
+	p What we need to implement a stream is delayed evaluation. We want to be able to "ask" for the next element of a stream without calculating the rest of the list. This is actually not hard: we can make each #[code cdr] of each #[code cons] in the list a thunk (a procedure that takes no arguments -- simply an expression that we can call later) that returns the next #[code cons], which is of the same form. Thus each node of the linked list can be thought of as having a value cell and a "pointer function" (rather than a pointer) that gets the next stream element when needed.
+
+	p While expressing streams by wrapping the #[code cdr]'s in thunks works, it may be inconvenient for the user and more intuitive to express the stream like a normal list. Fortunately, in Lisp we have metaprogramming! We can use a simple macro to rewrite the #[code cdr] into a thunk when creating the list using #[code cons]#[+footnote SICP states that the delayed evaluation is achieved by wrapping the code in thunks, but does not mention macros even though this seems the obvious solution. I don't know why.].
+
+	+precode('scheme').
+		(define-syntax stream-cons
+		  ;; rewrite b into a thunk without evaluating it
+		  ;; for performance we would probably also want to memoize
+		  ;; the result in case it is used multiple times
+		  (syntax-rules ()
+		    ([_ a b]
+		     (cons a (lambda () b)))))
+
+	p The rest of the stream primitives are fairly straightforward. Retrieving the next element of the list involves evaluating the #[code cdr] thunk.
+	+precode('scheme').
+		(define *empty-stream* '())
+		(define stream-null? null?)
+		(define stream-car car)
+		(define (stream-cdr s) ((cdr s)))
+
+	p Actually, you can see that #[code stream-null?] and #[code stream-car] are exactly the same as they are for normal lists. The only changes occur in the pieces related to the #[code cdr].
+
+	p To be explicit, you can see that the definition of #[code stream-cdr] is equivalent to invoking the #[code cdr] thunk:
+	+precode('scheme').
+		(define (invoke t) (t))
+		(define stream-cdr (compose invoke cdr))
+
+	hr
+	h4 Stream operations and their implementations
+	p We can start by writing an operation akin to #[code list-ref] that gets the n-th element of a stream.
+	+precode('scheme').
+		(define (stream-ref s n)
+		  ;; get the nth value of a stream
+		  (if [<= n 0]
+		      (stream-car s)
+		      (stream-ref (stream-cdr s) (1- n))))
+
+	p We can define the typical list operations that produce another list, like #[code filter], #[code map], #[code zip], #[code running-sum], etc. just like we would with lists except that we use our new #[code stream-*] primitives.
+
+	p TODO: implementation of filter and map
+
+	p The same is true of aggregate operations that produce a single value, such as #[code sum], #[code max], #[code fold-left]/#[code fold-right], etc.
+
+	p TODO: show an implementation
+
+	p Additionally, we may want to introduce certain operations that limit a stream. For example, the #[em take] operation returns a stream of a given length. We can also introduce a #[em take-while] operation that ends the stream when the predicate is not met. (Think of a filter operation, but it ends the stream when encountering a false value rather than dropping the element.) Similarly, we can discard elements of a stream so that we don't get values from the beginning of the stream. For this, we can introduce the #[code skip] and #[code skip-while] operators.
+
+	p TODO: show an implementation
+
+	hr
+	h4 Terminal vs. non-terminal stream operations
+	p There are two types of stream operations (operations that take a stream as input): terminal and non-terminal (intermediate) operations. Non-terminal stream operations return another stream and allow you to chain and interleave streams and are thus lazy. Terminal stream operations do not output a stream, and are thus not lazy.
+
+	p It is easy to tell what is an intermediate expression and what is not, because intermediate operations can composed in a "chain" and terminal operations can only appear at the end of a "chain"#[+footnote Sometimes this "chain" of stream expressions is referred to as a pipe, as it is in the Javascript RxJS library, but for us it is simply function composition.]. If we use the example from the book, we can now calculate the result efficiently in terms of stream operations (we will define the interval stream later):
+
+	+precode('scheme').
+		(stream-ref (stream-filter prime? (stream-interval 10000 100000)))
+
+	p In this case, #[code stream-filter] is an intermediate operation and #[code stream-ref] is a terminal one.
+
+	p In the previous section, the operations that take an input stream and output another stream (e.g., #[code stream-map], #[code stream-filter], #[code stream-zip]) are lazy and thus non-terminal. When "asked" for a value, they lazily process their input stream in order to produce the next value. On the other hand, the operations that output some sort of aggregate value (e.g., #[code stream-fold-left]/#[code stream-fold-right], #[code stream-sum], #[code stream-ref]) must evaluate the entire stream before returning their aggregate value, and thus the input stream to these functions should be finite. We usually don't use streams directly, but usually use some aggregated value that is the result of a terminal operation.
+
+	p Other examples of terminal operations, whose implementations are shown below, are #[code stream->list], which converts a stream to a regular list, or #[code stream-for-each], which eagerly loops through a stream.
+
+	p TODO: show implementations here
+
+	hr
+	h4 Explicit and implicit stream definitions
+
+	hr
+	h4 Scheme metaprogrammed-lists vs. Haskell lists vs. Java #[code Stream]s vs. Javascript (RxJS)
+
+	hr
+	hp Concurrent processing and race conditions
+
+	hr
+	h4 Philosophy: modeling with time in the memory dimension
+
+
+	hr
+	p esieve...
+
+	p ----------
 
 	p terminal vs non-terminal operations
+
+	p garbage collection
 
 	p using macros (versus using lambdas -- macros offer an efficiency that you can't have in other languages)
 
