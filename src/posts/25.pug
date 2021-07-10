@@ -2,6 +2,7 @@ extends blogpost
 
 block post
 	+codestyle
+	+mathjax
 
 	p Section 3.5 of #[em SICP] is about streams, and I found this section absolutely fascinating (after never really understanding what a stream was). Incidentally, I happened to start reading #[em A Gentle Introduction to Haskell] at the same time as reading this section, and it is extremely satisfying to see the idea of laziness coincide.
 
@@ -66,21 +67,41 @@ block post
 	+precode('scheme').
 		(define (stream-ref s n)
 		  ;; get the nth value of a stream
-		  (if [<= n 0]
+		  (if [zero? n]
 		      (stream-car s)
 		      (stream-ref (stream-cdr s) (1- n))))
 
 	p We can define the typical list operations that produce another list, like #[code filter], #[code map], #[code zip], #[code running-sum], etc. just like we would with lists except that we use our new #[code stream-*] primitives.
 
-	p TODO: implementation of filter and map
+	+precode('scheme').
+		(define (stream-map proc s)
+		  ;; stream equivalent of map
+		  (if [stream-null? s]
+		      *empty-stream*
+		      (stream-cons (proc (stream-car s))
+				   (stream-map proc (stream-cdr s)))))
+
 
 	p The same is true of aggregate operations that produce a single value, such as #[code sum], #[code max], #[code fold-left]/#[code fold-right], etc.
 
-	p TODO: show an implementation
+	+precode('scheme').
+		(define (stream-fold-left proc accumulator s)
+		  ;; stream equivalent of fold-left (left-associative accumulate)
+		  (if [stream-null? s]
+		      initial
+		      (stream-fold-left proc
+					(proc (stream-car s) accumulator)
+					(stream-cdr s))))
 
 	p Additionally, we may want to introduce certain operations that limit a stream. For example, the #[em take] operation returns a stream of a given length. We can also introduce a #[em take-while] operation that ends the stream when the predicate is not met. (Think of a filter operation, but it ends the stream when encountering a false value rather than dropping the element.) Similarly, we can discard elements of a stream so that we don't get values from the beginning of the stream. For this, we can introduce the #[code skip] and #[code skip-while] operators.
 
-	p TODO: show an implementation
+	+precode('scheme').
+		(define (stream-take n s)
+		  ;; take the first n elements of the stream
+		  (if [or (stream-null? s) (zero? n)]
+		      *empty-stream*
+		      (stream-cons (stream-car s)
+				   (stream-take (1- n) (stream-cdr s)))))
 
 	hr
 	h4 Terminal vs. non-terminal stream operations
@@ -95,29 +116,224 @@ block post
 
 	p In the previous section, the operations that take an input stream and output another stream (e.g., #[code stream-map], #[code stream-filter], #[code stream-zip]) are lazy and thus non-terminal. When "asked" for a value, they lazily process their input stream in order to produce the next value. On the other hand, the operations that output some sort of aggregate value (e.g., #[code stream-fold-left]/#[code stream-fold-right], #[code stream-sum], #[code stream-ref]) must evaluate the entire stream before returning their aggregate value, and thus the input stream to these functions should be finite. We usually don't use streams directly, but usually use some aggregated value that is the result of a terminal operation.
 
-	p Other examples of terminal operations, whose implementations are shown below, are #[code stream->list], which converts a stream to a regular list, or #[code stream-for-each], which eagerly loops through a stream.
+	p Other examples of terminal operations, are #[code stream->list], which converts a stream to a regular list, or #[code stream-for-each], which eagerly loops through a stream.
 
-	p TODO: show implementations here
+	+precode('scheme').
+		(define (stream->list s)
+		  ;; terminal operation to convert (finite) stream to list
+		  (if [stream-null? s]
+		      '()
+		      (cons (stream-car s)
+			    (stream->list (stream-cdr s)))))
 
 	hr
 	h4 Explicit and implicit stream definitions
 
-	p TODO: some explicit examples (of the below)
-	p TODO: ones, integers, fibonacci
+	p We can declare sequences as streams in the same way that we can lists (or infinite lists). All we need is some sort of (finite) generating function to find the next element.
+
+	p Say, for instance, we wanted to generate the infinite stream of natural numbers (an example given in the book). We can do this by iteratively adding one to the previous element:
+
+	+precode('scheme').
+		(define stream-natural
+		  (letrec ([next
+		            (lambda (n)
+		              (stream-cons n (next (1+ n))))])
+		    (next 0)))
+
+	p The stream of natural numbers is useful in that we can use it to generate other sequences using an explicit formula#[+footnote A formal definition of a sequence may be a function from the natural numbers into the set of possible elements of the sequence.]. For example, it is trivial to get the sequence of integer squares by mapping the #[code square] function over #[code stream-natural], or to get the arithmetic sequence #[code 3*x+1].
+
+	p The function to generate the next sequence need not be so simple. We can use two previous elements, as is the case with Fibonacci (or three in the case of Tribonacci):
+	+precode('scheme').
+		(define stream-fibonacci
+		  (letrec ([next
+		            (lambda (a b)
+		              (stream-cons a (next b (+ a b))))])
+		    (next 0 1)))
+
+	p Or, we can include some logic, e.g., to generate a Collatz sequence.
+	+precode('scheme').
+		(define (stream-collatz n)
+		  (letrec ([next
+		            (lambda (n)
+		              (stream-cons
+		               n
+		               (cond ([= n 1] *empty-stream*)
+			             ([even? n] (stream-collatz (/ n 2)))
+		                     (else (stream-collatz (1+ (* n 3)))))))])
+		    (next n)))
+
+	p The method of giving an explicit formula for the next element based on the previous element(s) from the previous element is simple and intuitive, and we call this an #[em explicit] stream definition. However, we can also define streams #[em implicit]ly, by starting with another stream and performing stream operations that output another stream. We've already seen this by mapping the stream of integers to another stream#[+footnote The terms "implicit" and "explicit" are just handy ways of describing our stream definitions, but the definitions of these terms may be a little arbitrary. I use the word "explicit" to mean that a recursive formula is given to generate the next element, while the word "implicit" to mean any stream that is not "explicit." I bring this up because we can define sequences using "recursive formulas" or "explicit formulas," in which case "explicit" here means an explicit function of the sequence of natural numbers. Thus, the definition I use of "explicit" streams is exactly the definition of "recursive" sequences, and my use of the word "implicit" streams includes but is not limited to "explicit" sequences (which can be formed by applying the stream map operation over the stream of natural numbers). It is not limited to "explicit" sequences because we can also define some "recursive" sequences "implicitly," such as the Fibonacci sequence. And of course, we can sometimes define a stream or sequence in either an explicit or implicit manner, just like how we can sometimes define a sequence explicitly or recursively, and then the term describes the manner in which we describe the sequence rather than describing the sequence itself. But I digress.].
+
+	p Explicit streams are relatively bland. What I find really cool is that you can define streams fully in terms of itself in a "tail-chasing" manner, and that you can define streams that are interdependent and lazily "ask" each other for the next element.
+
+	p For the tail-chasing variant, the simplest is a constant stream.
+
+	+precode('scheme').
+		(define stream-ones
+		  ;; infinite stream of ones
+		  (stream-cons 1 stream-ones))
+
+	p This feels like a mathematical definition that shouldn't be possible in code, but it works because of the delayed evaluation. A more complicated example is the integers. We've already defined it with an explicit recursive function based on the previous element, but we can also define it in the following way (we require the #[code stream-add] helper and the variadic form of #[code stream-map], whose implementation is not shown above):
+
+	+precode('scheme').
+		(define (stream-map proc . argstreams)
+		  ;; generalized (variadic) version of stream-map
+		  ;; assumes all input streams are the same length, or
+		  ;; at least that the first one is the shortest stream
+		  (if [stream-null? (car argstreams)]
+		      '()
+		      (stream-cons
+		       (apply proc (map stream-car argstreams))
+		       (apply stream-map
+			      (cons proc (map stream-cdr argstreams))))))
+
+		(define (stream-add s1 s2)
+		  ;; add two streams
+		  (stream-map + s1 s2))
+
+		(define stream-natural
+		  ;; an implicit definition of the stream of natural numbers
+		  (stream-cons 0 (stream-add stream-natural stream-ones)))
+
+	p This is already very nice and concise, but we can do better without even requiring #[code stream-add] or #[code stream-ones].
+
+	+precode('scheme').
+		(define stream-natural
+		  ;; an even more concise definition of the natural numbers
+		  (stream-cons 0 (stream-map 1+ stream-natural)))
+
+	p We can do a similar thing with the Fibonacci numbers:
+
+	+precode('scheme').
+		(define stream-fibonacci
+		  (stream-cons
+		   0
+		   (stream-cons
+		    1
+		    (stream-add
+		     stream-fibonacci
+		     (stream-cdr stream-fibonacci)))))
+
+	p The example of the infinite #[code stream-ones] stream was intuitive to me immediately, but it took some time to understand how this works and it blew my mind when I understood it.
+
+	p We generate the n-th element of the inner #[code stream-add] sequence by taking the sum of the n-th element of the #[code stream-fibonacci] sequence and the n-th element of the #[code (stream-cdr stream-fibonacci)] sequence. Hovewer, the inner #[code stream-add] is exactly equivalent to #[code (stream-cddr stream-fibonacci)], so it begins to map over the elements of itself. All we need are some starting initial values, and then the map operation "chases its own tail" by mapping over previous elements of the same stream.
+
+	p The following diagram, from #[em A Gentle Introduction to Haskell] (which will be discussed in the next section), was helpful for my understanding.
+
+	+imglinkext('https://haskell.org/tutorial/fig1.gif', 'Tail-chasing diagram of the implicit Fibonacci stream')
+
+	p I will save the example of the interdependent streams to the end of this post because it's a little hairier.
 
 	hr
 	h4 Scheme metaprogrammed-lists vs. Haskell lists vs. Java #[code Stream]s vs. Javascript (RxJS)
 
-	p TODO: mkyong fibonacci, java explicit only
-	p TODO: java streams zip terrible: https://stackoverflow.com/a/24063511/2397327 ; probably has to do with the way streams are implemented for efficiency
+	p I actually read the #[a(href="https://www.haskell.org/tutorial/functions.html") Chapter 3: Functions of #[em A Gentle Introduction to Haskell]] the day before reading the streams section in #[em SICP], without knowing that they would both relate to streams.
+
+	p In Haskell, though, we don't call them streams -- they're just regular lists. It's the default, nothing out of the ordinary. The term "non-strict" and "strict" are used instead of "lazy" and "eager," and the equivalent of the #[code cons] operator in Haskell is non-strict by default.
+
+	p They give implicit versions of the #[code stream-ones], #[code stream-natural], and #[code stream-fibonacci] streams. The Fibonacci example is presented like so, using the #[code zip] primitive rather than the stream adding operator.
+
+	+precode('haskell').
+		ones = 1 : ones
+		numsFrom n = n : numsFrom (n+1)
+		fib = 0 : 1 : [ a+b | (a,b) <- zip fib (tail fib) ]
+
+	p This kind of definitions makes me want to fall in love with Haskell.
+
+	p Take the other extreme: a classically imperative language that tries to implement streams. Java.
+
+	p Java 8 made big steps towards FP because of the introduction of lambda expressions (syntactic sugar for their terribly clunky "functional interfaces") and because of the introduction of streams, which was probably only possibly with a usable lambda syntax.
+
+	p I haven't used Java streams much. Java 8 came out around the same time that I began learning how to program computers, so I thought that those new features might be some obscure thing I would never use. Looking back on it, it looks like Streams are mostly used to chain list operations and allow for parallelism. You can easily split a stream for concurrent processing because the iterator is a #[code Spliterator], and you can perform the common list/stream operations like #[code map], #[code filter], and #[code reduce].
+
+	p I tried to see if Java has a way to elegantly write implicit streams in terms of themselves like you can in Haskell or Scheme, and I don't think you can (as far as I can tell from moderate Internet search). The most elegant stream implementation of Fibonacci I can find is by #[a(href="https://mkyong.com/java/java-fibonacci-examples/") using pairs], which is hardly elegant because this ends up just being an explicit definition of the sequence, not to mention that we're duplicating every term of the sequence:
+	+precode('java').
+		Stream.iterate(new int[]{0, 1}, t -> new int[]{t[1], t[0] + t[1]})
+		    .limit(10)
+		    .forEach(x -> System.out.println("{" + x[0] + "," + x[1] + "}"));
+
+	p Similarly, I went to see if we could do something similar to the Haskell edition by using a zip operator, but it seems that #[a(href="https://stackoverflow.com/a/24063511") it's not elegant at all to implement the zip operator], or to be able to interleave two streams. My guess that this inconvenience is due to how the #[code Spliterator]s are implemented internally, which I speculate is probably implemented similar to a loop. While this might make streaming over a single list easy and wouldn't inhibit splitting a single list, it would make combining two lists difficult#[+footnote This is based on my intuition, so it may be wrong. Whatever the case, the fact is that it's awkward to implement streams in Java with the flexibility and intuitiveness that you can in a more funtional language.].
+
+	p Other annoyances of Java streams are that you can only use them once[+footnote This supports my hypothesis that streams are implemented like loops, in which the used values are discarded. This is unlike in Haskell or Scheme, where the stream is fundamentally an ordinary linked list in memory.], and that you must pass in a lambda (or functional interface if you prefer to be verbose) rather than an expression, if you want to specify a sequence explicitly. There are no Java macros to rewrite that expression into a delayed expression, so you have to do it yourself.
+
+	p I want to bring up one more implementation of streams: the RxJS library (Reactive eXtensions for JS). This is where I first learned about streams. More specifically, it supports the "reactive programming" paradigm, which is, according to Wikipedia, a programming paradigm "concerned with data streams and the propagation of change." This is very useful in Javascript, where many actions are event-driven. The basic data type is the #[code Observable], to which other objects can "subscribe" to. These subscribers then can use stream-processing operators to process the incoming events. I highly recommend this library.
 
 	hr
-	hp Concurrent processing and race conditions
+	h4 Concurrent processing and race conditions
+	p I will preface this by saying that I don't understand this topic too well, but it seems to be another fundamental reason why we use streams. By their nature, streams are immutable. We never change the values in the memory cells of the underlying linked list; all we do is generate new elements (and discard old ones by means of garbage collection). Thus we have no chance for race conditions.
+
+	p What I understand is that this falls well under the immutable paradigm that is present in functional programming. As a result, much of the time streams are associated with parallel and concurrent processing. Take, for example, the default iterator for a #[code Stream] in Java. It is the #[code Spliterator], which, as the name suggests, naturally handles splitting into parallel streams. From what little I've heard about Clojure (the JVM-based Lisp), it is a great language for concurrency because of its support for parallel streams.
+
+	p I've still yet to find a compelling example of this because I don't often deal with hardcore parallelism or streams, so this is just speculation.
 
 	hr
-	h4 Philosophy: modeling with time in the memory dimension
+	h4 Interleaving multiple infinite streams
+	p Often, we need to make a search over some half-interval (e.g., the the natural numbers) for numbers matching some criteria (e.g., the first ten prime numbers). We can simply iterate over this infinite stream.
 
-	p TODO: random number generation
+	p The problem gets more complex once we move to multidimensional data. Say we want to search the space of the quarter-plane of the Cartesian product of the natural numbers#[+footnote The list of pairs (0,0), (0,1), (1,1), (0,2), (1,2), (2,2), ...]? Or a search over a whole plane (e.g., the complex numbers)? Or even a 3-D space? The problem here is that there is no implicit ordering in these elements.
+
+	p One way to approach this is to break down the problem into multiple infinite (1-D) lists (streams). In the example of the Cartesian product, we have an infinite stream of pairs beginning with 0, a stream of pairs beginning with 1, and so on. And then we need to take the union of these streams, but concatenation is not an option, since we will never complete the first stream.
+
+	p As a result, we need some way to merge the streams such that each element of each stream will be reached in some finite time#[+footnote This characterization may not be entirely mathematically correct. I'm not experienced when talking about infinity.]. The simplest method is interleaving, and an implementation is shown in #[em SICP]. However, this will likely not be the "fairest" or most efficient method of merging for a particular problem. Thus, the best method of merging infinite lists may be specific to each application and an important performance consideration.
+	
+	hr
+	h4 Philosophy: modeling with memory rather than time
+
+	p One of the things that Prof. S and I noticed is that Abelson and Sussman sometimes get extremely and unnecessarily philosophical. One example is in the beginning of chapter one when talking about wizards#[+footnote Perhaps this is practical in that it earns the book its cover image and its nickname, the "Wizard book."]. Or when they discuss the idea of "sameness" in the beginning of chapter 3, or when they discuss the theory of relativity and that "our computational models may in fact mirror a fundamental complexity of the physical universe" when talking about concurrency. In the same way, this section of streams is wrapped up with a discussion of streams as a way of modeling objects "without time" in the FP sense, as opposed to with "with time" as with mutation and imperative programming#[+footnote They conclude this section and the third chapter by stating that a grand unification of these two models has yet to emerge, which sounds a little too grandiose for me.].
+
+	p While the philosophical elements are a little over my head, I do want to talk about the practical side to this.
+
+	p So far, what I've been focused on is the benefits of using streams for iteration. We get the nice benefits of theoretically infinite lists and modular list operations, with good time and memory efficiency due to laziness and interleaving of operations. In this section, we interpret streams as a data model rather than a computational model.
+
+	p Abelson and Sussman return to the example from the beginning of the chapter about the "bank account" model, in which we have essentially an object that contains a mutable "balance" field. The authors propose that we rewrite this in terms of a list or stream of operations: rather than performing one operation at a time and observing the change in balance, we instead input a stream of operations and return a stream of balances after applying those transactions. In this way, they claim, the operation becomes pure and stateless: rather than depending on some local, mutable state, we treat the stream of operations as a single entity and operate on that entity as a whole. My interpretation of what "timeless" means in this context is that we have flattened operations over time dimension into the memory dimension.
+
+	p One qualm about this is that we don't solve the concurrency problem, but we rather abstract it away by stating that there is a clear order of transactions. I'm not sure if that's the intent of the authors here, though.
+
+	p As another, very similar example, we have the random number generator, which (at least for a LCG) needs to hold state. Rather than storing the state as a mutable element, we can store the values as an infinite stream#[+footnote LCGs are not actually infinitely-repeating, but we can approximate them to be.] of the internal state. I'm not sure if there's really any practical benefit of this over the mutation version; this is simply the FP version of the PRNG.
+
+	p In general, I can see myself using streams in this way, but I'm more interested in the elegance and performance of stream processing. I appreciate that we get a pure function of the input stream, but I need to see an example that will convince me of its benefit. The main practical benefit I can think of of storing a mutable object's state over time is that we can keep track of the history of an object like we can in Redux. Due to structural sharing and referential transparency, efficient memory allocation and change detection is given for free.
 
 	hr
-	p esieve...
+	h4 Assorted cool examples from this section
+
+	h5 Interdependent implicit streams
+	p I already mentioned this when I was talking about implicit stream definitions. This is the implicit definition of two streams -- based off of one another, which is even cooler. When defining a stream implicitly in terms of itself, we had to define an initial term (or two, in the case of Fibonacci); we have to do the same in the case of interdependent streams, because one stream has to be able to ask the other for a value in order to produce an initial value to get the process started.
+
+	p The example given by the book is a differential equation solver, which is a perfect use case. We achieve this by choosing one sequence to be the initiator -- it takes an initial value and take the second stream as a delayed input.
+
+	p This example is cool but I can't add much value in reproducing it here. This is the example from section 3.5.4.
+
+	h5 A prime sieve
+	p I'll preface this with saying: this is not the sieve of Eratosthenes, as the authors claim. It's a neat prime sieve expressed in terms of streams, but it is fundamentally less efficient. There is #[a(href="https://www.cs.hmc.edu/~oneill/papers/Sieve-JFP.pdf") a paper that explains why this example is not esieve]. It seems that this particular example is common amongst people who advocate FP, but it seems that there isn't really an efficient way to implement a esieve without mutation (the authors suggest using a priority queue, which is fundamentally an array-based data structure).
+
+	p It is still a cool example, so I'll include it here.
+
+	+precode('scheme').
+		(define (sieve stream)
+		  (stream-cons
+		   (stream-car stream)
+		   (sieve (stream-filter
+			   (lambda (x)
+			     (not (divisible? x (stream-car stream))))
+			   (stream-cdr stream)))))
+
+		(define primes (sieve (integers-starting-from 2)))
+
+	h5 Stream (sequence) acceleration by Euler's transform
+	p I think this is really cool. One result from calculus is that an alternating series with terms diminishing in absolute value converges. The Euler transform is a stream operation that maps a sequence of partial sums to a different sequence of partial sums that converges more quickly.
+
+	blockquote
+		p If \(S_n\) is the n-th term of the original sum sequence, then the accelerated sequence has terms \(E_n=S_{n+1}-\frac{(S_{n+1}-S_n)^2}{S_{n-1}-2S_n+S_{n+1}}\).
+
+	+precode('scheme').
+		(define (euler-transform s)
+		  (let ((s0 (stream-ref s 0))           ; S_{n-1}
+			(s1 (stream-ref s 1))           ; S_n
+			(s2 (stream-ref s 2)))          ; S_{n+1}
+		    (cons-stream (- s2 (/ (square (- s2 s1))
+					  (+ s0 (* -2 s1) s2)))
+				 (euler-transform (stream-cdr s)))))
+
+	p Even more magically, since the transformed sum is also a sequence of partial sums of an alternating sequence, we can accelerate the accelerated sequence recursively, until we run out of machine precision. I won't repeat their example, but they implement this using a "tableau" data structure -- a stream of streams.
+
+	p I don't know how this magic works, and this isn't especially related to streams, but it's very cool and works amazingly.
