@@ -1,0 +1,82 @@
+<!DOCTYPE html><html><head><title>jlam | New post using Emacs script</title><style>html {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0.5rem;
+}
+body {
+	max-width: 400pt;
+	margin: 0 auto;
+	padding: 0;
+}</style><link rel="icon" href="/res/favicon.png"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head><body><h1>Jonathan Lam</h1><p>EE/CS @ The Cooper Union</p><nav><a href="/">Home</a> | <a href="/contact">Contact</a> | <a href="/experience">Experience</a> | <a href="/res/resume.pdf" target="_blank">Resume</a> | <a href="http://files.lambdalambda.ninja">Files</a> | <a href="/blog">Blog</a></nav><hr><!-- inspiration taken from https://codepen.io/Zoxon/pen/WyqdBb--><!-- styles for blog posts--><style>kbd {
+	background-color: #eee;
+	padding: 0 3px;
+	border: 1px solid black;
+	border-radius: 2px;
+}
+blockquote {
+	margin: 0;
+	background-color: #eee;
+	padding: 1px 1em;
+}
+li {
+	margin-block-start: 1em;
+	margin-block-end: 1em;
+}
+</style><h2>Blog</h2><h3>New post using Emacs script</h3><p>On 7/14/2021, 9:23:32 PM</p><p><a href="/blog">Return to blog</a></p><hr><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.23.0/prism.min.js" integrity="sha512-YBk7HhgDZvBxmtOfUdvX0z8IH2d10Hp3aEygaMNhtF8fSOvBZ16D/1bXZTJV6ndk/L/DlXxYStP8jrF77v2MIg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.23.0/plugins/autoloader/prism-autoloader.min.js" integrity="sha512-zc7WDnCM3aom2EziyDIRAtQg1mVXLdILE09Bo+aE1xk0AM2c2cVLfSW9NrxE5tKTX44WBY0Z2HClZ05ur9vB6A==" crossorigin="anonymous"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.23.0/themes/prism-tomorrow.min.css" integrity="sha512-vswe+cgvic/XBoF1OcM/TeJ2FW0OofqAVdCZiEYkd6dwGXthvkSFWOoGGJgS2CW70VK5dQM5Oh+7ne47s74VTg==" crossorigin="anonymous"><style>pre {
+	padding: .5rem !important;
+	line-height: 1 !important;
+}
+code.fancy-code {
+	line-height: 1 !important;
+	font-size: 0.75rem !important;
+	tab-size: 8 !important;
+}
+</style><p>I made some custom Elisp functions to be able to build and serve this website easily from Emacs! It's not much and it's not very fancy, but it automates the somewhat-tedious setup. This works well if you have a very basic two-window setup: one window for editing files, and one window for the command-line output.</p><p>I learnt about buffers, windows, and regex in Elisp. Regex was used to extract the new post id from the output of running <code>npm run new-post</code> even though it would have been simpler to simply return the new post id; I just wanted to try using regex.</p><pre><code class="fancy-code language-elisp">(setq website-base "~/Documents/jonathan-lam-website")
+(defun website-npm-run (target)
+  (format "cd %s;npm run %s" website-base target))
+
+(defun website-serve ()
+  "Serve the website locally"
+  (interactive)
+  (async-shell-command (website-npm-run "serve") "npm-serve"))
+
+(defun website-build ()
+  "Start an NPM build and hide window in the background"
+  (interactive)
+  (async-shell-command (website-npm-run "build") "npm-build")
+  (let ((current-window (selected-window)))
+    (select-window (get-buffer-window "npm-build"))
+    (read-only-mode)
+    (select-window current-window)))
+
+(defun website-terminate ()
+  "Stop the NPM server and kill the build buffer"
+  (interactive)
+  (kill-buffer "npm-serve")
+  (kill-buffer "npm-build"))
+
+(defun website-new-post (post-title)
+  "New blog post for website"
+  (interactive "MPost title: ")
+  (shell-command
+   (format "cd %s;echo '%s'|npm run new-post" website-base post-title)
+   "npm-new-post")
+  (set-window-buffer (selected-window) "npm-new-post")
+  (re-search-forward "id=\\([[:digit:]]+\\)" nil t)
+  (message (substring-no-properties (match-string 1)))
+  (find-file (format "%s/src/posts/%s.pug"
+		     website-base
+		     (substring-no-properties (match-string 1)))))
+
+(defun website-edit ()
+  "Goto website source directory (dired)"
+  (interactive)
+  (find-file (format "%s/src" website-base)))
+
+;;; keybindings
+(global-set-key (kbd "C-c C-w e") 'website-edit)
+(global-set-key (kbd "C-c C-w s") 'website-serve)
+(global-set-key (kbd "C-c C-w b") 'website-build)
+(global-set-key (kbd "C-c C-w t") 'website-terminate)
+(global-set-key (kbd "C-c C-w n") 'website-new-post)
+</code></pre><hr><p>&copy; Copyright 2021 Jonathan Lam</p></body></html>

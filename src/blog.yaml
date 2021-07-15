@@ -123,3 +123,7 @@
   destination: 29
   title: Tablet screen mapping tool
   date: 2021-07-12T22:59:14-04:00
+- template: ../posts/30
+  destination: 30
+  title: New post using Emacs script
+  date: 2021-07-14T21:23:32-04:00

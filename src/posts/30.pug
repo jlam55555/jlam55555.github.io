@@ -1,0 +1,12 @@
+extends blogpost
+
+block post
+
+	+codestyle
+
+	p I made some custom Elisp functions to be able to build and serve this website easily from Emacs! It's not much and it's not very fancy, but it automates the somewhat-tedious setup. This works well if you have a very basic two-window setup: one window for editing files, and one window for the command-line output.
+
+	p I learnt about buffers, windows, and regex in Elisp. Regex was used to extract the new post id from the output of running #[code npm run new-post] even though it would have been simpler to simply return the new post id; I just wanted to try using regex.
+	
+	+precode('elisp')
+		include ../res/posts/30_blog_editing_commands.el
