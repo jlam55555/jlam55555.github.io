@@ -30,7 +30,6 @@
    "npm-new-post")
   (set-window-buffer (selected-window) "npm-new-post")
   (re-search-forward "id=\\([[:digit:]]+\\)" nil t)
-  (message (substring-no-properties (match-string 1)))
   (find-file (format "%s/src/posts/%s.pug"
 		     website-base
 		     (substring-no-properties (match-string 1)))))
