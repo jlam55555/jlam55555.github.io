@@ -127,3 +127,11 @@
   destination: 30
   title: Automating website build using Elisp
   date: 2021-07-14T21:23:32-04:00
+- template: ../posts/31
+  destination: 31
+  title: IRL bad UX
+  date: 2021-07-16T19:03:10-04:00
+- template: ../posts/32
+  destination: 32
+  title: Brain dump 2.5
+  date: 2021-07-16T19:04:09-04:00

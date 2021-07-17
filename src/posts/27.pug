@@ -35,7 +35,20 @@ block post
 
 	p the continuation of the expression #[code (1+ (* y 4))] is the multiplication expression #[code (* x ...)], with the value #[code 2] bound to #[code x].
 
-	p Now that we have an intuitive idea of an expression's continuation, now what? Well, we can use it as a control flow structure and jump to some continuation. We need to first get a handle to a continuation we (might) want to use later using the #[code call/cc] ("call with current continuation"), and then we can "call" that continuation at a later point, which brings us back to that earlier context. The general form is as so:
+	p Now that we have an intuitive idea of an expression's continuation, now what? Well, we can use it as a control flow structure and jump to some continuation.
+
+	p This is different than a C/Assembly label (#[code goto] label, switch #[code case] or #[code default] labels, or the implicit labels used by #[code break] or #[code continue] statements in loops). Those labels are simply branch instructions, and do not capture the context at all, which (among other reasons) makes #[code goto] a bad general programming practice. Other issues with gotos are skipped declarations (which is either an error or very dangerous) and the lack of cross-procedure jumps (which can be achieved with #[code setjmp]/#[code longjmp], but these also don't capture context and should be handled with care).
+
+	p It is more similar to calling a function and returning from that function to the previous function. In this case, we restore the previous context by popping the last stack frame off the stack. In fact, continuations are often used in Scheme to provide non-immediate returns#[+footnote Extending off of this idea, we can use continuations to return from nested procedures without having to rewind the whole stack. Similarly, exception handling control flow can be handled this way, also with the potential to cross procedural boundaries. I used this when I wrote a checkers-playing AI, for example, to easily break out of the DFS when the time limit was up.]. However, continuations are inherently more powerful than a return point for two reasons: they are "multiply-resumable," which means we can call the continuation multiple times; and they are "optionally-resumable," which means that we don't ever have to call them (similar to the implicit labels in a #[code for] loop used for #[code continue] and #[code break]).
+
+	p Because continuations require saving the entire context (call stack), we can think of it as a snapshot of a thread#[+footnote The various wiki pages below note that continuations and threads are roughly equivalent in power, in that they can be used to implement one another. It is left as an exercise to the reader to implement continuations in C using #[code fork()].]. Because it is multiply-resumable, we must save a copy of the thread -- then this thread representation becomes a #[em reification] (concrete implementation) of continuations. Reification is important in order to have first-class continuations as we do in Scheme.
+
+	p In IP languages, we don't typically have a reified version of continuations. We can emulate continuations using lambdas by explicitly passing the continuation of an expression to each of its subexpressions -- this is called #[em continuation-passing style] (CPS), as opposed to the #[em direct style] we are used to. This depends on lambdas capturing their context. Some examples are given in the links below.
+
+	p (Another interesting topic that continuations seem to be useful for is #[em coroutines], but I'm not too familiar with them. See the last link. There is also a famous "yin/yang" problem, which is stated on the Wikipedia page.)
+
+	h5 Implementation
+	p We need to first get a handle to a continuation we (might) want to use later using the #[code call/cc] ("call with current continuation"), and then we can "call" that continuation at a later point, which brings us back to that earlier context. The general form is as so:
 
 	+precode('scheme').
 		(call/cc
@@ -64,15 +77,7 @@ block post
 		(display (f (lambda (x) x)))    ; displays 3, doesn't call cc (return)
 		(display (call/cc f))           ; displays 2, calls cc (return)
 
-	p This is different than a C/Assembly label (#[code goto] label, switch #[code case] or #[code default] labels, or the implicit labels used by #[code break] or #[code continue] statements in loops). Those labels are simply branch instructions, and do not capture the context at all, which (among other reasons) makes #[code goto] a bad general programming practice. Other issues with gotos are skipped declarations (which is either an error or very dangerous) and the lack of cross-procedure jumps (which can be achieved with #[code setjmp]/#[code longjmp], but these also don't capture context and should be handled with care).
-
-	p It is more similar to calling a function and returning from that function to the previous function. In this case, we restore the previous context by popping the last stack frame off the stack. In fact, continuations are often used in Scheme to provide non-immediate returns#[+footnote Extending off of this idea, we can use continuations to return from nested procedures without having to rewind the whole stack. Similarly, exception handling control flow can be handled this way, also with the potential to cross procedural boundaries. I used this when I wrote a checkers-playing AI, for example, to easily break out of the DFS when the time limit was up.]. However, continuations are inherently more powerful than a return point for two reasons: they are "multiply-resumable," which means we can call the continuation multiple times; and they are "optionally-resumable," which means that we don't ever have to call them (similar to the implicit labels in a #[code for] loop used for #[code continue] and #[code break]).
-
-	p Because continuations require saving the entire context (call stack), we can think of it as a snapshot of a thread#[+footnote The various wiki pages below note that continuations and threads are roughly equivalent in power, in that they can be used to implement one another. It is left as an exercise to the reader to implement continuations in C using #[code fork()].]. Because it is multiply-resumable, we must save a copy of the thread -- then this thread representation becomes a #[em reification] (concrete implementation) of continuations. Reification is important in order to have first-class continuations as we do in Scheme.
-
-	p In IP languages, we don't typically have a reified version of continuations. We can emulate continuations using lambdas by explicitly passing the continuation of an expression to each of its subexpressions -- this is called #[em continuation-passing style] (CPS), as opposed to the #[em direct style] we are used to. This depends on lambdas capturing their context. Some examples are given in the links below.
-
-	p (Another interesting topic that continuations seem to be useful for is #[em coroutines], but I'm not too familiar with them. See the last link. There is also a famous "yin/yang" problem, which is stated on the Wikipedia page.)
+	p It is also easy to see that continuations are first-class: they look just like regular procedures, and can be handled just as any other procedure can be handled.
 
 	h5 References
 	ul
@@ -85,10 +90,10 @@ block post
 		li #[a(href='https://ds26gte.github.io/tyscheme/index-Z-H-15.html') Teach Yourself Scheme in Fixnum Days: Jumps] (this has numerous practical examples of #[code call/cc], as well as an explanation of coroutines.).
 
 	hr
-	h4 (Structural) Macros
+	h4 (Syntactic) Macros
 
 	h5 tl;dr
-	p Macros are the simplest concept of these three. A macro is a compile-time (preprocessor-time) code rewriting. At the most basic level, as we often see in C/C++, we simply substitute a macro with a constant value. A more complicated version is a macro that takes arguments, which we also see in C/C++. However, while C-style macros give us greater expressive power, they can be dangerous (unhygienic) and only provide basic text-replacement, while macros in Scheme#[+footnote And presumably other FP languages. Template Haskell is an extension for Haskell that allows macros, but I'm not aware of many other FP languages' macro support.]
+	p Macros are the simplest concept of these three. A macro is a compile-time (preprocessor-time) code rewriting. At the most basic level, as we often see in C/C++, a macro#[+footnote Technically, "macros" in C are preprocessor directives] can act as a compile-time variable that gets replaced with a constant value. A more complicated version is a macro that takes arguments, which we also see in C/C++. However, while C-style macros give us greater expressive power, they can be dangerous (unhygienic) and only provide basic text-replacement, while macros in Scheme#[+footnote And presumably other FP languages. Template Haskell is an extension for Haskell that allows macros, but I'm not aware of many other FP languages' macro support. An #[a(href='https://softwareengineering.stackexchange.com/a/253377') SWE Stack Exchange post] seems to indicate that Julia and Nim have powerful macro systems.] are syntactic.
 
 	h5 Long version
 
@@ -99,21 +104,33 @@ block post
 		li I used to be confused about when to use (C-style) macros and when to use functions. Macros don't require the overhead of a function call, but they will cause the arguments to be evaluated each time they appear. These make it tricky to choose whether to use a regular procedure or a macro#[+footnote For example, the #[a(href='https://dustri.org/b/min-and-max-macro-considered-harmful.html') common MIN and MAX macros].].
 		li Also marginally related to macros are inline functions in C++, which involve the compiler rewriting code for optimization purposes. We also have compiler optimizations that involve code rewrites, including inlining functions or unwrapping loops. This (optimization) is another possible application of macros, but is usually left to the compiler writer, because there's a good chance they know better than you.
 
-	p There are two major problems with C-style macros:
+	p There are some major problems with C-style #[em lexical] (text-replacement) macros:
 
 	ul
+		li Since a macro can output arbitrary text, it can potentially generate malformed code#[+footnote Usually this means we want our macros to generate a semantically-closed code snippet, but there is no way of enforcing this with lexical macros. Syntactic macros enforce semantic closure by default.]. Thus, we can only implement this in compiled-languages, or otherwise risk a runtime error.
 		li Our code-rewriting facilities are very weak. Macros use a special preprocessing language that only has a few basic text-replacement commands (e.g., stringifying an argument).
 		li Rewriting code simply by text manipulation may be dangerous because there is no information about other symbols in the current scope. Declaring a new symbol whose name shadows another symbol in an outside scope in a macro may involve accidental capturing of an external name. This is the hygiene problem#[+footnote The reason it is called hygienic, from #[a(href='https://wiki.c2.com/?DefineSyntax') c2 wiki: Define Syntax]: "Hygienic means clean or sanitary. Something is hygienic if it does not contaminate unrelated things. For example, surgical practices are hygienic if they do not leave blood and guts lying around to contaminate a wound. Scheme macros are hygienic if they do not affect code outside of their proper scope."].
 
-	p TODO: talk about semi-functional languages https://softwareengineering.stackexchange.com/a/253377/378810
-	p TODO: talk about Rust https://internals.rust-lang.org/t/are-procedural-macros-safe/6399
+	p The answer to these problems are #[em syntactic] macros#[+footnote Another name for syntactic macros is simply #[em macros] without a qualifier -- this is because Lisp's macros probably predated C's macros, which was originally (and still technically) called the #[em preprocessor]. #[a(href='https://softwareengineering.stackexchange.com/questions/937/why-arent-macros-included-in-most-modern-programming-languages#comment14576_986') Ref].]. These can only generate code that is syntactically correct and closed by (functionally) manipulating the input AST into some valid output AST#[+footnote I say "ostensibly" because (in Scheme at least) the syntax naturally lends itself to an AST representation, and the syntax is only sexprs (lists), so rewriting any list to any other list acts like transforming an AST into another (valid) AST.]. We take as input a list (of valid expressions), and output some other (valid) expression, whether it be an atom or a list. The nice thing about Scheme is that each function call or expression is an ordinary list (homoiconicity), so we naturally output valid Scheme code#[+footnote Of course, even so we can generate semantically incorrect code -- a macro may put a non-function expression as the first element of a list when it should be a function. But this is not a syntactical error, and leads to the ordinary run-time exception that is easy to detect and handle.].
 
+	p Homoiconicity not only addresses the first point (structural/syntactic correctness), but also the second point. Because Lisp is so great for LISt Processing, we can transform Lisp code in arbitrary ways just as if we were transforming an ordinary list. This elevates macros from being a text-replacement tool to an arbitrary compile-time procedure that takes an expression as an argument and returning another expression#[+footnote This can also be emulated at runtime using quoted expressions and then evaluating the transformed expression. This can be the basis for a very basic Lisp metacircular evaluator.].
 
+	p Syntactic macros also allow for hygiene. This was feature added to the language as of R5RS, and Scheme was the first language to implement hygienic macros#[+footnote Of course, the hygiene problem was known for a long time and macro writers had to deal with it. There are several possible solutions listed on the Wikipedia page, but none of them as elegant as automatically supporting hygiene in the language.]. I don't know much about the implementation details#[+footnote The Wikipedia article states that the KFFD algorithm was the first hygienic macro expansion algorithm, but I do not know if that is the one currently in place.], but my understanding is that Scheme macros automatically prevent capture for any local variables.
+
+	p A quick note about decorators: they also can be thought of as metaprogramming by modifying the behavior of functions or other constructs, but they are (AFAIK) a run-time concept and do not have access to the syntax of the language like macros do. See the SWE Stack Exchange link below about attempting to make Python decorators as powerful as Lisp macros.
+
+	p (I am very interested in macros in other languages, such as Scala and Rust. I am especially interested in the latter and if/how it manages to stay safe and hygienic.)
+
+	h5 Implementation
+	p TODO
+
+	h5 References
 	ul
 		li #[a(href='https://en.wikibooks.org/wiki/Scheme_Programming/Macros') Wikibooks: Scheme Programming/Macros]
 		li #[a(href='https://en.wikipedia.org/wiki/Hygienic_macro') Wikipedia: Hygienic macros]
 		li #[a(href='http://community.schemewiki.org/?scheme-faq-macros') scheme-faq-macros] (see the section "How are ellipses (...) 'counted' during macro expansion?")
 		li #[a(href='https://wiki.c2.com/?DefineSyntax') c2 wiki: Define Syntax] (the #[code define-syntax] special form in Scheme)
+		li #[a(href='https://softwareengineering.stackexchange.com/a/253377') SWE Stack Exchange: How do you make decorators as powerful as macros?] (in Python? The answer: you can't#[+footnote At least not until recently -- #[a(href='https://www.python.org/dev/peps/pep-0638/') PEP 638 -- Syntactic Macros] (Sept. 2020) may change this.].)
 
 	hr
 	h4 Monads (and functors, applicatives)
