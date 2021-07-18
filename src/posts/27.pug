@@ -8,7 +8,7 @@ block post
 	
 	p There are already plenty of explanations out there on the web, but I wanted to write down the things I found hardest to understand in a simple way.#[+footnote Another concept I could add to this list is laziness, which has enormous implications but the and motivation for which is intuitive.]
 
-	p These explanations were supposed to be short and sweet, but as I was writing more questions and details came up, as they usually do. So I've given each section a tl;dr for those in a hurry.
+	p These explanations were supposed to be short and sweet, but the process of writing this pulled in many questions and additional thoughts (as the writing process usually does, but it the effect was exaggerated by how loaded each of these concepts is). So I've given each section a tl;dr for those in a hurry.
 
 	hr
 	h4 (First-class (reified)) Continuations
@@ -174,7 +174,7 @@ block post
 
 	p Here, the pattern #[code (_ a b)] matches with #[code (stream-cons 1 ones)]. Thus, #[code _] matches with #[code stream-cons]#[+footnote The first variable of the pattern always matches the name of the macro, and thus we customarily match it with #[code _] and ignore it.], #[code a] matches with #[code 1], and #[code b] matches with #[code ones]. Of course, #[code a] and #[code b] can be more complicated expressions.
 
-	p I don't think I can do justice to a full explanation of the pattern and template syntax. The easiest way for me to describe patterns is that they are very much like Python's or Javascript's destructuring assignment of (potentially nested) lists#[+footnote Consider the following Javascript snippet: #[code!='[a, [b, c]] = [2, ["Hello, world", [3.14, {foo:"bar"}]]];'] which sets #[code a] to #[code 2], #[code b] to #[code "Hello, world"], and #[code c] to #[code!='[3.14, {foo:"bar"}]'].], except that we can match literals and handle variable-length lists of patterns using the ellipses:
+	p I don't think I can do justice to a full explanation of the pattern and template syntax. Pattern-matching is common in Haskell, where it is used in every declaration. The easiest way for me to describe patterns to the imperative programmer is that they are very much like Python's or Javascript's destructuring assignment of (potentially nested) lists#[+footnote Consider the following Javascript snippet: #[code!='[a, [b, c]] = [2, ["Hello, world", [3.14, {foo:"bar"}]]];'] which sets #[code a] to #[code 2], #[code b] to #[code "Hello, world"], and #[code c] to #[code!='[3.14, {foo:"bar"}]'].], except that we can match literals and handle variable-length lists of patterns using the ellipses:
 	ul
 		li Literals are intuitive. By default, each symbol in the pattern is a #[em pattern variable], which matches an arbitrary expression. A #[em literal variable] is a symbol that appears in the literals list and is only matched by that literal symbol. For example, if you wanted to define a macro #[code bind] that rewrote #[code let] statements with a single binding:
 			+precode('scheme').
@@ -254,11 +254,117 @@ block post
 
 	hr
 	h4 Monads (and functors, applicatives)
-	p TODO: talk about I/O, maybe
-	p TODO: talk about optional control flow and return values
-	p TODO: talk about expression containers
+
+	p It will be hard for me to do justice to these three very difficult ideas. I have not really used monads to any significant degree, so I am not sure I am qualified to write this in the first place, but the topic is so fascinatingly pervasive that I had to write about it to some degree. The article "Functors, Applicatives, and Monads in Pictures," and the Stack Overflow answer to "Why are side effects modeled as monads in Haskell?" were very helpful to me. I will defer a long explanation to them and all of the other articles mentioned in the Haskell wiki, and only provide a very high-level overview here with a few concrete examples for motivation.
+
+	h5 tl;dr
+	p If you've ever felt that FP is inherently lacking #[em something] that you can do in IP, especially handling non-pure functions, dealing with sequences of statements rather than expressions, or managing state, chances are the solution is monads. Monads offer a catch-all for all non-functional aspects in a functional manner, handling notably difficult concepts such as I/O, PRNGs, sequential or other custom control flows#[+footnote Including continuations, which are not implemented in Haskell as a monad.], hashtables, and optional expressions in a uniform way. It also automatically allows us to be aware of any impure behavior in our code because any expression that contains a monad will itself have to be a monadic expression, and its type is indicated as a monadic type.
+
+	h5 The general idea
+	p A monad can be thought of as a wrapper around a value. This wrapper is imbued with certain properties, has to implement the #[code Monad] typeclass, and should follow some general laws#[+footnote The monad laws. These are not enforced in Haskell, but they should be followed in order for a monad to have predictable behavior. See link in references.]. This monad "marks" the wrapped result as the result of some impure/nondeterministic computation ("action").
+
+	p All a monadic type#[+footnote I.e., a concrete implementation of a monad. This must be a parameterized type, i.e., the type constructor must take exactly one parameter, the type of its value -- in other words, a generic container type.] has to do to implement #[code Monad] is to implement the #[code return] method, which returns a wrapped monadic version of its input argument, and a method (the #[em bind] operator) that takes a monad, a function that converts an unwrapped value to a monadic (wrapped) value (such as #[code return]), and returns a monad. It's a little confusing to hear from words alone, so here is a simplified definition of the #[code Monad] typeclass:
+
+	+precode('haskell').
+		class Monad m where
+		  (>>=)         :: m a -> (a -> m b) -> m b
+		  return        :: a -> m a
+
+	p This seemingly-obscure bind operator can be interpreted to mean: on the left we have a monad, and on the right we have a function to create another monad using the previous monad. In this way we can "pass" values from one monad to another, allowing us to sequence impure computations by passing the result of one value to the next. A really oversimplified interpretation in Scheme might look something like:
+
+	+precode('scheme').
+		(define (>>= m1 a->m2)
+		  (let ([m1-result (monad-get-value m1)])
+		    ;; can do some logic here with m1-result to produce m1-result'
+		    (a->m2 m1-result'))
+
+	p Of course, monads are a generic type and the specific logic heavily depends on the monadic type, but this is just to get the idea#[+footnote Also, as a general reminder, extracting the value of a monad outside of the bind operator #[a(href='https://stackoverflow.com/a/28708661/2397327') is generally A Bad Idea#[!='&trade;']]. Here, we are extracting the value within the bind operator, which is fine, but usually this would be done by pattern matching rather than an external function like #[code monad-get-value].]. A sequence of monadic values essentially translates to a nested #[code let] statements. This is nice because it feels more functional: we are expressing a sequence of mutations as a series of nested expressions with the state being passed around as parameters rather than as a global side effect#[+footnote This is an oversimplified version of the description in "Stack Overflow: Why are side effects modeled as monads in Haskell?" That answer uses a more generic model where we define the type alias #[code type MonadicType m = RealWorld -> (a, RealWorld)]. In this case, we pass the global state as a parameter to a monad, and so technically all operations become pure, since we are only operating on our parameters' values. Then again, this model is not perfect, as passing around #[code RealWorld] would definitely be dangerous, and (as the comments mention) practical monads like #[code IO] #[a(href='https://stackoverflow.com/questions/2488646/why-are-side-effects-modeled-as-monads-in-haskell/2488852#comment8462421_2488852') support "interaction, concurrency, and nondeterminism"] which are not captured by this model. The comments also point to the article: "You could have invented Monads! (And maybe you already have)."].
+
+	p Other nice features of monads are that we can support optional values and control flow with impure values. The former is simply the result of having a container type, and the well-known example is the #[code Maybe] monad. The latter allows us to implement all sorts of nice language features, such as continuations, and non-functional data structures, such as hash tables, all within the same neat framework.
+
+	p It should also be noted that monads are not a language construct specific to Haskell, but a generic programming design pattern that can be implemented in any language (similar to how continuations can be implemented in any language with lambdas by using CPS). The "Haskell wiki: Monad" article has a section about monad implementations in other languages.
+
+	h5 The monad hierarchy
+	p Monads are a subclass of #[em applicative functors] (or simply #[em applicatives]), which are themselves a subclass of #[em functors]. These are all discussed in the article "Functors, Applicatives, and Monads in Pictures." The (really oversimplified) general idea is that functors are wrapped values on which you can apply a function, applicatives are wrapped values on which you can apply wrapped functions, and monads are wrapped values on which you can apply more general functions that can return other wrapped values#[+footnote An exact distinction and characteristic for the three is very difficult for me to understand at the moment. A better interpretation of wrapped values (see "Stack Overflow: What advantage does a Monad give us over an Applicative?") are some nondeterministic (unpure) computation or action. This action may have some "side effects" or "state" (e.g., in the #[code Maybe] applicative, the effect is whether there is a value or not; and a result (e.g., in the #[code Maybe] applicative, the result is the value #[code x] in #[code Just x]). Just by looking at the typeclass definitions for #[code Functor], #[code Applicative], and #[code Monad], we can somewhat see the distinction: #[code fmap] only allows us to combine a pure function with a functor to produce another functor; #[code <*>] allows us to combine the results of two actions (the first of which returns a function) into a third action; and #[code >>=] allows us to use the result of the first action to generate another action. In other words, functors cannot combine actions; the actions given to an applicative are performed independently and then their results ("sequenced") using #[code <*>] (the "sequencing operator"); and the next action in a monadic sequence can depend on the result of the previous action using the bind operator. The Stack Overflow post gives an example when the #[code Maybe] monad and applicative behave differently, in particular because the #[code <*>] operation between #[code Maybe]s returns #[code Nothing] if any of its operands is #[code Nothing], but in a monad we can introduce a "control flow" such that this is not always the case.].
+
+	p From the visual article, I'm able to easily see how applicatives are a subclass of functors, but the hierarchy between applicatives and monads was less clear. This was made clear to me by this #[a(href='https://stackoverflow.com/a/26194431/2397327') Stack Overflow answer], which states that #[code Applicative] and #[code Monad] both support the #[code return] (monad) or #[code pure] (applicative) method as well as the #[code >>] (monad) or #[code *>] (applicative) methods, but #[code Monad]s have to additionally implement the #[code >>=] (bind) operator. The bind operator is a more general version of the #[code >>] operator that allows you to use the previous wrapped monad value, and thus allows monads to support sequential (chained) operations. To put it even more concretely, here are simplified versions of the #[code Functor], #[code Applicative], and #[code Monad] typeclasses all next to one another:
+
+	+precode('haskell').
+		class Functor f where
+		  fmap          :: (a -> b) -> f a -> f b
+
+		class Functor f => Applicative f where
+		  pure          :: a -> f a
+		  (<*>)         :: f (a -> b) -> f a -> f b
+
+		class Applicative f => Monad f where
+		  return        :: a -> f a
+		  (>>=)         :: f a -> (a -> f b) -> f b
+
+	p In particular, we have the following equivalences (copied from the Hackage page on #[code Control.Monad]):
+	+precode('haskell').
+		pure            = return
+		m1 <*> m2       = m1 >>= (x1 -> m2 >>= (x2 -> return (x1 x2)))
+		(*>)            = (>>)
+
+	p We also have the following default definitions of #[code *>] (in the #[code Applicative] class) and #[code >>] (in the #[code Monad] class) that shows their relationships to #[code <*>]:
+	+precode('haskell').
+		u *> v          = (id <$ u) <*> v
+		m1 >> m2        = m1 >>= const m2
+
+	p Monads are also a subclass of #[em arrows], which are probably around the same on the hierarchy as applicatives, but not the same. I don't know enough about arrows to talk about them, but they seem to be less popular in Haskell discussions than monads.
+
+	h5 Examples of monads
+	p I've already mentioned a few common types of monads, and I'll mention them here again. The Haskell wiki and the Hackage website have many more examples.
+
+	p The stereotypical example of an impure calculation is that which requires input from a human or some other external interface #[code System.IO]. Another type of nondeterministic calculation is a random number generator, and this too is a monad #[code Control.Monad.Random.*].
+
+	p The list class is a monad. This is actually very intuitive upon inspection of the implementation (taken from #[em Learn you a Haskell]):
+	+precode('haskell').
+		instance Functor [] where
+		  fmap          = map
+
+		instance Applicative [] where
+		  pure x        = [x]
+		  fs <*> xs     = [f x | f <- fs, x <- xs]
+
+		instance Monad [] where
+		  return x      = [x]
+		  xs >>= f      = concat (map f xs)
+
+	p The other common example in the introductory study of monads is #[code Data.Maybe], which we've already used many times in examples. This is a data type that wraps an optional value and has custom behavior depending on whether the value is present or not.
+
+	+precode('haskell').
+		data Maybe a    = Nothing | Just a
+
+		instance Functor Maybe where
+		  fmap f (Just x) = Just (f x)
+		  fmap f Nothing = Nothing
+
+		instance Applicative Maybe where
+		  pure          = Just
+		  Nothing <*> _ = Nothing
+		  (Just f) <*> something = fmap f something
+
+		instance Monad Maybe where
+		  return x      = Just x
+		  Nothing >>= f = Nothing
+		  Just x >>= f  = f x
+
+	p Other monads relevant to this discussion include #[code Control.Monad.Reader], #[code Control.Monad.Writer], #[code Data.Hashtable.Class] (a typeclass that is based on the #[code Control.Monad.ST] monad), and #[code Control.Monad.Cont].
 
 	h5 References:
 	ul
 		li #[a(href='https://adit.io/posts/2013-04-17-functors,_applicatives,_and_monads_in_pictures.html') Functors, Applicatives, and Monads in Pictures]
+		li #[a(href='https://www.haskell.org/tutorial/monads.html') A Gentle Introduction to Haskell: Monads]
+		li #[a(href='https://stackoverflow.com/a/2488852/2397327') Stack Overflow: Why are side-effects modeled as monads in Haskell?] (the best and simplest explanation I can get to how monads help with impure behavior)
+		li #[a(href='http://learnyouahaskell.com/a-fistful-of-monads') Learn you a Haskell: A Fistful of Monads] (pretty much half of the book LYAH is dedicated to functors, applicative functors, and monads; this section in particular is focused on monads. I haven't read the book yet except for small snippets, but I want to.)
+		li #[a(href='http://blog.sigfpe.com/2006/08/you-could-have-invented-monads-and.html') You could have invented Monads! (And maybe you already have.)]
+		li #[a(href='https://wiki.haskell.org/Monad_laws') Haskell wiki: Monad Laws]
 		li #[a(href='https://wiki.haskell.org/All_About_Monads') Haskell wiki: All about Monads]
+		li #[a(href='https://wiki.haskell.org/Monad') Haskell wiki: Monad] (the section about monads in other languages is interesting, and emphasizes the fact that monads are not a language construct but a program design concept)
+		li #[a(href='https://wiki.haskell.org/Arrow') Haskell wiki: Arrow]
+		li #[a(href='https://stackoverflow.com/q/7220436/2397327') Stack Overflow: Good examples of Not  a Functor/Functor/Applicative/Monad?] (a good way to understand the relationships betweeen the structures in the monad hierarchy -- I'm still trying to digest these answers)
+		li #[a(href='https://stackoverflow.com/q/14576543/2397327') Stack Overflow: Why can applicative functors have side effects, but functors can't?] (similar to the previous link)
+		li #[a(href='https://hackage.haskell.org/package/base-4.15.0.0/docs/Control-Monad.html') Hackage: Control.Monad]
+		li #[a(href='https://stackoverflow.com/a/17412969/2397327') Stack Overflow: What advantage does a Monad give us over an Applicative?] (yet another post on the same topic, because I haven't digested this answer yet either. It interprets monads as separately handling "effects" and "results.")
