@@ -135,3 +135,11 @@
   destination: 32
   title: Brain dump 2.5
   date: 2021-07-16T19:04:09-04:00
+- template: ../posts/33
+  destination: 33
+  title: 3000 races in Colemak
+  date: 2021-07-23T00:59:39-04:00
+- template: ../posts/34
+  destination: 34
+  title: Falling in love with Haskell
+  date: 2021-07-23T01:00:55-04:00
