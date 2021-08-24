@@ -20,6 +20,13 @@ Commissioned projects:
       See it: https://safe-rides-redding-easton.herokuapp.com/
       Source: https://github.com/jlam55555/srre-client
 School projects (EE/CS):
+  "Variation on a Scheme: multiple implicit first-class continuations (and a general attempt at understanding continuations)":
+    anchor: multi_cont
+    year: 2021
+    desc: 'Two goals are achieved: the extension of a <code>call/cc</code>-like interface to support multiple continuations using CPS, modeled after the nondeterministic interpreter from <em>Structure and Interpretation of Computer Programs</em>; and a multifaceted exploration aimed at better understanding what continuations are. The exploration includes comparisons to more familiar constructs, common use cases for continuations, and some detail about implementation.'
+    links:
+      Source: https://github.com/jlam55555/sicp/tree/master/cont
+      Report: http://files.lambdalambda.ninja/reports/21_summer/ece491_continuations.pdf
   Color organ implementation:
     anchor: color_organ
     year: 2021
@@ -229,7 +236,7 @@ Hackathons:
     links:
       Demo: https://jlam55555.github.io/ringtune-website/
       Source: https://github:com/jlam55555/ringtune-website
-Smaller projects:
+Miscellaneous personal projects:
   Groovy Maven Template:
     anchor: groovy_maven
     year: 2020
