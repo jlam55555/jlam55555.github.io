@@ -143,3 +143,7 @@
   destination: 34
   title: Falling in love with Haskell
   date: 2021-07-23T01:00:55-04:00
+- template: ../posts/35
+  destination: 35
+  title: Programming languages timeline
+  date: 2021-08-26T23:31:54-04:00
