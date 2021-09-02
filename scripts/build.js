@@ -18,7 +18,13 @@ const COPYFILES = ['res', 'CNAME'];
 
 // clear builddir
 console.log(`Clearing build directory ${BUILDDIR}...`);
-fs.rmSync(BUILDDIR, {recursive: true, force: true});
+if (fs.rmSync) {
+  fs.rmSync(BUILDDIR, {recursive: true, force: true});
+} else {
+  // for versions of fs older than 14.14 
+  fs.rmdirSync(BUILDDIR, {recursive: true});
+}
+
 
 // create builddir
 console.log(`Creating build directory ${BUILDDIR}...`);
