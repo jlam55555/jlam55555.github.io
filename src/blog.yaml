@@ -151,3 +151,15 @@
   destination: 36
   title: 5000 races in Colemak and keyboard debugging
   date: 2021-09-06T20:29:59-04:00
+- template: ../posts/37
+  destination: 37
+  title: 'Brain dump 3: Quotes'
+  date: 2021-09-06T22:27:15-04:00
+- template: ../posts/38
+  destination: 38
+  title: First thoughts on program analysis
+  date: 2021-09-06T22:28:00-04:00
+- template: ../posts/39
+  destination: 39
+  title: Intentional programming for programming education
+  date: 2021-09-06T22:28:16-04:00
