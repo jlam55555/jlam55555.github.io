@@ -147,3 +147,7 @@
   destination: 35
   title: Programming languages timeline
   date: 2021-08-26T23:31:54-04:00
+- template: ../posts/36
+  destination: 36
+  title: 5000 races in Colemak and keyboard debugging
+  date: 2021-09-06T20:29:59-04:00
