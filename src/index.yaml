@@ -1,12 +1,12 @@
 - template: index
   destination: /
   title: Home
-- template: faq
-  title: FAQ
 - template: contact
   title: Contact
 - template: experience
   title: Experience
+- template: faq
+  title: FAQ
 - template: projects
   title: Projects
   dataSrc: projects.yaml
@@ -14,6 +14,8 @@
   destination: blog
 - template: readinglist
   title: Reading List
+- template: tutoring
+  title: Tutoring
 - template: 404
   title: 404
   is404: true
