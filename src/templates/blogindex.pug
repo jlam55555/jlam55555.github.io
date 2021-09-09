@@ -2,6 +2,7 @@ extends layout
 
 block content
 	h2 Blog
+	p Empty posts are placeholders for future writing.
 
 	each post in data.reverse()
 		unless post.destination === '/'
