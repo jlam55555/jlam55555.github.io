@@ -167,3 +167,15 @@
   destination: 40
   title: Emacs-centric
   date: 2021-09-06T23:37:12-04:00
+- template: ../posts/41
+  destination: 41
+  title: Undue gratitude
+  date: 2021-09-08T23:44:58-04:00
+- template: ../posts/42
+  destination: 42
+  title: The art of being direct
+  date: 2021-09-08T23:52:36-04:00
+- template: ../posts/43
+  destination: 43
+  title: Disassembling (and destroying) a broken Dell Latitude monitor
+  date: 2021-09-09T00:36:11-04:00
