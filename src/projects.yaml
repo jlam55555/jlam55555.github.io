@@ -1,36 +1,15 @@
-Commissioned projects:
-  Cooper Union EOYS 2021:
-    anchor: eoys2021
-    year: 2021
-    desc: 'Online presence for School of Engineering 2021 EOYS during COVID-19 pandemic. Performed technical advising: hosting & domain name (w/ GitHub Pages), Vue/Vite framework setup, Bootstrap integration.'
-    links:
-      See it: https://engineeringeoys.cooper.edu/
-      Source: https://github.com/evo2000/EOYS
-  Maroon and Gold Labs:
-    anchor: mag_labs
-    year: 2019
-    desc: Maroon and Gold Labs incubator for Cooper students. Created on Strikingly.
-    links:
-      See it: https://www.maroonandgoldlabs.org/home
-  Safe Rides of Redding and Easton Web-App:
-    anchor: safe_rides
-    year: 2018
-    desc: Web app for the newly-founded Safe Rides program at JBHS. Not operational anymore.
-    links:
-      See it: https://safe-rides-redding-easton.herokuapp.com/
-      Source: https://github.com/jlam55555/srre-client
 School projects (EE/CS):
   "Variation on a Scheme: multiple implicit first-class continuations (and a general attempt at understanding continuations)":
     anchor: multi_cont
     year: 2021
-    desc: 'Two goals are achieved: the extension of a <code>call/cc</code>-like interface to support multiple continuations using CPS, modeled after the nondeterministic interpreter from <em>Structure and Interpretation of Computer Programs</em>; and a multifaceted exploration aimed at better understanding what continuations are. The exploration includes comparisons to more familiar constructs, common use cases for continuations, and some detail about implementation.'
+    desc: 'Two goals are achieved: the extension of a <code>call/cc</code>-like interface to support multiple simultaneous continuations using an internal CPS representation, modeled after the nondeterministic interpreter from <em>Structure and Interpretation of Computer Programs</em>; and a comparative exploration aimed towards students unaccostomed to CPS (e.g., imperative programmers). The exploration also delineates common use cases for continuations and some notes about implementation.'
     links:
       Source: https://github.com/jlam55555/sicp/tree/master/cont
       Report: http://files.lambdalambda.ninja/reports/21_summer/ece491_continuations.pdf
   Color organ implementation:
     anchor: color_organ
     year: 2021
-    desc: 'A color organ is a speaker with lights that light up when certain frequencies are played. We implemented a very simple version, mainly comprising a set of filters lighting up LEDs for three frequency bands, and a power amplifier to drive the speakers. (a.k.a. SSSSS: Seventies-Style Sight and Sound System)'
+    desc: 'A color organ is a speaker with lights that light up when certain frequencies are played. We implemented a very simple version, mainly comprising a set of active bandpass filters lighting up LEDs for three frequency bands, and a power amplifier to drive the speakers. (a.k.a. SSSSS: Seventies-Style Sight and Sound System). The built product achieves its role as a school project, but the power design is not well-calculated (leading to excessive heat generation and speaker blowout) and the filtering method (thresholding with momentum for detection and denoising) is naive.'
     links:
       Report: http://files.lambdalambda.ninja/reports/20-21_spring/ece394_color_organ_report.lam_lee.pdf
       Presentation: http://files.lambdalambda.ninja/reports/20-21_spring/ece394_color_organ_presentation.lam_lee.pdf
@@ -38,7 +17,7 @@ School projects (EE/CS):
   Canny edge detector in CUDA:
     anchor: canny
     year: 2021
-    desc: The canny algorithm is a common multi-stage algorithm for edge detection. This is implemented on CUDA and compared to a single-threaded CPU version. Optimizations for several of the stages from Luo and Duraiswami (2008) are implemented and compared to the naive versions.
+    desc: The canny algorithm is a common multi-stage algorithm for edge detection in image processing. The standard algorithm is implemented on CUDA and performance is compared to a single-threaded CPU version. Several proposed algorithms from Luo and Duraiswami (2008) are implemented (including tiling, factoring, and a localized version of graph search) and compared to the naive versions, achieving the theoretical speedup.
     links:
       Source: https://github.com/jlam55555/cuda-canny
       Report: http://files.lambdalambda.ninja/reports/20-21_spring/ece453_canny_cuda.pdf
@@ -46,20 +25,20 @@ School projects (EE/CS):
   C99 compiler:
     anchor: compiler
     year: 2021
-    desc: A (poor) C99 compiler for the compilers class. Aims to implement a reasonable chunk of the C99 standard. Compiler was built using the standard compiler tools flex (lex) and bison (yacc). Successive assignments included lexing; parsing (expressions, declarations, statements); quad generation; and target code generation. Builds working but very unoptimized x86_64 target code (no time to learn register allocation, so all temporaries are memory-backed).
+    desc: A (poor) C99 compiler for the compilers class. Aims to implement a reasonable chunk of the C99 standard. The compiler was built using the standard compiler tools flex (lex) and bison (yacc). Successive assignments included lexing; parsing (expressions, declarations, statements); quad generation; and target code generation. Builds working but very unoptimized x86_64 target code (no time to learn register allocation, so all temporaries are memory-backed). The compiler generates correct output for several test cases using the supported parts of the C99 grammar.
     links:
       Source: https://github.com/jlam55555/c99-compiler
   Cloud convex hull:
     anchor: convex_hull
     year: 2021
-    desc: A convex hull cloud service, built on AWS in order to be scalable, highly-available, and performant. Built serverless on top of S3, Lambda, and API Gateway. Uses <a href='https://github.com/markus-wa/quickhull-go'>@markus-wa/quickhull-go</a> for a 3-D Golang QuickHull (convex hull) implementation. Front-end powered by Vue, back-end (lambdas) written in Golang. (Also wrote a 2-D quickhull implementation and failed to write a complete 3-D quickhull implementation, included in the source repository.)
+    desc: A convex hull cloud service, built on AWS in order to be scalable, highly-available, and performant. Built serverless on top of S3, Lambda, and API Gateway. Users can upload an .obj 3-D model and download or preview the convex hull of that object. Uses <a href='https://github.com/markus-wa/quickhull-go'>@markus-wa/quickhull-go</a> for a 3-D Golang QuickHull (convex hull) implementation. Front-end powered by Vue, back-end (lambdas) written in Golang. (Also wrote a 2-D quickhull implementation and failed to write a complete 3-D quickhull implementation in the time provided, included in the source repository.)
     links:
       Source: https://github.com/jlam55555/cloud-convex-hull
       Presentation: http://files.lambdalambda.ninja/reports/20-21_spring/ece465_cloud_convex_hull_presentation.pdf
   Parallel graph coloring:
     anchor: graph_color
     year: 2021
-    desc: Graph coloring using the Gebremedhin-Manne distributed-memory speculative coloring algorithm for the ECE453 Cloud Computing. The goal is to achieve speedup with parallel (CPU) computation of a real distributed computing algorithm. The first assignment was to implement this on a multi-threaded single-node application, and the second assignment was to extend to multiple nodes. While this particular algorithm scaled well onto multiple threads, network speeds were insufficient to produce a speedup.
+    desc: Graph coloring using the Gebremedhin-Manne distributed-memory speculative coloring algorithm for the ECE453 Cloud Computing. The goal is to achieve speedup with parallel (CPU) computation of a real distributed computing algorithm. The first assignment was to implement this on a multi-threaded single-node application, and the second assignment was to extend to multiple nodes. While this particular algorithm scaled well onto multiple threads (a distributed-memory, single-node architecture), high communication costs between nodes and insufficient network speeds prevented a speedup.
     links:
       Checkpoint 1 README: https://github.com/jlam55555/parallel-graph-coloring/blob/master/src/proj1/README.md
       Checkpoint 2 README: https://github.com/jlam55555/parallel-graph-coloring/tree/master/src/proj2/README.md
@@ -68,27 +47,27 @@ School projects (EE/CS):
   Lucy-Richardson Deconvolution on CUDA:
     anchor: lr_deconv_cuda
     year: 2021
-    desc: A blind iterative deconvolution algorithm used to deblur an image. CUDA version compared with CPU version in terms of accuracy and speed. Deblurring effectiveness was evaluated using a LoG filter (edge detector). CUDA acceleration achieved an order of magnitude speed improvement, even with a naive implementation.
+    desc: Lucy-Richardson is a blind (i.e., without a-priori information of the blur mechanism) iterative deconvolution algorithm used to deblur an image. CUDA version compared with CPU version in terms of accuracy and speed. Deblurring effectiveness was evaluated using a LoG filter (edge detector). CUDA acceleration achieved an order of magnitude speed improvement with a naive implementation. Additional tiling and factoring improved speedups even more.
     links:
       Report: http://files.lambdalambda.ninja/reports/20-21_spring/ece453_proj1_deblur.pdf
       Source: https://github.com/jlam55555/lucy-richardson-deconv-cuda
   CYK parser:
     anchor: cyk_parser
     year: 2021
-    desc: Parse tree generator using CYK algorithm on a CNF grammar for ECE467.
+    desc: Parse tree generator using CYK algorithm on a Chomsky-Normal Form (CNF) grammar for ECE467. The CYK algorithm is a dynamic programming approach to generating all valid parses of a CNF grammar. The resulting parses are pretty-printed in a LISP-like tree format. Several test cases are provided on a simple grammar.
     links:
       Source: https://github.com/jlam55555/cyk-parser
   Naive Bayes text categorization:
     anchor: naive_bayes
     year: 2021
-    desc: Naive Bayes bag-of-words (supervised) text categorization on three sample corpora. Uses the NLTK word tokenizer and Laplace (+1) smoothing for ECE467.
+    desc: Naive Bayes bag-of-words (supervised) text categorization on three sample corpora. Uses the NLTK word tokenizer and Laplace (+1) smoothing.
     links:
       Source: https://github.com/jlam55555/naive-bayes-text-categorization
       Report: http://files.lambdalambda.ninja/reports/20-21_spring/ece467_naive_bayes_tc.pdf
   Neural network in Scheme Lisp:
     anchor: nn_scheme
     year: 2020
-    desc: Neural network written in Scheme. Uses functional approaches to typically imperative (array-based) approaches, at the cost of some performance.
+    desc: 'Neural network written in Scheme. Uses naive, mostly-functional approaches (linked-list-based) to typically imperative (array-based) approaches, at the cost of performance. "Classes" for different layer types (sigmoid, dense, and loss layers) are implemented as a polymorphic <code>(train-lambda, infer-lambda, weights)</code> tuple. Default weights can be specified (for deterministic results) or randomly generated. Using LISP allows interactive debugging and support using the native interpreter (as opposed to a difficult-to-use C "REPL" like gdb). Tested on several small datasets.'
     links:
       Source: https://github.com/jlam55555/nn-scheme
       Report: http://files.lambdalambda.ninja/reports/20-21_fall/ece469_proj2_nn_scheme.pdf
@@ -115,7 +94,7 @@ School projects (EE/CS):
   Checkers-playing AI:
     anchor: checkers_ai
     year: 2020
-    desc: Checkers-playing AI using minimax-search with alpha-beta pruning and time-limited iterative deepening. Uses a custom heuristic based off of common Checkers strategy. Both a C++ and a Chez Scheme version were written, using very similar data structures and optimizations; Scheme version reaches roughly the same depth as C++ version. For ECE469.
+    desc: Checkers-playing AI using minimax-search with alpha-beta pruning and time-limited iterative deepening. Uses a custom heuristic based off of common Checkers strategy. Both a C++ and a Chez Scheme version were written, using very similar data structures and optimizations; Scheme version reaches roughly the same depth as C++ version. Scheme version attempts to remain mostly functional (e.g., using an immutable bytevector state representations, which allow rewalking the "history" of states like in Redux); also includes some LISP-specific features such as a multi-level escape continuation to exit the search when time limit is exceeded. For ECE469.
     links:
       Source: https://www.github.com/jlam55555/checkers-ai
       Report: http://files.lambdalambda.ninja/reports/20-21_fall/ece469_proj1_checkers_ai.pdf
@@ -134,7 +113,7 @@ School projects (EE/CS):
   'How-to Series: Scheme Lisp':
     anchor: how_to_lisp
     year: 2020
-    desc: Exploratory session into Scheme as the first installation of the IEEExACM club How-to series.
+    desc: 'Exploratory session into Scheme as the first installation of the IEEExACM club How-to series. An early attempt of mine to explain the usefulness of declarative (as opposed to imperative) programming, homoiconicity, a minimal syntax, the <code>cons</code> building block, etc. Performed to an audience of over 20 attendees.'
     links:
       Video: http://files.lambdalambda.ninja/reports/20-21_nonacademic/how_to_scheme.mp4
       Transcript: http://files.lambdalambda.ninja/reports/20-21_nonacademic/how_to_scheme.pdf
@@ -153,7 +132,7 @@ School projects (EE/CS):
   Photocol Photo Gallery:
     anchor: photocol
     year: 2020
-    desc: 'Explored various web design procedures and technologies, including but not limited to: CRLF injection attack, session cookies, Java Spring framework, React.JS, Bootstrap, HTTP protocols, containerization (w/ Docker), many-to-one relationships (e.g., access control) in PostgreSQL, prepared statements, one-way hashing (w/ bcrypt), SQL foreign keys, etc. For ECE366.'
+    desc: 'Explored various web design procedures and technologies, including but not limited to: CSRF injection attack, session cookies, Java Spring framework, React.JS, Bootstrap, HTTP protocols, containerization (w/ Docker), many-to-one relationships (e.g., access control) in PostgreSQL, prepared SQL statements, one-way hashing (w/ bcrypt), SQL foreign keys, etc. For ECE366.'
     links:
       Source: https://github.com/photocol
   Theremin:
@@ -162,7 +141,7 @@ School projects (EE/CS):
     desc: Constructed a theremin (the instrument) using the principles of circuit design and operational amplifiers. Final project for ECE291.
     links:
       Report: http://files.lambdalambda.ninja/reports/19-20_fall/ece291_theremin_lab.zhang_lam.pdf
-  Dataset-optimized Sorting:
+  Context-aware Sorting:
     anchor: sorting
     year: 2018
     desc: Implemented various common sorting algorithms adapted for provided datasets. Explored quicksort, counting/bin sort, indirect sort, insertion sort.
@@ -236,6 +215,27 @@ Hackathons:
     links:
       Demo: https://jlam55555.github.io/ringtune-website/
       Source: https://github:com/jlam55555/ringtune-website
+Commissioned projects:
+  Cooper Union EOYS 2021:
+    anchor: eoys2021
+    year: 2021
+    desc: 'Online presence for School of Engineering 2021 EOYS during COVID-19 pandemic. Performed technical advising and support: hosting & domain name (w/ GitHub Pages), Vue/Vite framework setup, Bootstrap integration.'
+    links:
+      See it: https://engineeringeoys.cooper.edu/
+      Source: https://github.com/evo2000/EOYS
+  Maroon and Gold Labs:
+    anchor: mag_labs
+    year: 2019
+    desc: Maroon and Gold Labs incubator for Cooper students. Created on Strikingly. Implemented a DonorBox integration, designed several visual assets, and provided technical and design-oriented advice.
+    links:
+      See it: https://www.maroonandgoldlabs.org/home
+  Safe Rides of Redding and Easton Web-App:
+    anchor: safe_rides
+    year: 2018
+    desc: Web app for the newly-founded "Safe Rides" program at JBHS. Provides a centralized management (Node.JS web backend) to communicate between volunteers and clients. Volunteers have to check in each time they reach a checkpoint on the route, and relevant parties are notified and their location shown on a GPS map. Uses Twilio to send SMS messages to relevant parties. Not operational anymore.
+    links:
+      See it: https://safe-rides-redding-easton.herokuapp.com/
+      Source: https://github.com/jlam55555/srre-client
 Miscellaneous personal projects:
   Groovy Maven Template:
     anchor: groovy_maven
