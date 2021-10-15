@@ -1,4 +1,28 @@
 extends blogpost
 
 block post
-	p (Empty blog post)
+  p I picked up an old Dell Latitude E6420 from our computer center, which was about to be thrown out because its monitor was broken. As I mentioned in previous posts, I already own a Latitude E5420 (basically product line but one generation older, also picked up from the computer center) and love the solidness of the business laptop feel. The performance of both Latitudes are roughly on par with my main laptop, a 2017 Acer Spin 3, to the point where I don't really feel a difference.
+
+  p This is the second time I'm "servicing" a Latitude, the first being when I #[a(href="/blog/36") repaired the keyboard] on my previous Latitude#[+footnote And I may have to service the new laptop once again in the near future, since it idles at 60deg C and goes up to 100deg C. The thermal paste has probably degraded.].
+
+  p So I took the Latitude to the lab to see what exactly was broken. When turned on, I could faintly see the text. Interestingly, when someone turned off the lights in the lab, I couldn't see the text anymore! I thought at that point that it was a transient issue, that maybe it only showed text for a brief moment when turned on. But when my friend R came over and I asked about it, he took his phone flashlight and shone it one the screen, and voila -- the text showed up. The backlight was broken, but the LCD was working.
+
+  p I didn't know anything about screen technology up until now, but it turns out that the LCD displays the image but do not emit light on their own, in the same way that Kindles' so-called "e-paper"#[+footnote Or regular paper, for that matter.] cannot be read in the dark.
+
+  p LCD displays require a "backlight" that evenly illuminates the whole screen. In lieu of covering the entire area with individual LEDs, the backlight is usually implemented as a light-emitting strip (older screens used CCFL lamps, which have been replaced with LED strips) on one edge of the screen, which is diffused evenly throughout the screen via several special purpose layers.
+
+  +imglinkext('https://assets.pid.samsungdisplay.com/s3fs-public/LCD_Function.gif', 'Diagram of the LCD structure')
+
+  p If you look up backlight repair on YouTube, you will most likely get videos of replacing older CCFL lamp backlights on TV's. I couldn't find a tutorial for the exact screen model#[+footnote In my case, MJ154 LTN140KT04.] (and didn't know I was supposed to be looking for a LED backlight as opposed to a CCFL one), so I basically went straight to disassembling the screen.
+
+  p I mean to have a lot more here and photo documentation of the process. However, I was hasty and didn't have the diligence to follow through on that, and ended up destroying the screen in the process. You're probably better off following tutorials on YouTube for LED strip backlights, but here are some of the things learnt:
+
+  p TODO: add some photos
+
+  ul
+    li There's a lot of warning tape. You'll probably void any sort of warrantee if these are removed. You might need to remove a little to simply replace the screen (relatively safe), but if you're undoing glue or shielding, you better understand the risk.
+    li The LCD panel is extremely fragile to bending! Luckily the screen chassis is very rigid and will prevent most flexing from normal usage, and you probably won't crack the LCD panel unless an acute force acts on and perpendicular to the screen.
+    li It took me a while to find out exactly where the backlight was. In the process I opened up the metal chassis of the screen and revealed the LCD panel and the various diffusion layers. This was cool for me to view the insides of a screen, but if you want to fix your screen this is a wrong move. Dust will get in and there is a very high risk of cracking your LCD panel. Opening the metal chassis of the screen is not necessary for replacing the backlight.
+    li For this screen, the backlight was lightly glued onto a strip of metal that was lightly glued to the top of the chassis. I did not know that this piece was hiding the backlight, nor did I know that it would be a LED strip until I opened it up.
+
+  p At this point, I had bent the part of the frame that held the backlight and cracked two corners of the LCD. Luckily, in my case I had gotten the laptop for free and a screen replacement for this older screen is only about $35 (laptop screen replacements can easily run over $100), so it was well worth the learning experience.

@@ -153,7 +153,7 @@
   date: 2021-09-06T20:29:59-04:00
 - template: ../posts/37
   destination: 37
-  title: 'Brain dump 3: Quotes'
+  title: 'Brain dump 3: quotes'
   date: 2021-09-06T22:27:15-04:00
 - template: ../posts/38
   destination: 38
@@ -177,13 +177,17 @@
   date: 2021-09-08T23:52:36-04:00
 - template: ../posts/43
   destination: 43
-  title: Disassembling (and destroying) a broken laptop monitor
+  title: On replacing a broken laptop screen backlight
   date: 2021-09-09T00:36:11-04:00
 - template: ../posts/44
   destination: 44
-  title: Advice for college freshmen from a college senior
+  title: Advice for college freshmen
   date: 2021-10-02T01:53:54-04:00
 - template: ../posts/45
   destination: 45
   title: On code reuse and copying
   date: 2021-10-03T22:54:52-04:00
+- template: ../posts/46
+  destination: 46
+  title: 'Brain dump 4: bookmarks'
+  date: 2021-10-15T16:30:16-04:00
