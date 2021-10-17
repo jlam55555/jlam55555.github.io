@@ -1,4 +1,10 @@
 School projects (EE/CS):
+  "Exploring RDBMS ORM usage in Haskell":
+    anchor: rdbms_orm
+    year: 2021
+    desc: "Used the Haskell Beam ORM library to interface with a sample PostgreSQL test fixture (schema), and explored the trade-offs of ORMs in a non-OOP language. Explored various RDBMS concepts such as CTEs, correlated subqueries, one-to-many and many-to-many relationships, foreign key constraints, ORM libraries, etc. Also discovered a type error in the Beam library that leads disallows certain valid queries, as well as a workaround using roughly-equivalent queries."
+    links:
+      Source/report: https://github.com/jlam55555/ece464-databases/tree/master/pset1
   "Variation on a Scheme: multiple implicit first-class continuations (and a general attempt at understanding continuations)":
     anchor: multi_cont
     year: 2021

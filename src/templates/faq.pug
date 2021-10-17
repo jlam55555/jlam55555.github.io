@@ -1,75 +1,91 @@
 extends layout
 
 block content
-	h2 FAQ
-	h3 You're a web developer? Why is your website sh*t?
-	p From prior experience, I'm not skilled with UI/UX. I'll leave it to the design gurus when possible.
-	p This is also a design choice, because simplicity has its benefits:
-	ul
-		li cheap on network data and processing power (see: #[a(href='https://developers.google.com/amp') Google AMP])
-		li brings on the nostalgia of #[a(href="http://info.cern.ch/hypertext/WWW/TheProject.html") the web when it was cool]
-		li less distracting (naturally minimalist?)
-		li relatively mobile-friendly
-		li this website runs on anything (like NetBSD, but on browsers -- this looks great on #[a(href='https://en.wikipedia.org/wiki/W3m') w3m]!)
-	p While SPAs are great, I think they're starting to become an anti-pattern as they become the norm, even and especially for small academic projects that would do better with much less. Thus I regress.
+        h2 FAQ
+        h3 You're a web developer? Why is your website sh*t?
+        p From prior experience, I'm not skilled with UI/UX. I'll leave it to the design gurus when possible.
+        p This is also a design choice, because simplicity has its benefits:
+        ul
+                li cheap on network data and processing power (see: #[a(href='https://developers.google.com/amp') Google AMP])
+                li brings on the nostalgia of #[a(href="http://info.cern.ch/hypertext/WWW/TheProject.html") the web when it was cool]
+                li less distracting (naturally minimalist?)
+                li relatively mobile-friendly
+                li this website runs on anything (like NetBSD, but on browsers -- this looks great on #[a(href='https://en.wikipedia.org/wiki/W3m') w3m]!)
+        p While SPAs are great, I think they're starting to become an anti-pattern as they become the norm, even and especially for small academic projects that would do better with much less. Thus I regress.
 
-	h3 Why are the margins so big?
-	p See: #[a(href="https://tex.stackexchange.com/questions/71172/") Why are the default LaTeX margins so big?]
+        h3 Why are the margins so big?
+        p See: #[a(href="https://tex.stackexchange.com/questions/71172/") Why are the default LaTeX margins so big?]
 
-	h3 How can I contact you?
-	p See the <a href="/contact">Contact page</a>.
+        h3 How can I contact you?
+        p See the <a href="/contact">Contact page</a>.
 
-	h3 Code style convention?
-	p For JavaScript: #[a(href="https://github.com/mrdoob/three.js/wiki/Mr.doob's-Code-Style%E2%84%A2") Mr.doob's Code Style #[sup &trade;]].
-	p For most others (mostly C-family languages): <a href="https://www.kernel.org/doc/html/latest/process/coding-style.html">Linux Kernel style guide</a>.
-	p In general, it will most likely depend on the project or the language (#[a(href="https://golang.org/pkg/cmd/gofmt/") gofmt] is a good example of this). When in doubt: agree with your team on an IDE and use the auto-format feature. And when you have a project involving multiple languages: good luck.
-	p 80 characters is also a good convention for most code, but gets unreasonable with unstructured data (e.g., markup languages).
+        h3 Fun facts?
+        p (These are several of my canned responses for icebreaker sessions, because I am bad with discovering new facts about myself on the spot.)
 
-	h3 Favorite language(s)?
-	p 1) LISP. 2) JavaScript. 3) C.
+        ul
+          li Recent ViM to Emacs convert
+          li Four handshakes from Napoleon (see: #[a(href="https://www.princeton.edu/news/2020/04/14/mathematician-john-horton-conway-magical-genius-known-inventing-game-life-dies-age") John Conway])
+          li Can't handle strong foods (e.g., high solute concentration of sugar, salt, oils, caffeine, and presumably alcohol -- I think I get dehydrated easily)
+          li One of the rare breed who uses Colemak
+          li I enjoy bowling, Rubik's speedcubing, and typing races
+          li We have ten "pets" at home (if you count chickens)
 
-	h3 Languages you want to learn?
-	p #[strike 1) Golang. 2) Rust.] Learned these languages since initially writing these. Now mostly interested in Haskell, Scala, and other FP languages.
+        h3 How do you look?
+        p #[a(href='/res/me.jpg') A small picture ID.]
 
-	h3 Least favorite language(s)?
-	p Python. MATLAB.
+        h3 Code style convention?
+        strike
+          p For JavaScript: #[a(href="https://github.com/mrdoob/three.js/wiki/Mr.doob's-Code-Style%E2%84%A2") Mr.doob's Code Style #[sup &trade;]].
+          p For most others (mostly C-family languages): <a href="https://www.kernel.org/doc/html/latest/process/coding-style.html">Linux Kernel style guide</a>.
+        p I have less rigid over time with coding conventions, especially after encountering functional languages such as Haskell (which are very opinionated).
+        p In general, it will most likely depend on the project or the language (#[a(href="https://golang.org/pkg/cmd/gofmt/") gofmt] is a good example of this). When in doubt: agree with your team on an IDE/formatting tool and use the auto-format feature. And when you have a project involving multiple languages: good luck.
+        p 80 characters is also a good convention for most code, but gets unreasonable with unstructured data (e.g., markup languages).
 
-	h3 Favorite web framework?
-	p Angular.
+        h3 Favorite language(s)?
+        p 1) LISP. 2) JavaScript. 3) C.
 
-	h3 Least favorite web framework?
-	p React.
+        h3 Languages you want to learn?
+        p #[strike 1) Golang. 2) Rust.] Learned these languages since initially writing these. Now mostly interested in Haskell, Scala, and other FP languages.
 
-	h3 Favorite color?
-	p Blue.
+        h3 Least favorite language(s)?
+        p Python. MATLAB.
 
-	h3 Favorite OS?
-	p FreeBSD for experimenting with/learning about the OS.
-	p Arch Linux for average screwing around and speed.
-	p Debian for overall stability and support.
-	p Fedora for being having all the consumer applications immediately ready.
+        h3 Favorite web framework?
+        p Angular.
 
-	h3 PC setup?
-	p Desktop: Nvidia GT740. i7-2600. 16GB DDR3. Debian 10 w/ xfce4. 128GB SATA SSD. Perixx Periboard 512W ergonomic keyboard.
-	p Laptop 1: Acer Aspire Spin 3 (~2017?). i7-7500U. 12GB DDR4. Arch Linux w/ xfce4. 256GB NVME SSD.
-	p Laptop 2: Dell Latitude E6420 (~2012?). i7-2720QM. 16GB DDR3. Debian 11 w/ xfce4. 128GB SATA SSD.
-	p Laptop 3: Dell Latitude E5420 (~2012?). i7-2620M. 8GB DDR3. Fedora 30 w/ xfce4. 128GB SATA SSD.
-	p Server (NAS): FreeNAS (FreeBSD 11.3). 8GB DDR3. 128GB SATA SSD + ZFS mirrored 2x3TB 7.2k SAS.
-	p Server (for other shenanigans): FreeBSD 12.1. 4GB DDR3. 128GB SATA SSD.
+        h3 Least favorite web framework?
+        p React.
 
-	h3 Other hobbies?
-	ul
-		li #[a(href="http://typeracerdata.com/profile?username=jlam55555") typing] and #[a(href="http://typeracerdata.com/profile?username=jlam55555colemak") more typing]
-		li bowling
-		li reading xkcd
-		li the occasional hackathon
+        h3 Favorite color?
+        p Blue.
 
-	h3 Reading list?
-	p #[a(href='/readinglist') OK]
+        h3 Favorite OS?
+        p FreeBSD for experimenting with/learning about the OS.
+        p Arch Linux for average screwing around and speed.
+        p Debian for overall stability and support.
+        p Fedora for being having all the consumer applications immediately ready.
 
-	h3 Tell me more about this website?
-	p #[a(href='/blog/1/') OK.]
+        h3 PC setup?
+        p Desktop: Nvidia GT740. i7-2600. 16GB DDR3. Debian 10 w/ xfce4. 128GB SATA SSD. Perixx Periboard 512W ergonomic keyboard.
+        p Laptop 1: Acer Aspire Spin 3 (~2017?). i7-7500U. 12GB DDR4. Arch Linux w/ xfce4. 256GB NVME SSD.
+        p Laptop 2: Dell Latitude E6420 (~2012?). i7-2720QM. 16GB DDR3. Debian 11 w/ xfce4. 128GB SATA SSD.
+        p Laptop 3: Dell Latitude E5420 (~2012?). i7-2620M. 8GB DDR3. Fedora 30 w/ xfce4. 128GB SATA SSD.
+        p Server (NAS): FreeNAS (FreeBSD 11.3). 8GB DDR3. 128GB SATA SSD + ZFS mirrored 2x3TB 7.2k SAS.
+        p Server (for other shenanigans): FreeBSD 12.1. 4GB DDR3. 128GB SATA SSD.
 
-	h3 Strange website issues?
-	p If the webpages look inconsistent (e.g., the navbar is different between pages), this is likely due to caching by the Fastly CDN. Sit tight for a few minutes or (for the impatient) add a query parameter. There shouldn't be any other errors except 404, since everything is static. (This is not true of the <code>eis</code> and <code>files</code> subdomains -- please contact me if you see errors on those sites.)
-	p If in doubt, feel free to #[a(href='/contact') contact me].
+        h3 Other hobbies?
+        ul
+                li #[a(href="http://typeracerdata.com/profile?username=jlam55555") typing] and #[a(href="http://typeracerdata.com/profile?username=jlam55555colemak") more typing]
+                li bowling
+                li reading xkcd
+                li the occasional hackathon
+
+        h3 Reading list?
+        p #[a(href='/readinglist') OK]
+
+        h3 Tell me more about this website?
+        p #[a(href='/blog/1/') OK.]
+
+        h3 Strange website issues?
+        p If the webpages look inconsistent (e.g., the navbar is different between pages), this is likely due to caching by the Fastly CDN. Sit tight for a few minutes or (for the impatient) add a query parameter. There shouldn't be any other errors except 404, since everything is static. (This is not true of the <code>eis</code> and <code>files</code> subdomains -- please contact me if you see errors on those sites.)
+        p If in doubt, feel free to #[a(href='/contact') contact me].
