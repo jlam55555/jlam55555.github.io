@@ -3,17 +3,32 @@ School projects (EE/CS):
     anchor: mongo
     year: 2021
     desc: Final project for ECE464. Using Rust. In progress......
-    links: []
+    links:
+      Source: https://github.com/jlam55555/cudb
   "Simple static analyzer for buffer overflows":
     anchor: static_buf
     year: 2021
     desc: Final project for ECE455. Using OCaml/LLVM. In progress......
-    links: []
+    links:
+      Source: https://github.com/jlam55555/overflow-analyzer
   "Proving the correctness of a red/black tree implementation":
     anchor: rbtree_proof
     year: 2021
     desc: Final project for ECE491. Using Agda. In progress......
-    links: []
+    links:
+      Source: https://github.com/jlam55555/red-black-proof
+  "Image vectorization for architecture":
+    anchor: imvec_arch
+    year: 2021
+    desc: Senior project. Using C++/Python. In progress......
+    links:
+      Source: https://github.com/Victoooooor/ECE-395-SeniorProj
+  "Exploring web scraping and MongoDB in SBCL":
+    anchor: scrap_mongo
+    year: 2021
+    desc: Second project for ECE464. Using SBCL. In progress......
+    links:
+      Source/report: https://github.com/jlam55555/ece464-databases/tree/master/pset2
   "Exploring RDBMS ORM usage in Haskell":
     anchor: rdbms_orm
     year: 2021
