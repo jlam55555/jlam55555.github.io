@@ -1,4 +1,26 @@
 extends blogpost
 
 block post
-	p (Empty blog post)
+  +mathjax
+
+  p #[strong Update 12/19/21]: This post was written on 12/19/21.
+
+  p For the VEIKK configuration tool, I need a way to map the tablet rectangle to a user-defined screen rectangle. This gives the user a lot more flexibility and comfort with their device.
+
+  p This is not a difficult problem, but I distinctly remember struggling with it in v1 of the VEIKK driver (before I took the linear algebra class) and again with the v2 driver. And someone recently asked me how to do this recently too, in the context of projecting an AR rectangle onto an arbitrary flat surface (this is an instance of the hardest problem here, mapping rectangles to arbitrary quadrilaterals)
+
+  p The simplest instance of this problem is mapping from one rectangle to another (disregarding the position of the rectangle). Let's say we can indicate a rectangle with \(R=(w,h)\), where \(w\) denotes width and \(h\) height. We want to convert \(R_1=(w_1,h_1)\) into \(R_2=(w_2,h_2)\) by some linear transform. In other words: \[\begin{aligned}ax_1\ \ \ \ \ \ \ &= x_2&\\by_1&=y_2\end{aligned}\] We can express this as a matrix equation by substituting \((w_1,h_1)\) for \((x_1,y_1)\) and \((w_2,h_2)\) for \((x_2,y_2)\): \[\begin{bmatrix}a &0 \\0 & b\end{bmatrix}\begin{bmatrix}w_1 \\ h_1\end{bmatrix}=\begin{bmatrix}w_2 \\ h_2\end{bmatrix}\] It is trivial to solve for \(a\) and \(b\) (even without the matrix equation).
+
+  p Imagine that our rectangle representation becomes \(R=(x,y,w,h)\), where \((x,y)\) is the top-left coordinate corner of the rectangle. (In the diagram, assume positive x is rightwards, and positive y is downwards, as it usually is in computer graphics.) Then we need an #[em affine transformation] to account for the offset, since some rectangle transformations will not be linear. \[\begin{aligned}ax_1+b&=x_2 \\ cy_1+d&=y_2\end{aligned}\] Substituting known \((x,y)\) pairs (note: we only need three coordinates to uniquely determine a rectangle), we get the following matrix equation: \[\begin{bmatrix}a & 0 & b \\ 0 & c & d\end{bmatrix}\begin{bmatrix} x_1 & x_1+w_1 & x_1 \\ y_1 & y_1 & y_1+h_1 \\ 1 & 1 & 1\end{bmatrix} = \begin{bmatrix}x_2 & x_2+w_2 & x_2 \\ y_2 & y_2 & y_2+h_2\end{bmatrix}\] Note that the input vectors must be augmented with an extra row of ones in order to accomodate the constants -- this can be thought of as projecting into a 3-D space and performing a linear tranformation in that space. Conventionally, we also write the output vectors in as augmented vectors, so that our #[em transformation matrix] is square: \[\begin{bmatrix}a & 0 & b \\ 0 & c & d \\ 0 & 0 & 1\end{bmatrix}\begin{bmatrix} x_1 & x_1+w_1 & x_1 \\ y_1 & y_1 & y_1+h_1 \\ 1 & 1 & 1\end{bmatrix} = \begin{bmatrix}x_2 & x_2+w_2 & x_2 \\ y_2 & y_2 & y_2+h_2 \\ 1 & 1 & 1\end{bmatrix}\] This can be solved by right-multiplying both sides by the inverse of the augmented input matrix. Let us denote the transformation matrix \(T\), the augmented matrix of inputs \(X\), and the augmented matrix of outputs \(Y\). Then the matrix equation is simply \[TX=Y\]
+
+  p Note that this can be expressed as a product (composition) of two operations: a linear scaling by \((a,c)\) operation \(S\) and an affine translation/offset by \((b,d)\) operation \(O\), applied in that order. \[O=\begin{bmatrix}1 & 0 & b \\ 0 & 1 & d \\ 0 & 0 & 1\end{bmatrix}\] \[S=\begin{bmatrix} a & 0 & 0 \\ 0 & c & 0 \\ 0 & 0 & 1\end{bmatrix}\] \[T=OS\]
+
+  p What if we want a rotation? Then we also need a rotation matrix. It is not hard to derive it using common trigonometric ratios, so I'll copy the solution here: \[R=\begin{bmatrix}\cos\theta & -\sin\theta \\ \sin\theta & \cos\theta\end{bmatrix}\]
+
+  p The last step is to compose these operations. In the case of the VEIKK screen mapping, we limit rotations to multiples of \(90\deg\) and can assume a transformation from \((0,0,1,1)\) to \((x,y,w,h)\), which greatly simplifies matters. (\(x\), \(y\), \(w\), and \(h\) are all given as percentages of the screen width/height.) We can simply perform the transformation as follows: \[TRX=Y\]
+
+  p However, this will fail in the general case. For mapping any two arbitrary rectangles, we can take the advice of #[a(href='https://math.stackexchange.com/a/2887212/96244') this Math Stack Exchange answer]: choose a point from the input rectangle, and translate it to the origin (affine operation). At this point, perform a rotation and scaling operation (linear operations) so that the input rectangle is the same as the output rectangle. Then, translate the origin to the corresponding point in the output rectangle. \[O_2SRO_1X=Y\]
+
+  p TODO: write javascript tool to demonstrate this
+
+  p So far, we've only mapped rectangles to other (potentially rotated) rectangles. Can we do better? It turns out, we can also use affine transformations to map any parallelogram to a parallelogram (parallelograms are also uniquely determined by three points, and a linear transformation between them can be performed in the same manner.) However, to map arbitrary quadrilaterals to quadrilaterals takes some extra work: this conceptually involves a #[em frustum] geometry, and is often used in perspective cameras in 3-D graphics. See #[a(href='https://math.stackexchange.com/a/104595/96244') this Math Stack Exchange post] for more details, or check out a tutorial on perspective cameras.
