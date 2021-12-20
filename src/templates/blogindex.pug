@@ -1,12 +1,19 @@
 extends layout
 
 block content
-	h2 Blog
-	p Empty posts are placeholders for future writing.
+  h2 Blog
+  p Empty posts are placeholders for future writing.
 
-	each post in data.reverse()
-		unless post.destination === '/'
-			div
-				span!= new Date(post.date).toLocaleDateString() + ' &mdash; '
-				a(href="/blog/" + post.destination)
-					h3(style='display:inline')= post.title
+  style.
+    td:nth-child(1),td:nth-child(2) { text-align:center; }
+
+  table
+    tbody
+      each post, index in data.filter(p=>p.destination!=='/').reverse()
+        tr
+          td
+            strong= data.filter(p=>p.destination!=='/').length - 1 - index
+          td= new Date(post.date).toLocaleDateString()
+          td
+            a(href="/blog/" + post.destination)
+              h3(style='display:inline')= post.title
