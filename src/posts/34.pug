@@ -1,17 +1,24 @@
 extends blogpost
 
 block post
-	p TODO: currently a brain dump space
+  p #[strong Update 12/20/21]: I'm only getting around to filling this placeholder post now. When I set out to write this post in July, I was in the middle of an independent study using Lisp and had just begun tutorials on Haskell, that being the first of the Miranda- or ML-family languages that I'd played around with. By this point, I've had a lot of time to play around more with Haskell and other functional languages (OCaml, Rust, Agda, and Hazel). Luckily, I left some annotations here earlier, so I hope I can remain somewhat true to the "first impressions" by going off of those. Whatever the case, no post will be able to capture the immensity of the reaction when trying to understand Haskell for the first time. Some of these confusions I still hold now, a few months and one Haskell project later.
 
-	p lhs pattern matching of constructors
-	p two-tier type hierarchy (data and type constructors, classes, method overloading), strict typing
-	p quicksort
-	p monads (IO, Maybe, ST) (also list comprehension with bind-like syntax)
-	p lift
-	p laziness ofc -- referring to self on both sides, if as a regular fn, automatic currying
-	p hoogle
-	p documentation is great, ghci is great
+  p Haskell is a culture shock. I'm mostly familiar with three families of languages: the C-like, statically-typed languages; the high-level, dynamically-typed, partially-functional languages like Python; and the dynamically-typed free-for-all that is Lisp. But a statically-typed purely-functional language? It feels wrong from the standpoint of the "static imperative, dynamic functional" mantra.
 
-	p reasons not to love haskell:
-	p syntax is difficult (indentation, let/where), builtin names not intuitive at all
-	p community is hard to understand
+  p Also, why is Haskell so hard? #[em A gentle introduction to Haskell], which I used to learn Haskell, was anything but gentle#[+footnote I want to read #[em Learn you a Haskell for great good], but only once I have some time.]. This is the densest tutorial material I have ever read. I thought it is easy for me to learn any (non-esoteric, or at least somewhat-mainstream) programming language, but I was wrong.
+
+  p The idea of a constructor is fascinating. It is really a declaration, rather than the typical OOP constructor which can set up state. Variant types are like unions, but safer and potentially carrying no data (like an enum).
+
+  p The type system seems very powerful (or at least, that's what everyone seems to be saying), but I don't understand all of it. What is the Hindley-Milner type system? The difference between type- and data-constructors took me a long time to understand#[+footnote Although I believe this to be mostly due to #[em A gentle introduction to Haskell] never explaining it explicitly.]. What is the difference between #[code type], #[code newtype], and #[code data]? Types being parameterized on other types feels like polymorphism, but I'm not sure if it's just parametric polymorphism or something more powerful. Type constraints mostly seem to make sense. I don't understand universal or existential quantification in the context of types. I don't quite understand the idea of type classes -- does this correspond to any concepts in OOP, and if so, what? Actually, what parts of the Haskell type system can be explained in types of OOP? It's cool that pattern matching can not only match variables, but constants as well.
+
+  p The idea of an exception type #[em bottom] is confusing.
+
+  p The simple quicksort that's always being thrown around as an example is beautiful. As is the examples of streams using laziness. Actually, most of the stuff using laziness is pretty beautiful. I wonder what the performance cost of laziness is. The idea of currying is also mathematically beautiful.
+
+  p Talking about beautiful, monads are questionably beautifuly. They feel like a large intellectual effort to do things in a purely functional way that could be done trivially in an imperative context. The ones that I know at the moment are the #[code IO], #[code Maybe], #[code ST], and #[code List] monads. Applicatives and functors are also cool. I don't totally understand applicatives, but functors I can easily grok through the idea of the #[code map] function. Lifting an operator also is intuitive.
+  
+  p Haskell has a nice documentation (Hoogle), and ghci seems to have a lot of modern features#[+footnote I only learned about the cabal/stack package managers and the Hackage/Stackage repositories later when working on a Haskell project, and they are also pretty good.].
+
+  p The syntax is pretty difficult and rigid. Like Python, indentation is important (too important?), although it is more flexible with exactly how much you indent as long as it's more than the previous line. Builtin names of operators, especially those for builtin algebraic classes like monads, are not intuitive at all. Record syntax is a little annoying or at least weird.
+
+  p The community is difficult to understand -- it feels like everyone is an academic studying programming languages. The barrier of entry seems high unless you have someone to guide you through the process.
