@@ -1,32 +1,48 @@
 School projects (EE/CS):
-  "MongoDB-like DBMS":
+  "Practical performance enhancements to the evaluation model of the Hazel programming environment":
+    anchor: hazel_perf
+    year: 2022
+    desc: "Hazel is a live programming environment with typed holes that serves as a reference implementation of the Hazelnut Live dynamic semantics and the Hazelnut static semantics, both of which tackle the &quot;gap problem.&quot; This work attempts to further develop the Hazelnut Live dynamic semantics by implementing the environment model of evaluation (as opposed to the current substitution model) and memoizing several evaluation-related operations to improve performance. Additionally, we provide an implementation-level description and a reference implementation of the fill-and-resume (FAR) performance optimization proposed in Hazelnut Live. We produce a metatheory and reference implementation of the proposed changes. Our implementation is benchmarked against the existing Hazel implementation to show that the results match expectations, although there is room for future improvement with the development with memoization. Finally, we discuss some useful theoretical generalizations that result from this work."
+    links:
+      Source: https://github.com/hazelgrove/hazel
+      Report: https://files.lambdalambda.ninja/reports/21-22_spring/ece499_thesis_final.pdf
+  "Image vectorization for architecture":
+    anchor: imvec_arch
+    year: 2022
+    desc: "Image vectorization is the process of converting a raster (pixel-based) image to a vector (shape-based) image. While raster images are the dominant mode of image representation, vector graphics may be more efficient for highly geometric images, such as logos, fonts, and maps. Edge tracing methods for vectorization produce clean edges but assume a color-thresholded image. Sampling-based methods work well over color gradients but produce a mesh that may not be well-aligned with edges. We aim to create a hybrid pipeline that combines the benefits of these two methods: performing well over color gradients and producing clean edges. Our sample implementation in C++/Python demonstrates that our method tends to perform better in terms of accuracy (MSE) and visual presentation of edges than the base methods, at the cost of some efficiency of representation."
+    links:
+      Source: https://github.com/Victoooooor/ECE-395-SeniorProj
+      Poster: https://files.lambdalambda.ninja/reports/21-22_spring/ece396_poster_final.pdf
+      Presentation: https://files.lambdalambda.ninja/reports/21-22_spring/ece396_presentation_final.pdf
+      Report: https://files.lambdalambda.ninja/reports/21-22_spring/ece396_report_final.pdf
+  "FLC: Fun(ctional) Lazy Compiler":
+    anchor: flc
+    year: 2022
+    desc: "This project closely follows the tutorial, &quot;Implementing functional languages: a tutorial&quot; by Simon Peyton Jones at Microsoft Research. The goal is to implement a simple untyped version of a lazy functional language with a syntax similar to Haskell or Miranda. This work builds up the compiler front-end (LL(1) lexer and parser) several back-ends, and an IR that is shared between all of the back-ends. The first implementation is the lazy &quot;Template Instantiation&quot; interpreter; the second is the &quot;G-Machine&quot;, which approximates the STG (Spineless Tagless G-Machine) behind Haskell's implementation. The G-Machine compiles to a series of imaginary low-level opcodes that are mapped to real hardware."
+    links:
+      Source: https://github.com/jlam55555/fun-lazy-compiler
+      Report: https://files.lambdalambda.ninja/reports/21-22_spring/ece491_final_report.pdf
+  "CUDB: MongoDB-like DBMS":
     anchor: mongo
     year: 2021
-    desc: Final project for ECE464. Using Rust. In progress......
+    desc: "CUDB (Cooper Union DataBase; alternatively CUDA++) is a simple document-based, MongoDB-inspired NoSQL database for learning purposes. The database is in the form of a Rust library that supports basic CRUD operations similar to MQL and a document-based data model. CUDB supports basic database features such as indexing using B-trees and persistence, but does not support many advanced features found in commercial DBMSes."
     links:
       Source: https://github.com/jlam55555/cudb
+      API documentation: https://jlam55555.github.io/cudb/cudb/index.html
+      Report: https://files.lambdalambda.ninja/reports/21-22_fall/ece464_report_cudb.lam_lee_zhang.pdf
+      Presentation: https://files.lambdalambda.ninja/reports/21-22_fall/ece464_presentation_cudb.lam_lee_zhang.pdf
   "Simple static analyzer for buffer overflows":
     anchor: static_buf
     year: 2021
-    desc: Final project for ECE455. Using OCaml/LLVM. In progress......
+    desc: "We aim to create a simple static analysis tool that tracks the use of stackallocated buffers to known memory-unsafe functions in C source code, such as the notorious <code>strcpy</code> standard library function. This is achieved using a dataflow analysis and call graph tracing on the unoptimized LLVM IR generated using the clang compiler frontend. We develop a novel dataflow analysis method, called &quot;buffer origin dataflow analysis&quot;, that allows us to track assignments of buffers. We evaluate this method and describe its shortcomings. A reference implementation is written using C++/LLVM."
     links:
       Source: https://github.com/jlam55555/overflow-analyzer
-  "Proving the correctness of a red/black tree implementation":
-    anchor: rbtree_proof
-    year: 2021
-    desc: Final project for ECE491. Using Agda. In progress......
-    links:
-      Source: https://github.com/jlam55555/red-black-proof
-  "Image vectorization for architecture":
-    anchor: imvec_arch
-    year: 2021
-    desc: Senior project. Using C++/Python. In progress......
-    links:
-      Source: https://github.com/Victoooooor/ECE-395-SeniorProj
+      Report: https://files.lambdalambda.ninja/reports/21-22_fall/ece455_report_overflow_analyzer.lam_tsarev.pdf
+      Presentation: https://files.lambdalambda.ninja/reports/21-22_fall/ece455_presentation_overflow_analyzer.lam_tsarev.pdf
   "Exploring web scraping and MongoDB in SBCL":
     anchor: scrap_mongo
     year: 2021
-    desc: Second project for ECE464. Using SBCL. In progress......
+    desc: Used SBCL (Steel Bank Common Lisp) to scrape eBay for seller data. This uses the <code>lquery</code> library to make HTTP requests, <code>lparallel</code> to parallelize requests, and <code>cl-mongo</code> to store data into MongoDB. Some data cleaning was necessary to get results in the same format.
     links:
       Source/report: https://github.com/jlam55555/ece464-databases/tree/master/pset2
   "Exploring RDBMS ORM usage in Haskell":
