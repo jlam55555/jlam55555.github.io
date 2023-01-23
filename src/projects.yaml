@@ -18,7 +18,7 @@ School projects (EE/CS):
   "FLC: Fun(ctional) Lazy Compiler":
     anchor: flc
     year: 2022
-    desc: "This project closely follows the tutorial, &quot;Implementing functional languages: a tutorial&quot; by Simon Peyton Jones at Microsoft Research. The goal is to implement a simple untyped version of a lazy functional language with a syntax similar to Haskell or Miranda. This work builds up the compiler front-end (LL(1) lexer and parser) several back-ends, and an IR that is shared between all of the back-ends. The first implementation is the lazy &quot;Template Instantiation&quot; interpreter; the second is the &quot;G-Machine&quot;, which approximates the STG (Spineless Tagless G-Machine) behind Haskell's implementation. The G-Machine compiles to a series of imaginary low-level opcodes that are mapped to real hardware."
+    desc: "This project closely follows the tutorial, &quot;Implementing functional languages: a tutorial&quot; by Simon Peyton Jones at Microsoft Research. The goal is to implement a simple untyped version of a lazy functional language with a syntax similar to Haskell or Miranda. This work builds up the compiler front-end (lexer and LL(1) parser) and several back-ends, and an IR that is shared between all of the back-ends. The first implementation is the lazy &quot;Template Instantiation&quot; interpreter; the second is the &quot;G-Machine&quot;, which approximates the STG (Spineless Tagless G-Machine) behind Haskell's implementation. The G-Machine compiles to a series of imaginary low-level opcodes that are mapped to real hardware."
     links:
       Source: https://github.com/jlam55555/fun-lazy-compiler
       Report: https://files.lambdalambda.ninja/reports/21-22_spring/ece491_final_report.pdf
