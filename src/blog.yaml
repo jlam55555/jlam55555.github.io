@@ -203,3 +203,7 @@
   destination: 49
   title: Fall 2021 semester shenanigans
   date: 2021-12-19T01:24:28-05:00
+- template: ../posts/50
+  destination: 50
+  title: The week after a layoff
+  date: 2023-01-27T15:06:53-08:00
