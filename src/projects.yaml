@@ -289,6 +289,13 @@ Commissioned projects:
       See it: https://safe-rides-redding-easton.herokuapp.com/
       Source: https://github.com/jlam55555/srre-client
 Miscellaneous personal projects:
+  VEIKK digitizer driver for Linux:
+    anchor: veikk
+    year: 2019-2021
+    desc: "A Linux driver for VEIKK-brand digitizers/drawing tablets using the usbhid API. Configuration options are exposed in sysfs and configurable with an associated GUI. Connects low-level hardware events to the input subsystem (e.g., libinput), with some processing/mapping logic in between. This draws heavily from the Wacom driver for Linux."
+    links:
+      Driver (v2) source: https://github.com/jlam55555/veikk-linux-driver
+      Configuration tool (v2) source: https://github.com/jlam55555/veikk-linux-driver-gui
   Groovy Maven Template:
     anchor: groovy_maven
     year: 2020
@@ -325,9 +332,9 @@ Miscellaneous personal projects:
   Everything is Sheep (EiS):
     anchor: eis
     year: 2018
-    desc: My (current) personal blog. Built on a Node.JS backend, hosted on Heroku. No front end frameworks employed (all JS/CSS is vanilla).
+    desc: "My (current) personal blog. Built on a Node.JS backend, <strike>hosted on Heroku</strike> currently not being hosted. No front end frameworks employed (all JS/CSS is vanilla)."
     links:
-      Demo: http://everything-is-sheep.herokuapp.com/
+      Source: https://github.com/jlam55555/everything-is-sheep
   Unscrambler:
     anchor: unscrambler
     year: 2018
@@ -538,3 +545,16 @@ Miscellaneous personal projects:
     desc: First website presented to peers. Calculator tools (in JS), and an explanation of how HTML/CSS/JS/PHP fit together to form a website.
     links:
       Demo: https://jlam55555.github.io/programath/
+Experimental:
+  "laos: LAm OS":
+    anchor: laos
+    year: 2023
+    desc: An experimental operating system for learning purposes. Developed for the x86_64 platform using QEMU. Currently uses the Limine bootloader. Very much a work in progress!
+    links:
+      Source: https://github.com/jlam55555/laos
+  Flexible game library:
+    anchor: bge
+    year: 2022
+    desc: "A flexible framework for defining (rule-based) board games. The goal is to provide a framework for digital game creators to define games programmatically, as well as a series of pre-built pluggable components (e.g., card game mechanics) that fit this framework. This provides the usefulness of a framework with predefined API's and components, but also the flexibility of a library to provide custom implementations for these API's, or to override the API's themselves as necessary. To accomplish this, I initially attempted to use Golang, but realized that the type system was not advanced enough; Scala's more advanced type system and JVM support made it the language of choice. (I think the original name was supposed to be &quot;basic game engine&quot;, but I'm not sure if that's actually the case.)"
+    links:
+      Source: https://github.com/jlam55555/bge
