@@ -207,3 +207,7 @@
   destination: 50
   title: The week after a layoff
   date: 2023-01-27T15:06:53-08:00
+- template: ../posts/51
+  destination: 51
+  title: A theory of motivation
+  date: 2023-02-25T20:13:48-08:00

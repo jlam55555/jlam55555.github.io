@@ -1,0 +1,78 @@
+extends blogpost
+
+block post
+  +mathjax
+
+  h4 Formula
+  p I hereby dub this Jonathan's motivation formula (v1#[+footnote I.e., subject to future improvement.] #[+footnote Please don't take any of this post seriously, I am just musing and there is no serious psychology or science taken into account when writing this. These are just the ramblings of a mind slightly distressed from the job application process. But if you do ever take this seriously and get experimental results for this theory, I'd be happy to hear about it.] #[+footnote On the topic of motivation to work, I read #[em The Motivation to Work] by Frederick Herzberg for my engineering management elective, and it provides an interesting two-axis motivation-hygiene theory. My model presented here, on the other hand, is a very simple one-axis function of time designed to understand how I make decisions at a given point of time based on events that have affected me.]):
+  p \[A(t)=\int_0^ta_s\delta\left(\frac{ns}{\text{day}}\right)+a_k\delta(s-t_k)\,ds,\ \ \ k,n\in\mathbb{N}\]\[M(t)=\left.A(t)\right|_{[0,1]}\]
+
+  hr
+  h4 Explanation of terms/notation:
+  ul
+    li \(A(t)\) represents sense of achievement over time
+    li \(\text{day}\) is a variable representing the numerical value of \(s\) after one day has passed
+    li \(\delta(x)\) is the Dirac delta (impulse) function
+    li \(M(t)\) represents motivation over time
+    li \(\left.x\right|_{D}\) is notation for clamping the value \(x\) to the domain (interval) \(D\)#[+footnote Borrowed from #[a(href="https://math.stackexchange.com/a/388094") here].]
+    li \(a_s\) represents the motivation gained from sleeping
+    li \((a_k,t_k)\) represents the net sense of achievement and the timestamp for some event
+
+  hr
+  h4 Summary and rationale
+  p The graphical interpretation of \(A(t)\) is a stepwise function of time. I wanted to write this down because in times of uncertainty, my mental state and sense of motivation feel as if they are deterministic functions of the events that happen over the course of a day. Good events cause a clearly positive change in motivation. Bad events cause a clearly negative change in motivation. And if you have a good streak or a bad streak, this doesn't really change your motivation by much (this is modeled by clamping the value of \(A(t)\), as described below). This post describes my whimsical thinking about how my motivation is affected by events and how it affects my ability to perform tasks in the future (providing a chaotic feedback cycle).
+
+  p The way this works is that you can predict values of motivation (\(M\)) over time given a series of events \(\{e_k\}=\{(a_k,t_k)\}\). That is, for each event we assign a achievement/motivation coefficient \(a_k\), and we record its timestamp \(t_k\). There are two functions here: there is a sense of &quot;achievement&quot; or &quot;satisfaction&quot;, which we call \(A\), which is the summation of the achievement impulses over time. A clipped version of this is the &quot;motivation&quot; \(M\). A motivation of \(M=0\) indicates no motivation to do anything, and the body is dragged around. A motivation of \(M=1\) is the highest level of motivation. The value of achievement or satisfaction represents an internal state of emotional or mental being, whereas the motivation factor represents the willingness to do work, i.e., it is a practical manifestation of the internal state of being: some level of motivation is required to perform tasks of one's own accord.
+
+  p The rationale behind the clamping is: there is no such thing as negative motivation, i.e., being unmotivated does not mean the same as wanting to do negative work, hence the clamping of the lower-bound; motivation is not infinitely linear with sense of achievement, otherwise we would become infinitely motivated and efficient, hence the clamping of the upper-bound. Note, however, that the sense of achievement or satisfaction \(A\) is not clipped, as one's emotions are hardly as limited. This means that if one's mental state is extremely poor or well, then the sense of motivation (by the clamping mechanism) is stuck at one of the extremes -- in more volatile or uncertain times, there is likely to be more movement in the motivation value. I found that my motivation was fairly constant when in school or when working; but now, in the uncertain stage of job-searching, the effect of every little success or failure seems to be magnified.
+
+  p There is a builtin daily motivational event encoded into the formula, representing the daily boost that sleep provides. Of course, this assumes that one sleeps every day. Taking the formula literally, it also assumes (most incorrectly) that the sleep event happens at precisely the beginning of each day (i.e., 12:00AM) -- the formula can be adjusted if accuracy is needed here. Another assumption given by this formula is that sleep provides a consistent sense of motivation, which I feel is the case for myself.
+
+  hr
+  h4 Sample values of \(a_k\)
+  p Sample values of \(a_k\) for totally hypothetical events (let \(a_s=0.5\)):
+  ul
+    li Visiting family: 1.0
+    li Solving a Leetcode easy question: 0.02
+    li Solving a Leetcode medium question: 0.1
+    li Solving a Leetcode hard question: 0.3
+    li Unboxing a new vintage fountain pen: 0.8
+    li Getting rejected from a job application screening: -0.25
+    li Getting rejected from a job application after a late-stage interview: -2.1
+    li Meal: 0.1
+    li Listening to Studio Ghibli music: 0.2
+    li Exercising: 0.3
+    li Catching up with a friend after a long time: 0.4
+    li Getting interrupts and a basic keyboard driver to work on my OS project: 0.6
+    li Averaging 140+ wpm for 10 races on typeracer: 0.08
+    li Writing a blog post about a formula for motivation: 0.4
+    li Hearing others say they've read my blog: 0.3
+    li Thinking about some of the cringiest things I've written, after someone says they've read my blog: -0.05
+
+  hr
+  h4 Sample values of \(M\)
+  p Some sample values of \(M\) necessary to perform certain tasks of my own initiative:
+  ul
+    li Attempting a Leetcode easy problem: 0.05
+    li Attempting a Leetcode medium problem: 0.1
+    li Attempting a Leetcode hard problem: 0.5
+    li Writing a blog post: 0.6
+    li Exercising: 0.8
+    li Reading a textbook for enrichment: 1.0
+    li Adding a new feature to my OS project: 1.0
+
+  hr
+  h4 Additional notes
+  p Note that the values of \(M\) and \(a_k\) for a task are orthogonal to each other, although they may be correlated: more significant tasks tend to require more motivational inertia to start, but also provide a larger motivational payoff. Also, the value of \(M\) needed for a task should not be seen as a cost (as it is not subtracted from \(A\) or \(M\)), but rather as an entry threshold. It is also possible for one task to have multiple effects on motivation; for example, playing a fun video game may cause a temporary boost in satisfaction but a longer-term drain on sense of achievement; these can be accounted for in this model as multiple events.
+
+  p Another thing to add is that I sometimes find spontaneous bursts of motivation to do something, but this only works for short-term tasks. For example, right now I would say \(M<0.6\) but I am writing this blog post. This doesn't fit well into the theory right now, but perhaps this is possible for tasks that provide a large sense of motivation over a small amount of time (high \(a_k/t_{\text{elapsed}_k}\) ratio). Moreover, working on tasks while incurring \(M\) debt for extended periods of time may result in burnout and inefficiency.
+
+  p If I were feeling really scientific, I would plot a curve over time of my motivation according to this formula, but I need a motivation \(M>0.8\) to start something like that. Right now my \(A\approx -0.3\). Hopefully I'll feel better in the morning.
+
+  hr
+  h4 Possible improvements to the model
+  ul
+    li We can add the sense of looming deadlines or projects as another source of motivation. To me, this feels like a passive drain on my motivation; the more projects I have left to do, the less the motivation. This quickly leads to a vicious cycle.
+    li Events can be more accurately modeled using functions of time \(a_k(t)\). But for now we treat events as impulses, since that was the way it was originally envisioned and time precision is not that important.
+    li As mentioned before, there are times when you are forced to do tasks on low or zero motivation. These happen (for me) in very strong gusts of motivation, caused by larger senses of impending doom and fear of an unsuccessful future. I'm not sure exactly how these should be characterized yet; the simplest way is to characterize these as ordinary events, but it may be difficult to determine values of \(a_k\) for these events.
+    li The idea of daily/regular motivational cycles, such as that gained by sleep, may be generalized. For example, if one finds the time between 12:00AM and 3:00AM to be especially productive, it may be encoded into the motivation formula similar to how sleep is currently encoded.
