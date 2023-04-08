@@ -219,3 +219,7 @@
   destination: 53
   title: TypeRacer tricks
   date: 2023-03-08T17:55:34-08:00
+- template: ../posts/54
+  destination: 54
+  title: The Linux tty subsystem
+  date: 2023-04-07T17:30:04-07:00

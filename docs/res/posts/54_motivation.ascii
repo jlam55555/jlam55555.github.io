@@ -1,0 +1,5 @@
+                  --< screen <--- (stdout)
+                 /               \
+user (master) <--    TERMINAL     --> process (slave)
+                 \               /
+                  --> keyboard -- (stdin)

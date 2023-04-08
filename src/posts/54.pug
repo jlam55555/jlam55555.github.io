@@ -1,0 +1,285 @@
+extends blogpost
+
+block post
+  +codestyle
+  h4 Preface
+  p This is my attempt at understanding terminal devices in Linux, both from a summary perspective and from an implementation perspective (for my OS project). This is the result of roughly two days of frantic Internet searching, and was originally written as part of my OS project documentation#[+footnote I originally wrote this in Markdown, and translated it to Pugjs (the templating system I use for my website) using #[a(href="https://alexandremasy.com/markdown-to-pug/") this tool]. Unfortunately, it introduced many errors that I had to hand-correct, so excuse any formatting mistakes here.].
+
+  hr
+  h4 What is a terminal device?
+  p The terminal is an abstraction used to manage I/O from a serial device. In its simplest form, let's assume we have a single keyboard, and a non-multitasking computer (only running one process at any time, and this process is in the foreground). Then, the terminal acts as the interface between the user and the process.
+  +precode('text')
+    include ../res/posts/54_motivation.ascii
+  p This is all a terminal is. It has a "master" (interactive) and a "slave" (process) side, and two queues (one for input and one for output). The master side can have some additional functionality, such as sending signals to the slave. Like a pipe, both sides can write to the file: output on one side becomes input on the other.
+  p In the old days, there were physical terminals (teletype machines, or tty), which were machines used to input data to and display output from mainframes, and the upper and lower lines were two pairs of physical wires (RX/TX). Now, we tend to abstract away terminals into Linux devices files, but the name tty persists.
+
+  hr
+  h4 Virtualization
+  p The picture becomes muddier once we add in some additional variables:
+  ol
+    li
+      p Multiple serial input devices?
+    li
+      p Multiple process sessions for one screen?
+    li
+      p Multiple processes or multiple devices attached to one terminal?
+    li
+      p Emulated (non-physical) master device?
+  p Addressing these issues:
+  ol
+    li
+      p We can simply allow multiple terminals. Each terminal is implemented in Linux as a device file (in devfs), and processes can read to/write from any of these files as if they were regular files.
+    li
+      p This leads us to multiplex (virtualize) the screen. The 
+        em virtual terminal 
+        | (vt) driver does this, multiplexing the screen over seven different physical terminals (
+        code /dev/tty[1-7]
+        | ), each running their own session (shell). The keyboard is only "connected" to the active terminal session.
+    li
+      p This leads us to multiplex the master and/or the slave side of a terminal. GNU 
+        code screen 
+        | is the prototypical example of this, turning the single-channel semantics into a broadcast semantics when multiple processes connect to the same terminal device.
+    li
+      p We may want to create a terminal where the master side input does not come from a physical device (i.e., directly from the keyboard driver). Without going into too much depth, this is used in graphical modes like 
+        a(href="http://X.org") X.org 
+        | to implement 
+        em terminal emulators
+        | . In 
+        a(href="http://X.org") X.org
+        | , keyboard input from the physical terminal are turned into X events at 
+        code /dev/event*
+        | , and sent to the foreground application. A terminal emulator like 
+        code xterm 
+        | may want to use this to emulate the master device of a terminal. To do this, it can use the 
+        em pseudoterminal 
+        | (pty) driver to create a master-slave pair, such that events written to the master side emulate a physical device master.
+
+  hr
+  h4 Updated diagram
+  p On the left, we have what is more or less the pty driver stack; on the right we have the vt driver stack.
+  +precode('text')
+    include ../res/posts/54_tty_block_diagram.ascii
+  p I got tired of the ascii art around the X.org magic part. X.org manages a single virtual terminal (which we can think of as something like 
+    code /dev/tty7
+    | , continuing the 
+    code vt 
+    | analogy). Keyboard events are signalled to the foreground process using 
+    code /dev/event*
+    | , which are sent to the pty tty master device.
+
+  hr
+  h4 Terminology
+  ul
+    li
+      p
+        strong Terminal
+        | : An abstract device that implements a bidirectional master/slave I/O channel.
+    li
+      p
+        strong Physical terminal (tty)
+        | : Refers to a terminal device connected to a physical device, e.g., a serial port; now, "tty" is loosely used to refer to the subsystem in general and to terminal devices in general.
+    li
+      p
+        strong Virtual terminal (vt)
+        | : Driver that multiplexes the text-mode display over multiple terminal devices, and performs text-mode rendering; provides the text-mode terminals usually found at 
+        code /dev/tty[1-6] 
+        | or  <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>F1</kbd> through <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>F6</kbd>.
+    li
+      p
+        strong System console
+        | : Usually refers to the text-mode terminal used for kernel space processes (i.e., calls to 
+        code printk() 
+        | get printed here, and this can usually be found at 
+        code /dev/tty1
+        | ).
+    li
+      p
+        strong Pseudoterminal (pty)
+        | : Driver that provides a master/slave terminal device file pair (as opposed to a physical terminal, where the master device is usually implemented as a hardware driver); allows the use of a non-physical device as the terminal master, e.g., in userspace graphical mode.
+    li
+      p
+        strong Terminal emulator 
+        | (e.g., 
+        code xterm
+        |) : A program running in graphical mode that provides an interface similar to a program running in a text-mode terminal using a pseudoterminal. In some ways, this is the graphical mode equivalent of a virtual terminal, and some people also call these programs virtual terminals.
+    li
+      p
+        strong Terminal multiplexer 
+        | (e.g., GNU 
+        code screen
+        | ) : Allow multiple processes to connect to a single terminal device (multi-channel terminal); i.e., reads and writes are broadcasted rather than being sent to a single process.
+    li
+      p
+        strong Shell 
+        | (e.g., 
+        code bash
+        | ): An interactive text-mode application that uses a terminal device for I/O; prompts user for commands to run and executes them, displaying their output. Shells aren't really related to this discussion, but sometimes conflated with the term "terminal".
+
+  hr
+  h4 Use cases of tty
+  p The tty interface can be used whenever you have a situation similar to the motivating scenario. Examples are the 
+    code ssh 
+    | and 
+    code telnet 
+    | commands, which are interactive sessions to some external computer. In this case, the slave process is not a local process, but rather a shell process (
+    code ssh
+    | ) or some process writing to a port (
+    code telnet
+    | ) on an remote machine.
+
+  hr
+  h4 tty subsystem in the Linux source code
+  ul
+    li
+      p
+        code include/linux/tty.h
+        | : Defines essential data structures related to a tty device, such as 
+        code struct tty_struct
+        | .
+    li
+      p
+        code include/linux/tty_driver.h
+        | : Defines essential data structures for a tty driver implementer (such as vt and pty), such as 
+        code struct tty_driver 
+        | and 
+        code struct tty_operations
+        | .
+    li
+      p
+        code drivers/tty/vt/vt.c
+        | : Defines a 
+        code struct tty_driver 
+        | for the six multiplexed text-mode physical terminal devices; provides the 
+        code /dev/tty* 
+        | slave device files.
+    li
+      p
+        code drivers/tty/pty.c
+        | : Defines a 
+        code struct tty_driver 
+        | for the 
+        code /dev/ptmx
+        | /
+        code /dev/pts/* 
+        | master/slave device files.
+
+  hr
+  h4 Thought exercise: who does the rendering? And how do we echo?
+  p This simple question stumped me for a little bit while I was trying to understand how the terminal works, and it was difficult to find an easy-to-swallow answer online. In text mode, who manages the rendering of the terminal text? And how do we manage the echo/noecho functionality (i.e., show or hide input from the master side)?
+  p (Note: I'm not sure if the following answers are correct, these are just the conclusions that I've logically come to.)
+  p Well, the master side is the one interacting with the system, and the one that wants to see the input and output to the process. The process doesn't need to render any of its I/O for to behave correctly; it is the human that needs it. So the master side manages any rendering, and can decide to turn off any rendering if need be.
+  p In the case of the system console, the master side of the 
+    code vt 
+    | driver renders data (using the VGA framebuffer) from the output queue when output is generated from the slave side. In the case of a graphical-mode terminal emulator, the master side (e.g., 
+    code xterm 
+    | connected to 
+    code /dev/ptmx
+    | ) renders likewise (albeit using 
+    X.org drawing commands).
+  p Then, what about displaying keyboard data from the master side? (I.e., how do we implement echoing?) We can do this by "echoing" (copying) the input stream onto the output queue. This is a change at the 
+    code tty 
+    | device level rather than the 
+    code vt
+    | /
+    code ptmx 
+    | driver level. (In Linux, I do not see any handling of echo in the 
+    code vt
+    | /
+    code ptmx 
+    | drivers, so I assume that it is performed in the 
+    code tty 
+    | device layer in this way.)
+
+  hr
+  h4 Special editing semantics
+  p While tty devices are mostly a "dumb" device, there are a few editing semantics that make sense for the interactive asymmetric terminal interface. This special behavior is transmitted using special (ascii) characters or character sequences from the keyboard, such as <kbd>Ctrl</kbd>+<kbd>C</kbd> (ascii code 3) or <kbd>Bksp</kbd> (ascii code 8). I won't go into these in detail here, these are explained well in other articles, and I don't find them terribly useful to understanding the core of the tty subsystem.
+  ol
+    li
+      p
+        strong Line discipline
+        | : This allows for some editing of the buffer by using special characters such as <kbd>Bksp</kbd>.
+    li
+      p
+        strong Signals
+        | : The master side can send POSIX signals (e.g., SIGHUP, SIGTERM) to the process using special characters such as <kbd>Ctrl</kbd>+<kbd>C</kbd>.
+    li
+      p
+        strong VT100 display codes 
+        | (a.k.a., ANSI escape codes): Used to manipulate the rendering of the output, such as moving the cursor, coloring the screen, etc. There are some newer standards, e.g., VT220.
+
+  hr
+  h4 Resources
+  p Wikipedia links to the major terminology words are also recommended but not included below, because you can find those yourself.
+  ul
+    li
+      p
+        a(href="http://www.linusakesson.net/programming/tty/") The TTY demystified
+        | : Highly recommended by many people. Provides a general overview of the tty subsystem, and especially talks about line discipline and signals.
+    li
+      p
+        a(href="https://unix.stackexchange.com/q/117981/307410") What are the responsibilities of each Pseudo-Terminal (PTY) component (software, master side, slave side)?
+        | : Many fantastic answers about tty in general, line discipline, and the pty master/slave relationship.
+    li
+      p
+        a(href="https://www.reddit.com/r/osdev/comments/hgzg6k/comment/fwabf1j/?utm_source=reddit&utm_medium=web2x&context=3") TTY questions
+        | : Some considerations when designing a tty implementation.
+    li
+      p
+        a(href="https://stackoverflow.com/q/69198577/2397327") Linux keyboard/terminal/kernel input buffer
+        | : How large is the tty buffer? This suggests 
+        code N_TTY_BUF_SIZE == 4096 
+        | is the maximum buffer size (see 
+        code drivers/tty/n_tty.c
+        | ).
+    li
+      p
+        a(href="https://stackoverflow.com/q/24024985/2397327") Linux keyboard/terminal/kernel input buffer
+        | : Motivates a terminal multiplexer like GNU 
+        code screen
+        | .
+    li
+      p
+        a(href="https://stackoverflow.com/q/48627344/2397327") Linux keyboard/terminal/kernel input buffer
+        | : Another Internet user trying to figure out how the tty subsystem works.
+    li
+      p
+        a(href="https://man7.org/linux/man-pages/man3/termios.3.html") termios(3) — Linux manual page
+        | : Interface to set terminal device settings, such as echo.
+    li
+      p
+        a(href="https://stackoverflow.com/a/23317250/2397327") How does input echoing work in a Linux terminal?
+        | : Summarizes the many responsibilities of the tty subsystem.
+    li
+      p
+        a(href="https://unix.stackexchange.com/a/138390/307410") How to read/write to tty* device?
+        | : Provides some examples of how to use 
+        code /dev/tty 
+        | files.
+    li
+      p
+        a(href="https://unix.stackexchange.com/q/21147/307410") What are pseudo terminals (pty/tty)?
+        | : Gives a simple explanation of pty.
+    li
+      p
+        a(href="https://unix.stackexchange.com/q/404555/307410") What is the purpose of the controlling terminal?
+        | : Explains the concept of a controlling terminal.
+    li
+      p
+        a(href="https://unix.stackexchange.com/a/351064/307410") Does keyboard input always go through a controlling terminal?
+        | : Explains some other implications of a controlling terminal.
+    li
+      p
+        a(href="https://github.com/V01D-NULL/limine-terminal-port") Port of the Limine bootloader terminal
+        | : Isolated terminal implementation from the Limine bootloader, with basic text-mode rendering.
+    li
+      p
+        a(href="https://wiki.osdev.org/Terminals") OSDev: Terminals
+    li
+      p
+        a(href="https://unix.stackexchange.com/q/60641/307410") Linux: Difference between /dev/console , /dev/tty and /dev/tty0
+    li
+      p
+        a(href="https://manpages.ubuntu.com/manpages/bionic/man4/vt.4freebsd.html") bionic (4) vt.4freebsd.gz
+        | : 
+        code vt 
+        | manpage for BSD

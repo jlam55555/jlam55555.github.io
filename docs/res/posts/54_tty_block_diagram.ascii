@@ -1,0 +1,31 @@
+   Graphical mode/pseudoterminal       : Text mode/physical terminal
+                                       :
++----------------+ +---------------+   :   +---------------+
+| /usr/bin/xterm | | /usr/bin/bash |   :   | /usr/bin/bash |
+|                | |               |   :   |               |
+| terminal       | | process       |   :   | process       |
+| emulator       | +---------------+   :   +---------------+
++----------------+    ^                :      ^
+   ^                  |                :      |
+   |                  v                :      v
+   |               +--------------+    :   +--------------+
+   |               | /dev/pts/3   |    :   | /dev/tty5    |
+   |               |              |    :   |              |
+   |               | pty tty      |    :   | vt tty       |
+   |               | slave device |    :   | slave device |
+   |               +--------------+    :   +--------------+
+   |  **********      ^                :      ^
+   | *xorg magic*     |                :      |
+   |/ ********** \    v                :      v
+   |            +--------------------------------------------------+
+   |            | tty line discipline/other core editing utilities |
+   |            +--------------------------------------------------+
+   |              ^                    :      ^
+   |             /                     :      |
+   v            v                      :   +---------------+
++---------------+                      :   | keyboard IRQ  |
+| /dev/ptmx     |                      :   |               |
+|               |                      :   | vt tty        |
+| pty tty       |                      :   | master device |
+| master device |                      :   +---------------+
++---------------+                      :
