@@ -296,6 +296,9 @@ Miscellaneous personal projects:
     links:
       Driver (v2) source: https://github.com/jlam55555/veikk-linux-driver
       Configuration tool (v2) source: https://github.com/jlam55555/veikk-linux-driver-gui
+      Blog post (Driver fundamentals): https://eis.lambdalambda.ninja/posts/on-developing-a-linux-driver/
+      Blog post (v3 update): https://eis.lambdalambda.ninja/posts/veikk-linux-driver-v3-notes/
+      Blog post (Button mapping journey): https://eis.lambdalambda.ninja/posts/button-mapping-journeys/
   Groovy Maven Template:
     anchor: groovy_maven
     year: 2020
@@ -332,9 +335,10 @@ Miscellaneous personal projects:
   Everything is Sheep (EiS):
     anchor: eis
     year: 2018
-    desc: "My (current) personal blog. Built on a Node.JS backend, <strike>hosted on Heroku</strike> currently not being hosted. No front end frameworks employed (all JS/CSS is vanilla)."
+    desc: "My (current) personal blog. No front end frameworks employed (all JS/CSS is vanilla). This used to be hosted on Heroku at https://everything-is-sheep.herokuapp.com, but now is being hosted on a subdomain of this website."
     links:
       Source: https://github.com/jlam55555/everything-is-sheep
+      Demo: https://eis.lambdalambda.ninja
   Unscrambler:
     anchor: unscrambler
     year: 2018
@@ -549,9 +553,10 @@ Experimental:
   "laos: LAm OS":
     anchor: laos
     year: 2023
-    desc: An experimental operating system for learning purposes. Developed for the x86_64 platform using QEMU. Currently uses the Limine bootloader. Very much a work in progress!
+    desc: An experimental operating system for learning purposes. Developed for the x86_64 platform using the QEMU virtualization software. At the time of writing, this uses the Limine bootloader and I'm working on developing very simple text-mode terminal/keyboard/screen drivers. Very much a work in progress!
     links:
       Source: https://github.com/jlam55555/laos
+      Blog post (Linux tty subsystem): https://lambdalambda.ninja/blog/54/
   Flexible game library:
     anchor: bge
     year: 2022
