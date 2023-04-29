@@ -1,0 +1,200 @@
+extends blogpost
+
+block post
+  +codestyle
+  h4 Preface
+  p This is my attempt at understanding the keyboard driver, after my #[a(href="/blog/54") attempt to understand the tty subsystem]. Again, this understanding will help shape my OS project development.
+  p At this point, I've developed a simple terminal and console driver. This allows me to print text to the screen using VGA text mode. The terminal acts as a I/O device with bidirectional ringbuffer queues between a master (the keyboard) and a slave (some process). The console provides a simple "print to screen" functionality with scrollback.
+  p With just a console, I am able to print to the screen for debugging (without relying on Limine's terminal or the BIOS print functions). With a terminal subsystem and keyboard driver, we form the basis for interactive programming, and it would be trivial to write a shell on top of it, which will make interacting with the OS at runtime much more interesting. Note that, at this stage of the OS, there is still no concept of processes; we only have kernel context and interrupt context.
+
+  hr
+  h4 Overview of a keyboard driver
+  p The idea of a keyboard driver is pretty simple: handle key presses when the keyboard interrupt fires, and process the events into some usable format that interested processes (such as a tty device) can access.
+  p We can break this down into several steps: 1) read data (scancodes) from the PS/2 device from interrupt context; 2) parse the scancodes into a more usable format (keycodes and keyboard events); and 3) pass the keyboard events to the appropriate endpoints in the input subsystem.
+
+  hr
+  h4 The PS/2 interface
+  p Older keyboards used the PS/2 interface for keyboards and mice. This is simpler to deal with than the USB interface, and many modern BIOSes still support a PS/2 emulation mode (#[a(href="https://docs.kernel.org/x86/usb-legacy-support.html") #[em USB Legacy Support]]) for compatibility. For our purposes, this is plenty fine until we have a need for integrating other USB devices.
+
+  h5 The keyboard and the keyboard controller I/O ports
+  p We communicate with the keyboard using the PS/2 interface on x86 systems using two I/O ports (accessed using the #[code inb] and #[code outb] assembly instructions) 0x60 (for the keyboard) and 0x64 for the keyboard controller. The keyboard controller is a separate chip (Intel 8042) that manages all communication between the CPU and the PS/2 devices. Data involving the keyboard only (e.g., commands to configure the keyboard, and scancodes from the keyboard) will go through port 0x60; however, the keyboard controller may also use port 0x60 to pass arguments to keyboard controller commands, and the keyboard controller may also change the data read from port 0x60 (see the section about scancode set translation below).
+  p For the most part, regular operation involves reading (#[code inb]) a scancode byte from the keyboard port on a keyboard interrupt. Some scancodes are multiple bytes, so this may require multiple read calls.
+  p There are a number of special PS/2 operations, such as enabling/disabling interrupts upon keyboard events, initializing the device, changing the scancode set, etc. Some of these commands are written directly to the keyboard port, and some are written to the keyboard controller port. The OSDev wiki provides a good reference for both ports (#[a(href="https://wiki.osdev.org/PS/2_Keyboard") 0x60 reference]; #[a(href="https://wiki.osdev.org/%228042%22_PS/2_Controller") 0x64 reference]).
+  p Both the 0x60 and 0x64 ports are R/W ports. The purpose of each operation is described below:
+  ul
+    li #[strong Read 0x60 (keyboard output buffer)]: Read data (scancodes) or special return codes from commands
+    li #[strong Write 0x60 (keyboard input buffer)]: Write commands or command arguments to the keyboard or keyboard controller
+    li #[strong Read 0x64 (status register)]: Read the PS/2 status register
+    li #[strong Write 0x64]: Send commands to the PS/2 controller
+
+  h5 PS/2 status register and controller configuration byte
+  p The PS/2 interface has two special 8-bit bytes/registers that describe its behavior.
+  p The #[em status register] is read-only, and is read from port 0x64 describing the status of the PS/2 keyboard, such as whether the output buffer is ready to read, if the input buffer is ready to write, or if there are parity or timeout errors. The first two flags can be used to poll the keyboard device before reading or writing to the keyboard device.
+  p The #[em controller configuration byte] describes the behavior of the PS/2 controller chip. This can be read/written using the 0x20/0x60 commands sent to 0x64. This byte describes the behavior of the PS/2 devices, such as whether interrupts are enabled, whether the PS/2 port clock is enabled, and whether PS/2 translation (described below) is enabled.
+  p The complete definition of the status register and controller configuration byte are documented in the #[a(href="https://wiki.osdev.org/%228042%22_PS/2_Controller") OSDev wiki entry for the PS/2 controller].
+
+  h5 Initialization and configuration
+  p The OSDev wiki entry for the PS/2 keyboard controller provides a list of initialization steps for a PS/2 device. This may involve steps such as disabling the PS/2 device, flushing the output buffer, running self-checks, checking if there are two PS/2 channels, etc.
+  p For now, my very simple implementation works fine on QEMU without going through all of the steps -- this is fine for me. For my very simple initialization, I disable the PS/2 translation (see below) by setting bits in the controller configuration byte and enable interrupts. Notably, the keyboard interrupt is disabled during initialization, and the status register is polled to determine when the keyboard input/output buffers are ready to write/read.
+
+  h5 Scancodes and scancode sets
+  p Whenever a key is pressed, held down (repeated, similar to a keypress event in Javascript), or released, a #[em scancode] is written to the output buffer and an interrupt is raised. Scancodes are often a single byte, but may comprise multiple consecutive bytes. Each scancode is either a #[em make] or #[em break] scancode: keydown and keypress events use the make scancode; keyup events use the break scancode.
+  p There are three standard mappings from keys (on a standard IBM PC keyboard) to scancodes; these are called #[em scancode sets]. Scan codes for sets 1, 2, and 3 for each key can be found #[a(href="https://www.vetra.com/scancodes.html") here]. The OSDev wiki page for the PS/2 keyboard interface also #[a(href="https://wiki.osdev.org/PS/2_Keyboard#Scan_Code_Sets") lists scancode sets 1 and 2].
+  p There are some interesting patterns amongst and between the scancode sets. For example, in scancode sets 1 and 2, the prefix byte 0xE0 indicates a multi-byte (make) scancode. (In scancode set 3, all make codes are a single byte and all break codes are two bytes.) In scancode sets 2 and 3, the break scancode for any key is the make scancode prefixed with a F0 byte. (In scancode set 1, the break codes are simply the make codes + 0x80.)
+  p The OS can configure the scancode set the keyboard emits by sending a command to port 0x60. In scancode set 1, the make and break codes for most common keys are only a single byte, which can make processing easier; I currently use this in my driver and only process single-byte scancodes, but there is no hard reason not to use scancode sets 2 or 3. To me, scancode set 3 seems the most consistent and reasonable (i.e., simple one-byte make codes and two-byte break codes with a clear relationship between the two), so I may switch to this in the future.
+
+  h5 PS/2 translation
+  p The original PS/2 keyboards generated scancodes from set 1. Later keyboards generated scancodes from set 2. To ensure compatibility, the PS/2 controller supports a translation capability that converts set 2 scancodes into set 1 scancodes.
+  p To see how this works, consider the following examples (use #[a(href="https://www.vetra.com/scancodes.html") the table of scancodes mentioned above]):
+  ul
+    li #[strong F9 is pressed]: This is scancode 0x01 in set 2, which gets translated to 0x43 in set 1.
+    li #[strong F5 is pressed]: This is scancode 0x03 in set 2, which gets translated to 0x3F in set 1.
+  p While this makes sense from a compatability perspective, it can be a frustrating feature. Every byte that is read from the the PS/2 keyboard input buffer is translated from set 2 to set 1. This is problematic for three reasons:
+  ul
+    li #[strong The mapping of keys to scancodes is not a bijection.] For example, there is no scancode 0x02 in set 2. Thus, what should this byte map to in set 1? It turns out that it maps to 0x41, but this is idiosyncratic.
+    li #[strong The translation is irrespective of which scancode set the keyboard is actually configured to emit.] Thus, if the keyboard is set to emit scancode set 1 or set 3 scancodes, the translated bytes will be garbage.
+    li #[strong Responses to commands (non-scancodes) are translated.] For example, if you send the command "Get current scancode set" (0xF0 0x00) to port 0x60, and the translation is disabled, you will get 0x01, 0x02, or 0x03 (corresponding to scancode sets 1, 2, and 3, respectively). If the translation is enabled, then you will get back 0x43, 0x41, and 0x3F, respectively, following the above example.
+  p By default, keyboards send set 2 scancodes, and this translation capability is on. It can be disabled by zeroing bit 6 of the controller configuration byte. I do this in my PS/2 initialization code.
+  p See the #[a(href="https://wiki.osdev.org/%228042%22_PS/2_Controller#Translation") relevant section in the OSDev wiki].
+  
+  hr
+  h4 Moving forward from scancodes
+  p Once we've decided which scancode set to configure the PS/2 keyboard for, we can receive scancodes that uniquely identify a key, and whether it is pressed or released (make or break scancode).
+  p The problem is that scancodes aren't convenient to work with in software. Firstly, a key can have up to three different representations due to the existence of three scancode sets, but it would be useful to have only one representation per key. Secondly, some scancodes (in scancode sets 1 and 2) are multi-bytes sequences, so we have variable-length codes#[+footnote Variable length encodings are definitely useful in cases such as Unicode/UTF-8 or Huffman coding. But for a keyboard interface with less than 256 widely-recognized keys on standard IBM PC keyboards, it doesn't make much sense to use more than one byte to identify a key.]. Thirdly, the use of a prefix byte (scancode sets 2 and 3) or offset (scancode set 1) to indicate a make/break code is not very intuitive, andmake codes can indicate either a keydown or keypress (repeat) event.
+  p The solution is to map scancodes into a single fixed-length (one-byte) representation -- what we can call a #[em keycode]. Additionally, it would be useful for software handling keyboard events to know a few more things:
+  ul
+    li The type of event (keydown, keypress, keyup).
+    li The ASCII character this keycode corresponds to (if applicable).
+    li Any modifier keys that are held down, or toggle keys that are enabled (e.g., Shift, Control, Caps Lock, etc.).
+  p All together, this is packaged together as a #[em keyboard event] object. We can then think of the keyboard driver as an abstract function that converts scancodes to keyboard events upon a keyboard interrupt, and dispatches this keyboard event to the input subsystem in the kernel for further processing.
+  +precode('text')
+    | Keyboard IRQ
+    |      |
+    |      | scancode
+    |      v
+    | IRQ handler
+    |      |
+    |      | keyboard event
+    |      v
+    | Input subsystem
+    |  |            \
+    |  |             \
+    |  v              v
+    | tty subsystem   /dev/event*
+
+  h5 Choosing a keycode convention
+  p It turns out there is #[a(href="https://stackoverflow.com/q/56323710/2397327") no single agreed-upon keycode convention]. It is important that it is a single-byte representation agreed upon by the driver and the other software layers, but the specific mapping is not standardized. The OSDev wiki #[a(href="https://wiki.osdev.org/PS/2_Keyboard#Scan_Code_Sets.2C_Scan_Codes_and_Key_Codes") confirms this and gives their own suggestion for a keycode convention]:
+  blockquote
+    p There is no standard for "key codes" - it's something you have to make up or invent for your OS. I personally like the idea of having an 8-bit key code where the highest 3 bits determine which row on the keyboard and the lowest 5 bits determine which column (essentially, the keyboard is treated as a grid of up to 8 rows and up to 32 columns of keys). Regardless of what you choose to use for your key codes, it should be something that is used by all keyboard drivers (including USB Keyboards) and could possibly also be used for other input devices (e.g. left mouse button might be treated as "key code 0xF1").
+
+  p Other possible standards that fulfill the aforementioned requirements include:
+  ul
+    li #[a(href="https://developer.mozilla.org/en-US/docs/Web/API/UI_Events/Keyboard_event_code_values") Javascript #[code KeyboardEvent.code] standard]
+    li #[a(href="https://usb.org/sites/default/files/hut1_3_0.pdf#page=89") USB HID#[+footnote #[em HID] stands for "Human Interface Devices," and is used to refer to hardware devices that the human interfaces with, as opposed to hardware such as the the hard drive or memory that have no direct human interaction.] subsystem Usage ID's for the Keyboard/Keypad Page (0x07)]
+    li Make codes for scanset 3
+  p Any of these standards would be equally good for my needs; I ended up using the USB HID Usage ID standard.
+  p After deciding on a keycode convention, it is a good idea to define a set of constants mapping human-readable names for keys to keycodes. E.g., it will be useful to define a constant like #[code KC_SPACE] whose value is the Spacebar keycode. This raises an interesting design choice: is this a good choice for a long string of #[code #define] constants, or is it better to phrase as an #[code enum]? Currently, I don't have a strong preference towards one or the other#[+footnote Considerations in play: it is easy to define sequentially-increasing constants with enums, you can override the sequence as necessary, and this probabaly involves less typing. But providing a #[code #define] for each constant allows the reader to instantly tell which value the name maps to, and is more convenient when the constants are not sequential (e.g., a set of bitmask constants). Performance-wise, both act before run-time, but #[code #define] macros are resolved at preprocessor time and enums are resolved at compile-time. Enum values and macros are both weakly typed and basically are interchangeable with integral values. The size of an enum variable is also #[a(href="https://stackoverflow.com/a/366033/2397327") compiler-dependent], whereas macros are untyped integer literals. Macros are unexplicitly scoped, only going out of scope with a matching #[code #undef] directive.], but this opinion may change as time goes on.
+
+  h5 Mapping scancodes to keycodes
+  p The mapping of scancodes to keycodes can be computed using lookup table(s). For scancode set 3, this is simplest because each the last byte of each scancode corresponds to a unique key; all we need is a mapping from #[code uint8_t] to #[code uint8_t]. Additionally, if you choose to use scancode set 3 make codes as the keycode convention, then no mapping is needed at all; the last byte of the scancode is simply the keycode. This makes for a good argument to use scancode set 3.
+  p If you have to deal with multiple bytes (in scancode sets 1 and 2), you will need at least one lookup table. Since most scancodes in scancode set 1 and most make codes in scancode set 2 are one or two bytes (where 2-byte scancodes begin with the 0xE0 byte), we can perform most of the mapping using two lookup tables. The longer remaining scancodes can be manually mapped.
+
+  h5 Keeping track of pressed keys
+  p We need to keep track of which keys are pressed for two reasons:
+  ul
+    li To distinguish between keydown and keypress events.
+    li To keep track of pressed modifier keys.
+  p We keep track of pressed keys by storing a boolean array mapping #[code uint8_t] (keycodes) to #[code bool] (0 if not pressed, 1 if pressed).
+  p For non-toggle keys (most keys; keys that repeat when held down), a make code sets the mapped value to 1, and a break code sets the mapped value to 0. Break codes always indicate a keyup event. Make codes indicate a keydown event if the mapped value was previously 0, and a keypress event if the mapped value was previously 1. This is a general technique also mentioned by the #[a(href="https://wiki.osdev.org/PS/2_Keyboard#Key_Codes.2C_Key_States_and_Key_Mappings") OSDev wiki], and is something I've always done when needing to keep track of multiple pressed keys#[+footnote For example, when programming a Javascript game and pressing two arrow keys at once may indicate diagonal movement.].
+  p Note that some keys act as toggle keys. This usually means NumLock, ScrollLock, and CapsLock keys. However, sometimes the keyboard layout may designate different sets of toggle keys. In Colemak, for example, the Caps Lock key may be treated as an additional Backspace key, and should not be treated as a toggle key. Toggle keys toggle the state of the key on a keydown event only.
+
+  h5 Keycodes to ASCII
+  p At this point, we've filled out all the important parts of a keyboard event. However, there is another incredibly common and useful function that the keyboard driver can provide: mapping the keyboard event to an ASCII value.
+  p The reason why this can be considered the job of the application rather than the keyboard driver is that the interpretation of a keyboard event is application-dependent. For example, pressing the #[kbd A] key can sometimes mean the left arrow on a QWERTY layout when the user is playing a game using the WASD-arrow key controls. It can also mean the append command in ViM command mode. However, pressing this key means that the user wants to type the letter 'a' or 'A' the overwhelming majority of the time.
+  p Luckily, it is fairly simple to generate the ASCII value for a key. In the simplest case, when no keyboard modifiers are sent, each key maps to one ASCII character. However, we need to account for the Shift, CapsLock, and NumLock modifiers; each of these may change the interpretation of the key#[+footnote I've been lazy and only implemented a simple two-layout mapping, which handles all of the most common keys and all of the ASCII values. The second layout is used when Shift XOR CapsLock are pressed/toggled. However, in the same way that NumLock should only affect the numeric keypad, CapsLock should only affect alphabetic characters, so there's some nuance here.].
+  p Not all keys are tied to an ASCII value, and it's possible for multiple keys to correspond to the same ASCII value (e.g., the dash ('-') key vs. the keypad minus ('-') key), so (unlike the scancode->keycode mapping) this mapping is neither one-to-one nor onto.
+  
+  h5 Keyboard layouts
+  p The keycode to ASCII mapping is called the #[em keyboard layout]. The most widely known one for US standard keyboards is the QWERTY layout -- this maps each keycode to the ASCII value printed on the corresponding key on a QWERTY keyboard.
+  p However, there are other mappings that may be useful for ergonomic purposes or to better serve people using different languages. Some examples for other English-based keyboard layouts include Dvorak and Colemak; AZERTY is a common keyboard layout based on QWERTY that is used in France.
+  p Note that in addition to remapping keys, keyboard layouts may change the behavior of certain keys. A prime example is Colemak using the CapsLock key as an additional Backspace key (for ergonomic reasons), which changes it from a toggle key to a regular non-toggle key. The mapping code should be flexible enough to accomodate this.
+
+  p #[strong Aside: when to perform the keyboard layout mapping]: One may wonder (as I did) whether the keyboard mapping (i.e., the key to ASCII mapping) should happen at the scancode->keycode mapping layer or the keycode->ASCII mapping layer. I believe it should be the latter, since the former mapping should be a bijection, so that any application that reads the keycode is able to determine the original key that was pressed. If an application was only able to read a keyboard-mapped keycode and the corresponding ASCII character, they wouldn't be able to know the original key that was pressed. This is important because some applications depend on the position of the keys on the keyboard (e.g., the WASD arrow keys in a game, or passing through keycodes to a hardware emulator) and thus the keycodes reported to an application for a given physical key should be independent of the keyboard layout. In other words, the ASCII character provided can be thought of as a useful suggestion to the application that takes a keyboard layout into account, but the application is free to interpret the keycode (which indicates a physical key) and map it however it likes.
+
+  hr
+  h4 Case studies
+  p The following set of examples demonstrate some additional considerations that better helped me understand various aspects of the keyboard mechanism.
+
+  h5 Keyboard repeat
+  p By default, the keyboard will periodically send keypress events (make scancodes) if you hold down a key. This is called the #[code typematic] system, or #[code hardrepeat]. The repeat rate and the initial delay of the typematic system can be customized using a command (0xF3) sent to the keyboard port (0x60).
+  p The typematic system provides a useful default behavior, but it is somewhat limited in its configuration, and is controlled by the keyboard. In order to provide higher customizability, a more consistent experience across keyboards (and consistency with USB keyboards), and support for keyboard repeat when hardrepeat isn't available (which is the case for polling-based USB keyboards), the keyboard repeat functionality can be implemented in software, i.e., #[em softrepeat]. This may be implemented by only processing keydown and keyup events from the PS/2 keyboard, and implementing keypress events using timer interrupts.
+  p Of course, softrepeat should not be used for toggle/lock keys.
+
+  h5 Holding down a key and then pressing Shift
+  p Say you hold down the #[kbd A] key, press the #[kbd Shft] key some time later, and then release the #[kbd Shft] key. Would you expect to get "aaaaAAAAaaaa" or "aaaaaaaaaaaaa"?
+  p This is something that I've experienced countless times but never thought about. On Linux, I observe the first behavior. For some reason I was expecting the second behavior. Luckily, the first behavior is easier to implement in software; the ASCII value of a keypress event depends on the current state of modifier keys such as Shift.
+
+  h5 Holding down two keys and then releasing one key
+  p Say you perform the following sequence of events, with some time in between each event:
+  ol
+    li Press #[kbd A] -> press #[kbd B] -> release #[kbd A]
+    li Press #[kbd A] -> press #[kbd B] -> release #[kbd B]
+  p In scenario 1), the result is of the form "aaaabbbb..." with the 'b' continuing to repeat. In scenario 2), the result is of the form "aaaabbbb", without the 'b' repeating.
+  p Similar to the above situation, this is a use case that is very common but not typically thought about until you work on implementation. Luckily, this use case seems entirely consistent with the behavior of the PS/2 device hardrepeat; repeated keypress events only are emitted for the most recently-pressed key. If softrepeat is used, then we'll want to emulate this behavior.
+
+  h5 Exhausting the keyboard buffer
+  p If many keys are pressed but the keyboard driver does not promptly respond to the keyboard interrupt and read from the PS/2 keyboard's output buffer, then the output buffer will presumably fill and extra bytes will be dropped. Thus, care must be taken to empty the output buffer as quickly as possible. In other words, the interrupt latency should be low and the keyboard IRQ handler should efficiently empty the output buffer.
+  p Note that this differs between PS/2 and USB, since USB keyboards are polling-based rather than interrupt-based. See the section on USB keyboard drivers.
+
+  hr
+  h4 In the Linux kernel
+  p The PS/2 keyboard driver exists in Linux at #[code drivers/input/keyboard/atkbd.c]. The IRQ handler #[code atkbd_interrupt()] is simple enough to digest. The major steps include:
+  ol
+    li #[code input_event(dev, EV_MSC, MSC_RAW, code)]: Read the scancode from the device.
+    li #[code keycode = atkbd->keycode[code&rsqb;]: Convert the scancode into a keycode.
+    li #[code input_event(dev, EV_KEY, keycode, value)]: Send the keyboard event to the input subsystem for further processing. Much of the code for the input subsystem can be found in #[code drivers/input/input.c].
+  p We'll talk about the input subsystem in the following section.
+
+  h5 A generic input subsystem
+  p Currently, my toy kernel project has exactly one input producer (the keyboard), and exactly one input consumer (the terminal). It's possible to perform all of the processing inside the small keyboard IRQ handler.
+
+  p However, the input relationships may get more complex, with multiple devices (e.g., a mouse, multiple keyboards, a digitizer, etc.) contributing input to the same applications. Similarly, the input processing may become more complicated and may require appropriate locking of data structures or deferred work, such as reporting events to #[code /dev/event*]. At this point, it will be useful to implement a generic input subsystem layer that handles the common core functions of input processing.
+
+  p The following diagram from #[a(href="http://www.embeddedlinux.org.cn/EssentialLinuxDeviceDrivers/final/ch07lev1sec1.html") #[em Embedded Linux Device Drivers]] illustrates a bird's eye view of the Linux input subsystem:
+
+  +imglinkext("http://www.embeddedlinux.org.cn/EssentialLinuxDeviceDrivers/final/images/YTNyaWQ3ODBzOS9jL2VnbXRwNjQ5NWEzMi9yZzE1ZmZpMHBhdGxfMC8xaGlnN2NzZ2ku.jpg", "Illustration of Linux input subsystem. From Chapter 7 of #[em Essential Linux Device Drivers].")
+
+  p We see here that input device drivers send #[a(href="https://www.kernel.org/doc/Documentation/input/event-codes.txt") input events] through the input core (#[code drivers/input/input.c]). The input core mostly processes the edge-triggered input events into a stateful representation (e.g., keeping track of which keys are pressed based on keyup and keydown events). This then interfaces with the input event drivers such as #[code evdev], which provide a uniform software interface to input events (i.e., keyboard event objects). Applications such as the (virtual) terminal driver or X.org can then process these event objects.
+
+  h5 USB vs. PS/2
+  p PS/2 is an old interface and the physical PS/2 port is missing on modern computers. It only lives on in the USB Legacy Support compatibility mode, whereas USB is a much richer and newer standard. Linux definitely still has a PS/2 driver to run on older devices that require it, but most modern interactions between the OS and a keyboard will be using the USB interface.
+
+  p I haven't looked too much into the USB keyboard specification, but from a quick search it seems that the most important difference is that the USB HID keyboard interface is polling-bsaed rather than interrupt based. In other words, the keyboard cannot notify the CPU (raise an interrupt) when new data is available; instead, there is a fixed-size output #[em report] (buffer) that represents the currently-pressed keys that can be polled by the driver. This means that USB keyboards have limited #[a(href="https://en.wikipedia.org/wiki/Key_rollover") #[em key rollover]], and the hardware key repeat occurs at the polling frequency. PS/2's interrupt-based mechanism supports arbitrary n-key rollover, whereas the USB HID specification allows 6-key rollover. Custom USB drivers are necessary to overcome this rollover limitation.
+
+  hr
+  h4 Miscellaneous resources
+  ul
+    li
+      a(href="https://www.asciitable.com/") ASCII table
+    li
+      a(href="https://stackoverflow.com/questions/27075328/list-of-hex-keyboard-scan-codes-and-usb-hid-keyboard-documentation") Keyboard event format for USB
+    li
+      a(href="https://usb.org/sites/default/files/hut1_3_0.pdf#page=89") Keyboard usage IDs for USB
+    li
+      a(href="https://www.cisco.com/c/en/us/td/docs/ios/12_4/cfg_fund/command/reference/cfnapph.html") ASCII character set, including control sequences
+    li
+      a(href="http://www.embeddedlinux.org.cn/EssentialLinuxDeviceDrivers/final/ch07lev1sec1.html") Input subsystem kernel API in Linux
+    li
+      a(href="https://wiki.osdev.org/PS/2_Keyboard") OSDev PS/2 keyboard interface (port 0x60)
+    li
+      a(href="http://www.embeddedlinux.org.cn/EssentialLinuxDeviceDrivers/final/ch07lev1sec1.html") OSDEV PS/2 keyboard controller interface (port 0x64)
+    li
+      a(href="http://www.embeddedlinux.org.cn/EssentialLinuxDeviceDrivers/final/ch07lev1sec1.html") Another description of the PS/2 spec
+    li
+      a(href="https://www.vetra.com/scancodes.html") Table of scan code sets 1, 2, 3
+    li
+      a(href="https://cs.stackexchange.com/a/97128/104875") Softrepeat on Linux
+    li
+      a(href="https://superuser.com/a/693148/243079") USB hardrepeat
+    li
+      a(href="https://www.quora.com/Why-do-keyboards-have-n-key-rollover-in-PS-2-mode-but-only-4-or-6-key-rollover-in-USB-mode/answer/Tom-Wilson-12") USB polling
