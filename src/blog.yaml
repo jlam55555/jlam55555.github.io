@@ -221,7 +221,7 @@
   date: 2023-03-08T17:55:34-08:00
 - template: ../posts/54
   destination: 54
-  title: The Linux tty subsystem
+  title: "Understanding the tty subsystem: Overview and architecture"
   date: 2023-04-07T17:30:04-07:00
 - template: ../posts/55
   destination: 55
@@ -229,9 +229,5 @@
   date: 2023-04-21T19:24:14-07:00
 - template: ../posts/56
   destination: 56
-  title: Interfacing between the input subsystem and tty layer
-  date: 2023-04-28T17:47:27-07:00
-- template: ../posts/57
-  destination: 57
-  title: Wrapping up the job search process
-  date: 2023-04-28T17:47:50-07:00
+  title: "Understanding the tty subsystem: Line discipline"
+  date: 2023-05-04T17:47:27-07:00

@@ -1,5 +1,8 @@
-                  --< screen <--- (stdout)
-                 /               \
-user (master) <--    TERMINAL     --> process (slave)
-                 \               /
-                  --> keyboard -- (stdin)
+MASTER SIDE                          SLAVE SIDE
+===========                          ==========
+
+              --< output queue <-- (stdout)
+      screen /                    \
+user <-------       TERMINAL       --> process
+    keyboard \                    /
+              --> input queue --- (stdin)

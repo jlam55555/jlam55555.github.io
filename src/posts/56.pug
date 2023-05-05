@@ -1,0 +1,219 @@
+extends blogpost
+
+block post
+  +codestyle
+  p This is the second part of a two-part series describing the tty subsystem. See the first part describing the subsystem and giving an overview of its architecture #[a(href="/blog/54") here].
+
+  p Initially, I had thought that these "extra terminal behaviors" were unnecessary and not critical to my understanding and implementation of the terminal in Linux. I was very wrong; not only does line discipline make up many useful and familiar behaviors that create the look and feel of a terminal, but keeping it separate from the tty driver helps preserve the distinction between policy and mechanism in the kernel.
+
+  hr
+  h4 Overview of the line discipline
+  p While tty devices are mostly a "dumb" device, acting as a bidirectional channel between keyboard/console (master) and process (slave), there are a number of useful special semantics that have evolved over the years that suit the asymmetric, interactive terminal interface. Some well-known examples include:
+  ul
+    li Typed characters (input) show up on the console (output) by default even without any process printing this out. This is called #[em echoing].
+    li Backspacing in the input allows you to perform basic line editing. This type of line-based editing is called #[em cooked mode] or #[em canonical mode]. (We call it #[em raw mode] when cooked mode is disabled.)
+    li Pressing the special interrupt control character, usually #[kbd Ctrl]+#[kbd C] (alternatively notated #[kbd ^C]), sends a signal to the slave process.
+
+  p Overall, this behavior is called the #[em line discipline], and it describes the behavior ("policy") of the terminal device. Recall from the #[a(href="/blog/54") earlier blog post] that the other major component of the tty/terminal subsystem is the terminal driver, which provides an interface to the input and output serial hardware devices ("mechanism"). All operations on a terminal device go through the line discipline interface.
+
+  h5 Line discipline interface
+  p The line discipline interface comprises three functions for normal operation:
+  ul
+    li #[code receive_buf()]: called by the terminal driver to send input to the line discipline
+    li #[code read()]: called by the slave to read from the line discipline (input) buffer
+    li #[code write()]: called by the slave to write to the output buffer; should forward writes to the terminal driver
+  p Additionally, the line discipline should be able to receive #[code ioctl]s to change its behavior, i.e., through the #[code termios] interface described below. This interface is defined in #[code struct tty_ldisc_ops] defined in #[code include/linux/tty_ldisc.h].
+  p The interactions between the line discipline and the tty driver are summarized in the following diagram.
+  +precode('text')
+    | +-----------------+
+    | | process         |
+    | +-----------------+
+    |         |  |
+    | write() |  | read()
+    |         v  v
+    | +-----------------+
+    | | ldisc           |
+    | +-----------------+
+    |         |  ^
+    | write() |  | receive_buf()
+    |         v  |
+    | +-----------------+
+    | | tty driver      |
+    | +-----------------+
+    |         ^    |
+    |         |    |
+    |         |    v
+    | +--------+  +--------+
+    | | input  |  | output |
+    | | serial |  | serial |
+    | | device |  | device |
+    | +--------+  +--------+
+
+  hr
+  h4 Special characters
+  p Before going into specifics about line discipline behavior, we should review special ASCII characters, notation, and common keys.
+  p In ASCII, there are 128 characters. Characters 0-31 are special, non-printable characters. Characters 32-127 are printable characters. Any character with the parity bit set (characters 128-255) are not valid ASCII and may be handled normally or filtered out using terminal settings (e.g., #[code ignpar], #[code inpck]).
+  p In this section we focus on the low 32 characters. Each of these characters can be entered with a control sequence; for example, ASCII 0x01 can be entered using #[kbd Ctrl]+#[kbd A]; we denote this using Emacs notation as #[kbd ^A]. Some keys on the keyboard are mapped to special keys, such as #[kbd Enter] being mapped to #[kbd ^M]. Important special characters are summarized in the below table; a more comprehensive table can be found #[a(href="https://www.cisco.com/c/en/us/td/docs/ios/12_4/cfg_fund/command/reference/cfnapph.html") here].
+  table
+    thead
+      tr
+        th ASCII
+        th Name
+        th Key
+    tbody
+      tr
+        td 0x00
+        td null
+        td #[kbd ^@]
+      tr
+        td 0x03
+        td break/interrupt
+        td #[kbd ^C]
+      tr
+        td 0x08
+        td backspace
+        td #[kbd ^H]
+      tr
+        td 0x0A
+        td line feed (LF)
+        td #[kbd ^J]
+      tr
+        td 0x0D
+        td carriage return (CR)
+        td #[kbd ^M] or #[kbd Enter]
+      tr
+        td 0x1B
+        td escape
+        td #[kbd ^[] or #[kbd Esc]
+      tr
+        td 0x7F
+        td delete
+        td #[kbd ^?] or #[kbd Bksp]
+
+  p The #[kbd ^H], #[kbd ^J], and #[kbd ^M] characters are understood by a terminal console driver; they are commands to move the cursor left, down, and to the beginning of a line, respectively. The #[kbd ^J] character signals the end of a line in canonical mode. The #[kbd ^?] character is used to delete backwards in canonical mode. The #[kbd ^C] character is used to send the SIGTERM signal when #[code isig] is enabled.
+  p There may be some confusion around the #[kbd Enter] (which produces a carriage return rather than a newline character) and #[kbd Bksp] (which produces a delete key rather than a backspace key). I believe it is mostly historical significance but am not too sure. The mixup between #[kbd ^M] (produced by #[kbd Enter]) and #[kbd ^J] (universally understood by Linux to mean end-of-line) is common enough that a common terminal setting exists to convert #[kbd ^M] to #[kbd ^J] called #[code icrnl].
+
+  hr
+  h4 Canonical mode
+  p In #[a(href="https://www.gnu.org/software/libc/manual/html_node/Canonical-or-Not.html") canonical mode] (a.k.a., cooked mode), special characters may be used to provide editing within a line. Usually these are the #[em erase] (default #[kbd ^?] or #[kbd Bksp]) and #[em kill] (default #[kbd ^U]) keys, which erase the last character and the whole line, respectively.
+  p Since you can edit a line, a read operation on a terminal in canonical mode will not complete until the end of line is reached (#[kbd ^J] is sent). Similarly, no more than one line will be sent for any read command, no matter how many bytes are requested.
+  p The opposite of cooked mode is called raw mode. In raw mode, reads return as soon as there is data (possibly throttled for performance), and the erase and kill characters have no special meaning.
+
+  h5 Quirks of canonical-mode line-based editing
+  p The line discipline uses a 4KB ringbuffer (by default) to manage data. In canonical mode, data is not sent to the application until a line feed (#[kbd ^J]) character is written to the input buffer.
+  p One aspect of this behavior is that when a program reads input from a cooked-mode terminal, the read call doesn't finish until the LF character is sent. A call to #[code getchar()] in libc would not instantly return once a character is inputted, unless the character was a line feed; instead, it would read the entire line and return the first byte of the terminal buffer.
+  p Having a fixed-size line editing buffer also means that extra characters are discarded once the buffer is exhausted. If the input buffer is full, future characters are still processed (signals, echoing, etc.) but new characters will be lost. #[a(href="https://man7.org/linux/man-pages/man3/termios.3.html") #[code termios(3)]] documents this behavior. We can observe this by entering more than 4096 characters of input#[+footnote 4096 characters is a lot of typing... easier to generate a long text file and copy-paste it into stdin.] for a program reading from stdin in cooked mode, and checking how many characters are actually received.
+  p Note that this buffer overflow can also happen in raw mode if the buffer is not emptied quickly enough.
+
+  hr
+  h4 Echo functionality
+  p Usually, when interacting with a terminal, we are able to see each character that we type. This is called echoing; it works by "echoing" (copying) each byte from the input buffer to the output buffer, so that it gets displayed.
+  p When we type characters into the terminal with echoing enabled, the characters are normally also written onto the output buffer and displayed onto the console. For printable characters, this does exactly what we expect. What happens for non-printable (control characters)?
+  p Control characters will be printed out in Emacs notation (e.g., "^@" for #[kbd Ctrl]+#[kbd 2]). The special characters are escaped before being echoed to the output buffer. The slave side receives the unescaped characters, and any special characters written to output buffer are not escaped automatically.
+  p Some control keys will be handled specially in cooked mode and thus not be printed, such as #[kbd ^?].
+  p Echoing can also be disabled (e.g., when entering passwords) using the #[code termios] interface.
+
+  hr
+  h4 Configuring terminal devices in Linux
+  p Terminal devices in Linux can be configured using the #[code termios] C interface. This interface exposes the #[code tcgetattr()]/#[code tcsetattr()] functions to fetch and set the terminal configuration via #[code ioctl()]s, respectively. The terminal configuration exists as a set of flags that define the terminal behavior; some sample flags from the #[code termios] interface are shown below:
+  ul
+    li #[strong INPCK]: Disable parity check for input characters (allows non-ASCII characters).
+    li #[strong ICRNL]: Convert carriage return (CR) characters to line feed (line feed) characters. This is commonly enabled since the #[kbd Enter]/#[kbd Return] key is ommonly mapped to CR, but the terminal uses LF characters to represent the mark the end of a line.
+    li #[strong ICANON]: Enable canonical mode.
+    li #[strong ECHO]: Enable echoing.
+
+  p While the termios interface may be useful when writing a C program that manages terminal properties (e.g., if you are a program like #[code bash]), then using the C interface directly is fine. However, the #[code stty] interface is a useful shell utility to change terminal properties on command. For example, we can enable echoing using #[code stty echo], disable echoing using #[code stty -echo], enable raw mode using #[code stty raw], and enable cooked mode using #[code stty cooked]. There are many more options available to match much of the #[code termios] interface; see the manpages for #[a(href="https://man7.org/linux/man-pages/man3/termios.3.html") #[code termios(3)]] and #[a(href="https://man7.org/linux/man-pages/man1/stty.1.html") #[code stty(1)]].
+  
+  hr
+  h4 Experiment with #[code sh] rather than #[code bash]
+  p If you try and experiment with terminal features on your own using the #[code stty] shell command, you may have unexpected results if using the #[code bash] shell. At least, it will be unexpected if you don't understand what #[code bash] does under-the-hood (as I didn't); most of the time, the good ol' Bourne shell #[code sh] will give the expected result.
+  p To give a simple illustration, try entering the following experiments in #[code bash] and #[code sh]. The following experiments are all done in raw mode, by first entering #[code stty raw] #[kbd Enter] into the shell#[+footnote You can also try them in cooked mode without doing #[code stty raw] beforehand, although the results will probably be expected. Understanding how the shell interacts in raw mode was the difficult part for me.] #[+footnote I am following the Emacs notation for control keys to avoid any ambiguity in the examples shown, as the #[kbd Ctrl]+#[kbd C] could look like a sequence of three characters rather than a keyboard combination.].
+  ol
+    li #[kbd ^C] #[code whoami] #[kbd Enter]
+    li abc #[kbd Bksp]
+    li #[code cat -A] #[kbd Enter] #[kbd ^C] #[code abc] #[kbd Bksp]
+    li #[code cat -A] #[kbd ^J] #[kbd ^C] #[code abc] #[kbd Bksp]
+  p Here are my results:
+  ol
+    li
+      | #[code bash]:
+      +precode('text')
+        | $ ^C
+        | $ whoami
+        | jon
+        |    $
+      | #[code sh]:
+      +precode('text')
+        | $ ^Cwhoami^M
+    li
+      | #[code bash]:
+      +precode('text')
+        | $ ab
+      | #[code sh]:
+      +precode('text')
+        | $ abc^?
+    li
+      | #[code bash]:
+      +precode('text')
+        | $ cat -A
+        | ^C^Caabbcc^?^?
+      | #[code sh]:
+      +precode('text')
+        | $ cat -A^M^Cabc^?
+    li
+      | #[code bash]:
+      +precode('text')
+        | $ cat -A
+        | ^C^Caabbcc^?^?
+      | #[code sh]:
+      +precode('text')
+        | $ cat -A^J^C^Caabbcc^?^?
+
+  p Phew! There's a lot of nuance here. Before going through each example, it'll be easier if I provide the overall reason for the differences upfront: #[code bash] changes the terminal settings when prompting the user for a command. That is, it provides nice line-editing features via user-level software, and not via the terminal itself. However, before #[code exec]-ing a program (e.g., #[code cat], it restores the terminal settings. #[code sh] doesn't provide any custom line editing semantics in the prompt, so we see the truer terminal behavior. To summarize, #[code bash] overrides the terminal settings in the command prompt, while #[code sh] doesn't#[+footnote If you want to see exactly what #[code bash] does, you can run any of the above examples #[code strace bash]. Look for #[code ioctl]s being sent to the terminal device used to set terminal settings before handling prompt input, and to reset terminal settings before executing a command. When reading the command prompt, #[code bash] enables raw mode and disables echoing for the prompt, and handles the raw-mode input directly.]; however, both share the same behavior within a program executed by the shell.
+
+  p Another thing we need to look into is exactly what #[code stty raw] does, since it turns a number of terminal flags. Looking at the manpage for #[a(href="https://man7.org/linux/man-pages/man1/stty.1.html") #[code stty(1)]], we see that the #[code raw] option is shorthand for:
+  +precode('text') -ignbrk -brkint -ignpar -parmrk -inpck -istrip -inlcr -igncr -icrnl -ixon -ixoff -icanon -opost -isig -iuclc -ixany -imaxbel -xcase min 1 time 0
+  p That's a handful, but the main options we care about are:
+  ul
+    li #[strong -icanon]: Turn off canonical line editing.
+    li #[strong -isig]: Turn off signal processing (e.g., don't handle #[kbd ^C]).
+    li #[strong -icrnl]: Disable CR->LF translation.
+  p Setting just these options rather than #[code stty raw] should provide (almost) identical output. That should be enough to go through these examples.
+  ol
+    li
+      p In the #[code bash] example, #[kbd ^C] still sends the SIGTERM signal despite the #[strong -isig] flag#[+footnote Note that in the command prompt, #[kbd ^C] does not send any signal, since no program is currently being executed by the shell. Instead, it cancels the current prompt. In other words, shell programs set a SIGTERM signal handler to cancel the current prompt. This is not relevant to the question at hand, I just found it interesting because it was not something I had thought about previously.]. A new prompt is entered, and the command #[code whoami] is entered and executed by pressing #[kbd Enter], which actually sends a #[kbd ^M] character that #[code bash] translates to #[kbd ^J] despite the #[code -icrnl] flag being set. Note that the following prompt is indented; this is due to the #[code -opost] flag that is also set by #[code stty raw].
+      p In the #[code sh] equivalent, the story is much simpler. The #[kbd ^C] does not send a signal and is not treated specially. #[code whoami] is entered, followed by a #[kbd ^M], which is also not treated specially. No command is executed becuase #[kbd ^J] is not sent.
+    li
+      p This one is pretty clear. #[code bash] implements its own editing semantics. #[code sh] doesn't, and thus the #[kbd ^?] character that is sent when pressing #[kbd Bksp] is not treated as a special character.
+    li
+      p Now, we introduce a subprocess spawned by the shell that will read from the terminal. #[code cat -A] echoes special characters using the Emacs carat notation.
+      p In the #[code bash] version, after pressing #[kbd Enter] we execute teh #[kbd cat] command, and it begins listening for input. The #[kbd cat] command doesn't implement any line editing like #[code bash], so it simply receives each character from the terminal and echoes it out. Since the terminal is in raw mode, the terminal returns characters one-by-one rather than waiting for the end of the line, hence the repeated characters; it also does not handle #[kbd ^C] and #[kbd Bksp] specially.
+      p In the #[code sh] version, we might expect the same, except for one caveat: the #[kbd Enter] command sends #[kbd ^M], not #[kbd ^J], so we do not actually execute the #[code cat] command. Recall that #[kbd Enter] doesn't send a newline character if #[code icrnl] is disabled.
+    li
+      p This is almost the same as the previous version, except that we explicitly send #[kbd ^J] rather than #[kbd ^M]/#[kbd Enter].
+  p I apologize for going into this much depth in this section, but #[code bash]'s behavior profoundly confused me at the beginning. My suggestion for messing around with terminal settings is to work in #[code sh] or #[code cat], both of which will not implement line-editing behavior or change terminal settings.
+
+  hr
+  h4 In the Linux kernel
+  ul
+    li #[code include/linux/tty_ldisc.h]: Defines critical data structures #[code struct tty_ldisc] and #[code struct tty_ldisc_ops].
+    li #[code drivers/tty/n_tty.c]: The default ldisc implementation.
+    li #[code drivers/tty/tty_ldisc.c]: ldisc utility functions and wrapper code.
+    li #[a(href="https://man7.org/linux/man-pages/man3/termios.3.html") #[code termios(3)]]: C API to configure terminal settings using #[code ioctl]s.
+    li #[a(href="https://man7.org/linux/man-pages/man1/stty.1.html") #[code stty(1)]]: Shell command to modify terminal settings; usually simpler than using #[code termios].
+
+  hr
+  h4 Resources
+  ul
+    li #[a(href="https://stackoverflow.com/a/44104228") How to read from the terminal "keystrokes buffer"?]: A fantastic dive into a particular example of the shell behavior when interacting with the terminal.
+    li #[a(href="https://stackoverflow.com/q/69198577/2397327") Linux keyboard/terminal/kernel input buffer] #[code N_TTY_BUF_SIZE == 4096] is the default ldisc buffer size.
+    li #[a(href="https://man7.org/linux/man-pages/man3/termios.3.html") termios(3) — Linux manual page]: Interface to set terminal device settings, such as echo.
+    li #[a(href="https://stackoverflow.com/a/23317250/2397327") How does input echoing work in a Linux terminal?]: Summarizes the many responsibilities of the tty subsystem.
+    li #[a(href="https://unix.stackexchange.com/questions/414159/behaviour-of-the-backspace-on-terminal") Backspace in the terminal]
+    li #[a(href="https://unix.stackexchange.com/questions/401010/prevent-the-line-discipline-from-handling-control-characters") Prevent the line discipline from handling control characters]
+    li #[a(href="https://unix.stackexchange.com/questions/239808/how-to-display-control-characters-c-d-differently-in-the-shell") How to display control characters (^C, ^D, ^[, ...) differently in the shell]
+    li #[a(href="https://unix.stackexchange.com/questions/719948/does-the-tty-line-discipline-echo-vertical-arrow-keys") Does the tty line discipline echo vertical arrow keys?]
+    li #[a(href="https://unix.stackexchange.com/a/367086/307410") Why is the terminal sending a CR even though ICRNL is set?]
+    li #[a(href="https://www.cisco.com/c/en/us/td/docs/ios/12_4/cfg_fund/command/reference/cfnapph.html") Appendix: ASCII Character Set and Hexadecimal Values (12.4 CF CR)]: List of ASCII codes and corresponding keyboard input (Emacs escape codes)
+    li #[a(href="http://www.embeddedlinux.org.cn/EssentialLinuxDeviceDrivers/final/ch06lev1sec4.html") Essential Linux Device Drivers: Line Disciplines]
+    li #[a(href="http://marcocorvi.altervista.org/games/lkpe/tty/tty.htm") tty layer]

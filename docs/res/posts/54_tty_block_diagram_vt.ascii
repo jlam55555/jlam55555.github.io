@@ -1,0 +1,29 @@
+Text mode/physical terminal
+
++---------------+  +-----------------+
+| /usr/bin/bash |  | print to screen |
+| process       |  | console driver  |
++---------------+  +-----------------+
+              ^             ^
+ stdin/stdout |             | terminal output buffer
+              |             |
++-------------v-------------|---------+
+| +--------------+  +---------------+ |
+| | /dev/tty5    |  | /dev/tty5     | |
+| | slave driver |  | master driver | |
+| +--------------+  +---------------+ |
+|             vt driver        ^      |
++------------------------------|------+
+                               |
+               keyboard events |
+                               |
+                       +-----------------+
+                       | /dev/event*     |
+                       | input subsystem |
+                       +-----------------+
+                               ^
+                     scancodes |
+                               |
+                       +---------------+
+                       | Keyboard IRQ  |
+                       +---------------+

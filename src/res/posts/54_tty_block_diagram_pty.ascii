@@ -1,0 +1,26 @@
+Graphical mode/pseudoterminal
+
++---------------+           +--------------------+
+| /usr/bin/bash |           | /usr/bin/xterm     |
+| process       |           | terminal emulator  |
++---------------+           +--------------------+
+              ^             ^  |                 ^
+ stdin/stdout |    terminal |  | keyboard events |
+              |     out buf |  |                 |
++-------------v-------------|--v------+  +-------------+
+| +--------------+  +---------------+ |  | X.org event |
+| | /dev/pts/3   |  | /dev/ptmx     | |  | layer       |
+| | slave driver |  | master driver | |  +-------------+
+| +--------------+  +---------------+ |    ^
+|             pty driver              |    | keyboard events
++-------------------------------------+    |
+                                         +-----------------+
+                                         | /dev/event*     |
+                                         | input subsystem |
+                                         +-----------------+
+                                           ^
+                                           | scancodes
+                                           |
+                                         +---------------+
+                                         | Keyboard IRQ  |
+                                         +---------------+

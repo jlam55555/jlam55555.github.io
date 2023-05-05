@@ -1,0 +1,33 @@
++-----------+
+| /bin/bash |
+| shell     |
++-----------+
+  ^
+  | stdin/stdout
+  v
++------------------------+
+| /dev/tty5              |
+| character device layer |
+| in the filesystem      |
++------------------------+
+  ^
+  |
++-v-------------------+ slave side
+| +-----------------+ |
+| | n_tty           | |
+| | line discipline | |
+| +-----------------+ |
+|    ^                |
+|    |                | tty layer
+|    v                |
+| +-----------------+ |
+| | vt              | |
+| | terminal driver | |
+| +-----------------+ |
++-^----------------\--+ master side
+  |                 \
+  | keyboard events  \ terminal output
+  |                   v
++-----------------+  +----------------+
+| keyboard driver |  | console driver |
++-----------------+  +----------------+
