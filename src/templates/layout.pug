@@ -1,36 +1,36 @@
 doctype html
 html
-	head
-		title jlam | #{title}
-		style.
-			html {
-				box-sizing: border-box;
-				margin: 0;
-				padding: 0.5rem;
-			}
-			body {
-				max-width: 400pt;
-				margin: 0 auto;
-				padding: 0;
-			}
-		link(rel='icon' href='/res/favicon.png')
-		meta(name='viewport' content="width=device-width, initial-scale=1.0")
-	body
-		h1 Jonathan Lam
-		p (Recently) Software Engineer @ Google Silicon#[br](Also recently) EE/CS @ The Cooper Union
-		nav
-			a(href="/") Home
-			= " | "
-			a(href="/contact") Contact
-			= " | "
-			a(href="/experience") Experience
-			= " | "
-			a(href="//github.com/jlam55555/resume/raw/master/resume.pdf" target="_blank") Resume
-			= " | "
-			a(href="/blog") Blog
-		hr
+  head
+    title jlam | #{title}
+    style.
+      html {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0.5rem;
+      }
+      body {
+        max-width: 400pt;
+        margin: 0 auto;
+        padding: 0;
+      }
+    link(rel='icon' href='/res/favicon.png')
+    meta(name='viewport' content="width=device-width, initial-scale=1.0")
+  body
+    h1 Jonathan Lam
+    p Core Developer @ Hudson River Trading
+    nav
+      a(href="/") Home
+      = " | "
+      a(href="/contact") Contact
+      = " | "
+      a(href="/experience") Experience
+      = " | "
+      a(href="//github.com/jlam55555/resume/raw/master/resume.pdf" target="_blank") Resume
+      = " | "
+      a(href="/blog") Blog
+    hr
 
-		block content
+    block content
 
-		hr
-		p &copy; Copyright 2023 Jonathan Lam
+    hr
+    p &copy; Copyright 2023 Jonathan Lam

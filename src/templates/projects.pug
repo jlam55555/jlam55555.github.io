@@ -1,27 +1,27 @@
 extends layout
 
 block content
-	h2 Projects
+  h2 Projects
 
-	// table of contents
-	each projs, projType in data
-		h3= projType
+  // table of contents
+  each projs, projType in data
+    h3= projType
 
-		ul
-			each proj, name in projs
-				li
-					a(href="#" + proj.anchor)= name
+    ul
+      each proj, name in projs
+        li
+          a(href="#" + proj.anchor)= name
 
-	hr
+  hr
 
-	// actual list of projects
-	each projs, projType in data
-		each proj, name in projs
-			h3(id=proj.anchor) #{name} (#{proj.year})
+  // actual list of projects
+  each projs, projType in data
+    each proj, name in projs
+      h3(id=proj.anchor) #{name} (#{proj.year})
 
-			each href, text in proj.links
-				p
-					a(href=href)= text
+      each href, text in proj.links
+        p
+          a(href=href)= text
 
-			p !{proj.desc}
-			hr
+      p !{proj.desc}
+      hr

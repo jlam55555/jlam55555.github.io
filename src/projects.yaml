@@ -29,7 +29,7 @@ School projects (EE/CS):
     desc: "CUDB (Cooper Union DataBase; alternatively CUDA++) is a simple document-based, MongoDB-inspired NoSQL database for learning purposes. The database is in the form of a Rust library that supports basic CRUD operations similar to MQL and a document-based data model. CUDB supports basic database features such as indexing using B-trees and persistence, but does not support many advanced features found in commercial DBMSes."
     links:
       Source: https://github.com/jlam55555/cudb
-      API documentation: https://jlam55555.github.io/cudb/cudb/index.html
+      API documentation: /cudb/cudb/index.html
       Report: https://files.lambdalambda.ninja/reports/21-22_fall/ece464_report_cudb.lam_lee_zhang.pdf
       Presentation: https://files.lambdalambda.ninja/reports/21-22_fall/ece464_presentation_cudb.lam_lee_zhang.pdf
   "Simple static analyzer for buffer overflows":
@@ -266,7 +266,7 @@ Hackathons:
     year: 2016
     desc: First hackathon project (LIHacks 2016)! Worked with <a href="https://github.com/All88keys">Chris Vassallo</a> to create a user-guided music generator using common sequences of notes. Won Most Entrepreneurial award.
     links:
-      Demo: https://jlam55555.github.io/ringtune-website/
+      Demo: /ringtune-website/
       Source: https://github:com/jlam55555/ringtune-website
 Commissioned projects:
   Cooper Union EOYS 2021:
@@ -331,7 +331,7 @@ Miscellaneous personal projects:
     year: 2019
     desc: CSS classes as "color filters" using Sass.
     links:
-      Demo: https://jlam55555.github.io/color-layer-generator/examples/example.html
+      Demo: /color-layer-generator/examples/example.html
       Source: https://github.com/jlam55555/color-layer-generator
   Everything is Sheep (EiS):
     anchor: eis
@@ -345,7 +345,7 @@ Miscellaneous personal projects:
     year: 2018
     desc: Anagram finder. Additionally, scrambles words as a game for you to find an anagram.
     links:
-      Demo: http://jlam55555.github.io/unscrambler/
+      Demo: /unscrambler/
       Source: https://github.com/jlam55555/unscrambler
   Blank new tab Chrome extension:
     anchor: blank_new_tab
@@ -365,21 +365,21 @@ Miscellaneous personal projects:
     year: 2018
     desc: Second iteration of a personal website.
     links:
-      Demo: https://jlam55555.github.io/personal-new/
+      Demo: /personal-new/
       Source: https://github.com/jlam55555/personal-new
   Elastic band:
     anchor: elastic_band
     year: 2018
     desc: Playing around with what we learned in physics class. Spring/elastic band simulation using p5/processing.js. Adjustable spring constants.
     links:
-      Demo: https://jlam55555.github.io/elastic-band/
+      Demo: /elastic-band/
       Source: https://github.com/jlam55555/elastic-band
   Gravity points:
     anchor: gravity_points
     year: 2018
     desc: Using what we learned in AP Physics.
     links:
-      Demo: https://jlam55555.github.io/p5-gravity-field/
+      Demo: /p5-gravity-field/
       Source: https://github.com/jlam55555/p5-gravity-field
   Barlow Bowling website:
     anchor: barlow_bowling
@@ -409,14 +409,14 @@ Miscellaneous personal projects:
     year: 2016
     desc: Simple memory game in JS.
     links:
-      Demo: http://jlam55555.github.io/memory-game/
+      Demo: /memory-game/
       Source: https://github.com/jlam55555/memory-game
   Tic Tac Toe:
     anchor: ttt_js
     year: 2016
     desc: Simple JS tic tac toe. Doesn't play very well.
     links:
-      Demo: https://jlam55555.github.io/tic-tac-toe/
+      Demo: /tic-tac-toe/
       Source: https://github.com/jlam55555/tic-tac-toe
   rps-random:
     anchor: rps
@@ -435,14 +435,14 @@ Miscellaneous personal projects:
     year: 2016
     desc: If you copy HTML from a webpage using Ctrl+C, you can paste it into this input box (using Ctrl+V) and get the underlying HTML. Handy little tool.
     links:
-      Demo: https://jlam55555.github.io/paste-to-html/
+      Demo: /paste-to-html/
       Source: https://github.com/jlam55555/paste-to-html
   Word visualizer:
     anchor: word_vis
     year: 2016
     desc: Save image as text! Also change font family, size, (some) lighting, letter colors, and more! Can be used to imitate simple text-only logos.
     links:
-      Demo: https://jlam55555.github.io/word-visualizer/
+      Demo: /word-visualizer/
       Source: https://github.com/jlam55555/word-visualizer
   htmldebug:
     anchor: htmldebug
@@ -455,7 +455,7 @@ Miscellaneous personal projects:
     year: 2016
     desc: My second attempt at revamping the original Nutmeg Bowl of Fairfield website. They didn't accept it.
     links:
-      Demo: https://jlam55555.github.io/nutmegbowl/
+      Demo: /nutmegbowl/
       Source: https://github.com/jlam55555/nutmegbowl
   jkcd:
     anchor: jkcd
@@ -474,7 +474,7 @@ Miscellaneous personal projects:
     year: 2016
     desc: Imitation of the original game of the same name.
     links:
-      Demo: http://jlam55555.github.io/pop-the-lock/
+      Demo: /pop-the-lock/
       Source: https://github.com/jlam55555/pop-the-lock
   Real coding time:
     anchor: real_coding_time
@@ -494,21 +494,21 @@ Miscellaneous personal projects:
     year: 2016
     desc: Fun tool to make strings of text out of periodic element boxes. I used this to make a Christmas tree out of some Christmas song for Honors Chemistry.
     links:
-      Demo: http://jlam55555.github.io/periodic-letters/
+      Demo: /periodic-letters/
       Source: https://github.com/jlam55555/periodic-letters
   Balencistry:
     anchor: balencistry
     year: 2016
     desc: Visual aid to help when balancing chemical equations for Honors chemistry.
     links:
-      Demo: http://jlam55555.github.io/balencistry/
+      Demo: /balencistry/
       Source: https://github.com/jlam55555/balencistry
   Personal website (v1):
     anchor: website_v1
     year: 2015
     desc: First iteration of a personal website.
     links:
-      Demo: https://jlam55555.github.io/personal-old/
+      Demo: /personal-old/
       Source: https://github.com/jlam55555/personal-old
   Chat:
     anchor: chat
@@ -522,21 +522,21 @@ Miscellaneous personal projects:
     year: 2015
     desc: Aimed to help my sister win the regional Spelling Bee (which she did!). Playing around with the voice using the native <a href="https://blog.teamtreehouse.com/getting-started-speech-synthesis-api">JS speech synthesis API</a>.
     links:
-      Demo: http://jlam55555.github.io/speller/
+      Demo: /speller
       Source: https://github.com/jlam55555/speller
   Planetary:
     anchor: planetary
     year: 2015
     desc: Fun little visual. Props to <a href="https://www.hunterlightman.com/">Hunter Lightman</a> for the visuals and showing me how to use trig to animate circles with code for the first time.
     links:
-      Demo: http://jlam55555.github.io/planetary/
+      Demo: /planetary
       Source: https://github.com/jlam55555/planetary
   Flappy:
     anchor: flappy
     year: 2015
     desc: Naive attempt at Flappy bird. Buggy but kind of fun.
     links:
-      Demo: http://jlam55555.github.io/flappy/
+      Demo: /flappy
       Source: https://github.com/jlam55555/flappy
   (Early attempts at) Project Euler in JS:
     anchor: pe_js
@@ -549,7 +549,7 @@ Miscellaneous personal projects:
     year: 2014
     desc: First website presented to peers. Calculator tools (in JS), and an explanation of how HTML/CSS/JS/PHP fit together to form a website.
     links:
-      Demo: https://jlam55555.github.io/programath/
+      Demo: /programath
 Experimental:
   "laos: LAm OS":
     anchor: laos
@@ -557,7 +557,9 @@ Experimental:
     desc: An experimental operating system for learning purposes. Developed for the x86_64 platform using the QEMU virtualization software. At the time of writing, this uses the Limine bootloader and I'm working on developing very simple text-mode terminal/keyboard/screen drivers. Very much a work in progress!
     links:
       Source: https://github.com/jlam55555/laos
-      Blog post (Linux tty subsystem): https://lambdalambda.ninja/blog/54/
+      Blog post (tty architecture): /blog/54
+      Blog post (kbd driver): /blog/55
+      Blog post (tty ldisc): /blog/56
   Flexible game library:
     anchor: bge
     year: 2022
