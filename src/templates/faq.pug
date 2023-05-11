@@ -1,86 +1,87 @@
 extends layout
 
 block content
-        h2 FAQ
-        h3 You're a web developer? Why is your website sh*t?
-        p From prior experience, I'm not skilled with UI/UX. I'll leave it to the design gurus when possible.
-        p This is also a design choice, because simplicity has its benefits:
-        ul
-                li cheap on network data and processing power (see: #[a(href='https://developers.google.com/amp') Google AMP])
-                li brings on the nostalgia of #[a(href="http://info.cern.ch/hypertext/WWW/TheProject.html") the web when it was cool]
-                li less distracting (naturally minimalist?)
-                li relatively mobile-friendly
-                li this website runs on anything (like NetBSD, but on browsers -- this looks great on #[a(href='https://en.wikipedia.org/wiki/W3m') w3m]!)
-        p While SPAs are great, I think they're starting to become an anti-pattern as they become the norm, even and especially for small academic projects that would do better with much less. Thus I regress.
+  h2 FAQ
+  h3 You're a web developer? Why is your website shit?
+  p I used to call myself a web developer, but the sum of my experience in that field has led me to conclude that I am a terrible designer. I'll leave UI/UX to the professionals when possible.
+  p But for my purposes, simplicity is a design choice with its own benefits:
+  ul
+    li cheap on network data and processing power (see: #[a(href='https://developers.google.com/amp') Google AMP])
+    li brings on the nostalgia of #[a(href="http://info.cern.ch/hypertext/WWW/TheProject.html") the web when it was cool]
+    li less distracting (naturally minimalist?)
+    li relatively mobile-friendly
+    li this website runs on anything (like NetBSD, but on browsers -- this looks great on #[a(href='https://en.wikipedia.org/wiki/W3m') w3m]!)
+  p While SPAs are great, I think they're starting to become an anti-pattern as they become the norm, even and especially for small academic projects that would do better with much less. Thus I regress.
+  p It was brought to my attention that #[a(href="http://motherfuckingwebsite.com/") this website] exists, which affirms a lot of the points outlined above.
 
-        h3 Why are the margins so big?
-        p See: #[a(href="https://tex.stackexchange.com/questions/71172/") Why are the default LaTeX margins so big?]
+  h3 Why are the margins so big?
+  p See: #[a(href="https://tex.stackexchange.com/questions/71172/") Why are the default LaTeX margins so big?]
 
-        h3 How can I contact you?
-        p See the <a href="/contact">Contact page</a>.
+  h3 How can I contact you?
+  p See the <a href="/contact">Contact page</a>.
 
-        h3 Fun facts?
-        p (These are several of my canned responses for icebreaker sessions, because I am bad with discovering new facts about myself on the spot.)
+  h3 Fun facts?
+  p (These are several of my canned responses for icebreaker sessions, because I am bad with discovering new facts about myself on the spot.)
 
-        ul
-          li Recent ViM to Emacs convert
-          li Four handshakes from Napoleon (see: #[a(href="https://www.princeton.edu/news/2020/04/14/mathematician-john-horton-conway-magical-genius-known-inventing-game-life-dies-age") John Conway])
-          li Colemak typist!
-          li We have #[strike ten] eight "pets" at home (if you count chickens)
+  ul
+    li Recent ViM to Emacs convert
+    li Four handshakes from Napoleon (see: #[a(href="https://www.princeton.edu/news/2020/04/14/mathematician-john-horton-conway-magical-genius-known-inventing-game-life-dies-age") John Conway])
+    li Colemak typist!
+    li We have #[strike ten] eight "pets" at home (if you count chickens)
 
-        h3 How do you look?
-        p #[a(href='/res/me.jpg') A recent picture.]
+  h3 How do you look?
+  p #[a(href='/res/me.jpg') A recent picture.]
 
-        h3 Code style convention?
-        strike
-          p For JavaScript: #[a(href="https://github.com/mrdoob/three.js/wiki/Mr.doob's-Code-Style%E2%84%A2") Mr.doob's Code Style #[sup &trade;]].
-          p For most others (mostly C-family languages): <a href="https://www.kernel.org/doc/html/latest/process/coding-style.html">Linux Kernel style guide</a>.
-        p I have become less rigid over time with coding conventions, especially after encountering functional languages such as Haskell (which are very opinionated).
-        p In general, it will most likely depend on the project or the language (#[a(href="https://golang.org/pkg/cmd/gofmt/") gofmt] is a good example of this). When in doubt: agree with your team on an IDE/formatting tool and use the auto-format feature. And when you have a project involving multiple languages: good luck. For example, Google has its own sets of style guides for each major language used, and sometimes they can conflict (e.g., names for global constants are #[code kConstantName] in C++ and #[code CONSTANT_NAME] in Python).
-        p 80 characters is also a good convention for most code, but gets unreasonable with unstructured data (e.g., markup languages).
+  h3 Code style convention?
+  strike
+    p For JavaScript: #[a(href="https://github.com/mrdoob/three.js/wiki/Mr.doob's-Code-Style%E2%84%A2") Mr.doob's Code Style #[sup &trade;]].
+    p For most others (mostly C-family languages): <a href="https://www.kernel.org/doc/html/latest/process/coding-style.html">Linux Kernel style guide</a>.
+  p I have become less rigid over time with coding conventions, especially after encountering functional languages such as Haskell (which are very opinionated).
+  p In general, it will most likely depend on the project or the language (#[a(href="https://golang.org/pkg/cmd/gofmt/") gofmt] is a good example of this). When in doubt: agree with your team on an IDE/formatting tool and use the auto-format feature. And when you have a project involving multiple languages: good luck. For example, Google has its own sets of style guides for each major language used, and sometimes they can conflict (e.g., names for global constants are #[code kConstantName] in C++ and #[code CONSTANT_NAME] in Python).
+  p 80 characters is also a good convention for most code, but gets unreasonable with unstructured data (e.g., markup languages).
 
-        h3 Favorite language(s)?
-        p 1) LISP. 2) OCaml. 3) Haskell.
+  h3 Favorite language(s)?
+  p 1) LISP. 2) OCaml. 3) Haskell.
 
-        p (C and JavaScript used to be on this list, but the annoyances of C and the idiosyncraries of JS have pushed them off.)
+  p (C and JavaScript used to be on this list, but the annoyances of C and the idiosyncraries of JS have pushed them off.)
 
-        h3 Languages you want to learn?
-        p #[strike 1) Golang. 2) Rust.] Learned these languages since initially writing these. Now mostly interested in Haskell, Scala, and other FP languages.
+  h3 Languages you want to learn?
+  p #[strike 1) Golang. 2) Rust.] Learned these languages since initially writing these. Now mostly interested in Haskell, Scala, and other FP languages.
 
-        h3 Least favorite language(s)?
-        p MATLAB. Bash.
+  h3 Least favorite language(s)?
+  p MATLAB. Bash.
 
-        p (Python used to be on this list, but the world has coerced me to like it more. The Python code written by others (especially data science researchers) is probably the worst code I've read though.)
+  p (Python used to be on this list, but the world has coerced me to like it more. The Python code written by others (especially data science researchers) is probably the worst code I've read though.)
 
-        h3 Favorite color?
-        p Blue.
+  h3 Favorite color?
+  p Blue.
 
-        h3 Favorite OS?
-        p FreeBSD for experimenting with/learning about the OS.
-        p Arch Linux for average screwing around and speed.
-        p Debian for overall stability and support.
-        p Fedora for being having all the consumer applications immediately ready.
+  h3 Favorite OS?
+  p FreeBSD for experimenting with/learning about the OS.
+  p Arch Linux for average screwing around and speed.
+  p Debian for overall stability and support.
+  p Fedora for being having all the consumer applications immediately ready.
 
-        h3 Hardware and OS setup
-        p At one point I was more ambitious. Now I stick to my humble 2017 Acer Spin 3 for most of my computing needs, which runs Arch Linux. If I need to mess around with other hardware, I usually use Debian.
+  h3 Hardware and OS setup
+  p At one point I was more ambitious. Now I stick to my humble 2017 Acer Spin 3 for most of my computing needs, which runs Arch Linux. If I need to mess around with other hardware, I usually use Debian.
 
-        h3 Hobbies?
-        ul
-                li #[a(href="http://typeracerdata.com/profile?username=jlam55555") typing] and #[a(href="http://typeracerdata.com/profile?username=jlam55555colemak") more typing]
-                li bowling
-                li reading xkcd
-                li the occasional hackathon
-                li Rubik's speedcubing
-                li typing races
-                li (vintage) fountain pens
-                li biking/bike maintenance
+  h3 Hobbies?
+  ul
+    li #[a(href="http://typeracerdata.com/profile?username=jlam55555") typing] and #[a(href="http://typeracerdata.com/profile?username=jlam55555colemak") more typing]
+    li bowling
+    li reading xkcd
+    li the occasional hackathon
+    li Rubik's speedcubing
+    li typing races
+    li (vintage) fountain pens
+    li biking/bike maintenance
 
-        h3 Reading list?
-        p #[a(href='/readinglist') OK].
+  h3 Reading list?
+  p #[a(href='/readinglist') OK].
 
-        h3 Tell me more about this website?
-        p #[a(href='/blog/1/') OK].
+  h3 Tell me more about this website?
+  p #[a(href='/blog/1/') OK].
 
-        h3 Strange website issues?
-        p If the webpages look inconsistent (e.g., the navbar is different between pages), this is likely due to caching by the Fastly CDN. Sit tight for a few minutes or (for the impatient) add a query parameter. There shouldn't be any server errors except 404, since everything is static.
-        p If in doubt, feel free to #[a(href='/contact') contact me].
+  h3 Strange website issues?
+  p If the webpages look inconsistent (e.g., the navbar is different between pages), this is likely due to caching by the Fastly CDN. Sit tight for a few minutes or (for the impatient) add a query parameter. There shouldn't be any server errors except 404, since everything is static.
+  p If in doubt, feel free to #[a(href='/contact') contact me].
