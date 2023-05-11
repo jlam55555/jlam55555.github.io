@@ -235,3 +235,7 @@
   destination: 57
   title: Coming-of-age stories
   date: 2023-05-09T12:47:49-07:00
+- template: ../posts/58
+  destination: 58
+  title: "Understanding the tty subsystem: Data structures"
+  date: 2023-05-10T23:12:07-07:00
