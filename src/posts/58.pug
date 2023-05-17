@@ -1,25 +1,67 @@
 extends blogpost
 
 block post
-  p Post is a work in progress.
-  p Summary
+  +codestyle
+
+  p This is part three of the discussion on the tty subsystem (#[a(href="/blog/54") part 1], #[a(href="/blog/56") part 2]). Here we cover two essential data structures that are useful for providing efficient and reliable buffering#[+footnote I wanted to write about this because I had trouble understanding the design and implementation of both of these data structures. I was only able to find vague explanations of them online. Reading the Linux source code gave me a much more concrete understanding of the data structures, and I hope to summarize what I learned here for those in the same position as me.].
+  p Recall the architecture of the tty subsystem for the input path. When the hardware device receives an input event, the tty driver sends this event to the tty line discipline. The process can then read input from the line discipline.
+  p There are two use cases for buffering. The line discipline may require significant processing, so we may not want to call it directly from the tty driver, which will often be probably in interrupt context. Thus, we require some buffering to quickly store input from the tty driver, and defer the flushing of this buffer to the line discipline outside of interrupt context. This buffering mechanism is implemented using the #[em flip buffer] data structure.
+  p We also require a buffer to store data in the line discipline before it is read by the process. To maximize line size, we use a ringbuffer (fixed-size queue) to implement the #[em line buffer]. We also need to handle both raw and canonical mode.
+  p Both buffering methods are best-effort#[+footnote The input path must be best-effort because we cannot the producer can't sleep if the consumer can't keep up. On the output path, the producer can sleep or defer output if the output buffer is currently full.]. If the flip buffers don't get a chance to flush to the line discipline before they fill up, then data is lost before it reaches the line discipline. Similarly, if the line buffer is filled at a rate faster than #[code read()]s from the slave process empty it, then data will be lost before it is sent to the process#[+footnote Data loss also happens if the line length is longer than the line buffer size in canonical mode, but this is a byproduct of the canonical mode protocol.].
+  p Note that the flip-buffering is an optimization used to keep interrupt-context execution short, whereas the line buffer is necessary to buffer data for subsequent calls to #[code read()] on the tty device.
 
   hr
   h4 Flip buffers
-  p Understanding the problem
-  h5 Overview of flip buffers
-  p Relationship to triple-buffering
-  h5 Extending past two
+  p Flip buffers provide a simple best-effort mechanism for a producer-consumer queue, with minimal need for synchronization. The idea is that we use two buffers: one for receiving data, and one for reading data#[+footnote This sounds like the #[a(href="https://en.wikipedia.org/wiki/Multiple_buffering") multiple buffering] technique used in graphics rendering, but the motivation and side-effects are not quite the same. Both involve a separate consumer/producer buffer that allow for parallel producer and consumer action. Multiple buffering is used to reduce visual artifacts due to combining multiple frames in one framebuffer. Flip buffers are used on an inherently serial data stream to reduce latency of the producer code (running in interrupt context). However, loss of coordination between producer and consumer is normal and expected when rendering, causing frame drops; but a slower consumer than producer in the flip buffers causes data loss. Luckily, this is typically tolerable or unlikely for serial devices.]. Since the producer and consumer operate on separate arrays, synchronization is minimized (the producer and consumer only need to agree on which buffer is the producer/consumer buffer).
+  p Input events fill up the producer buffer; once it is full, the producer buffer is marked as full. If the consumer buffer is empty, then we can swap the producer and consumer buffers, so that new input events will go into the new producer buffer (which was previously the consumer buffer), and the consumer will be notified that data is available to read. If the consumer buffer is not empty, then we cannot swap the buffers yet, and any new data will be lost.
+  p Conversely, the tty ldisc reads from the consumer buffer. Once it is empty, the consumer buffer is marked as empty. If the producer buffer is full, then we can swap the producer and consumer buffers, and the ldisc can continue reading from the new consumer buffer (which was previously the producer buffer).
+  p Under normal operation, we hope that the consumer can read data from the consumer buffer faster than the producer fills up the new producer buffer, so that we don't have data loss. What actually happens depends heavily on the nature of the serial input device (e.g., producing very intermittent data such as a keyboard device, or a higher-frequency serial device), the size of the flip buffers, and the nature of the consumer (e.g., how much processing goes on in the tty ldisc consumer). The process of "notifying" the consumer that data is available is usually done by scheduling the producer, so scheduling latency will also have to be considered.
+
+  p To improve the reliability of flip-buffering, Linux uses more than two flip-buffers. There exists a pool of flip buffers that may be used. One is always chosen as the producer buffer; once the producer buffer is full, it is pushed onto a queue (linked list) of consumer buffers for the consumer to process. Data is only lost if the flip buffer pool is exhausted.
+
+  //- TODO: illustration of operation
+
+  p To see the action of line buffers in action in Linux, it is instructive to look at the #[code flush_to_ldisc()] function in #[code drivers/tty/tty_buffer.c]. This is the function that asynchronously flushes data to the line discipline when there is data available, and it demonstrates how to walk the buffer chain.
 
   hr
-  h4 Line (ring)buffer
-  p Understanding the problem
-  h5 Commit head and tail
-  h5 Canonical head
+  h4 Line buffer
+  p The line discipline maintains a queue to buffer terminal input before it is read. A ringbuffer is used; any incoming data from the flip buffers is stored at the #[em commit head] pointer, and the head pointer is then advanced. Data is read from the #[em read tail] pointer. If the buffer is full (#[code head == tail-1]), no additional data will be written to the buffer. If the buffer is empty (#[code head == tail]), then any calls to #[code read()] will block until new data comes in.
+
+  p In raw mode, reads occur between at the tail up to the commit head. In canonical mode, we need additional provisions to handle line-editing. To do this, we have another pointer, called the #[em canonical head] pointer. This points to the latest newline character (start of the latest line in the header). Characters before this pointer are finalized, so reads now happen until the read tail reach the canonical head. Characters between the canonical head and the commit (raw-mode) head can be edited using line-editing characters such as #[kbd C-?] (erase last character)  and #[kbd C-U] (kill whole line).
+
+  //- TODO: illustration of behavior
+
+  p It is very instructive to look at the #[code n_tty_receive_buf()] and #[code n_tty_read()] API functions in #[code drivers/tty/n_tty.c], where the default line discipline is implemented. #[code n_tty_receive_buf()] implements the filling of the buffer, and #[code n_tty_read()] implements the emptying of the buffer. For example, see the following excerpt, which is called by #[code n_tty_read()] in canonical mode:
+  +precode('c')
+    include ../res/posts/58_canon_copy_from_read_buf.c
+  p Breaking this down...
+  ol
+    li #[code canon_head = smp_load_acquire(&ldata->canon_head);] Get the current (published#[+footnote An #[a(href="https://stackoverflow.com/a/24565699/") acquire-release memory ordering model] is used here for multi-core synchronization.]) canonical head pointer.
+    li #[code n = min(*nr, canon_head - ldata->read_tail);] We assign #[code n] to be the number of number of bytes we read. This is the minimum of the requested bytes (#[code *nr]) and the available bytes in the line buffer (#[code canon_head - read_tail]). Note that the #[code canon_head] and #[code read_tail] variables are actually monotonic integers and do not wrap around, so the difference should always be positive. We get their positions in the line buffer by using a #[code 0xfff] mask (since the line buffer is 4096 bytes).
+    li #[code tail = ldata->read_tail & (N_TTY_BUF_SIZE - 1);] Perform the masking as described above to get the tail pointer's position in the line buffer.
+    li #[code size = min_t(size_t, tail + n, N_TTY_BUF_SIZE);] The end of the read operation, assuming no wraparound. We will deal with the wraparound shortly.
+    li #[code eol = find_next_bit(ldata->read_flags, size, tail);] Get the position of the first newline in the range #[code &lsqb;tail, size&rsqb;]. Newlines are marked using the #[code ldata->read_flags] bitmap. We need to know this because we return at maximum one line at a time in canonical mode. If there is wraparound and we haven't found the end of the line, we look for it in the wrapped portion (this comes a few lines later).
+    li #[code more = n - (size - tail);] #[code (size-tail)] is the size of the unwrapped bytes to read. #[code more] is the size of the wrapped bytes to read.
+    li #[code found = ...;] #[code found] is true iff a newline is found in the first #[code n] bytes. The definition of #[code found] depends on whether a newline was found in the unwrapped section or in the wrapped section.
+    li #[code n = eol - tail;] If we've found a newline character in the first #[code n] bytes, stop reading at that newline character. (If #[code found] is false, then #[code eol == size+more] and the value of #[code n] shouldn't change.)
+    li #[code if (n > N_TTY_BUF_SIZE) n += N_TTY_BUF_SIZE;] If there was wraparound, then #[code n] will be negative, hence this correction. We check if it is #[code > N_TTY_BUF_SIZE] rather than checking if it is less than zero because #[code n] is an unsigned integer.
+    li #[code c = n + found;] #[code c] is the number of bytes to be removed from the buffer, including the newline (if #[code found]).
+    li #[code tty_copy(tty, *kbp, tail, n);] Perform a ringbuffer copy from #[code tail] with length #[code n] to the output buffer #[code *kbp].
+    li #[code *kbp += n;] Update the position of the pointer in the output buffer.
+    li #[code *nr -= n;] Update the number of bytes remaining from the originally requested read size.
+    li #[code if (found) clear_bit(eol, ldata->read_flags);] Clear the newline from the bitmap (if #[code found]).
+    li #[code smp_store_release(&ldata->read_tail, ldata->read_tail + c);] Update the read tail pointer, discarding the next #[code c] bytes. Publish this using acquire-release semantics.
+    li #[code return ldata->read_tail != canon_head;] Returns #[code true] iff there is more data to be read.
 
   hr
   h4 In the Linux kernel
+  ul
+    li #[code include/linux/tty_buffer.h]: Flip buffer definitions. See #[code struct tty_buffer] (single flip buffer), #[code struct tty_bufhead] (list of flip buffers; the #[code struct work_struct] field is the deferred buffer flushing operation.)
+    li #[code include/linux/tty_flip.h]: Interface between tty driver and flip buffers.
+    li #[code drivers/tty/tty_buffer.c]: Flip buffer implementation code.
+    li #[code drivers/tty/n_tty.c]: Line discipline and line buffer implementation.
 
   hr
   h4 Resources
-  p O'reilly book
+  ul
+    li #[a(href="https://www.oreilly.com/library/view/linux-device-drivers/0596005903/ch18.html") Linux Device Drivers: TTY Drivers]: The O'Reilly book gives the motivation behind tty flip buffers.
