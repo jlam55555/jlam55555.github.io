@@ -560,6 +560,7 @@ Experimental:
       Blog post (tty architecture): /blog/54
       Blog post (kbd driver): /blog/55
       Blog post (tty ldisc): /blog/56
+      Blog post (tty buffering): /blog/58
   Flexible game library:
     anchor: bge
     year: 2022

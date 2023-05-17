@@ -2,7 +2,7 @@ extends blogpost
 
 block post
   +codestyle
-  p This is the second part of a two-part series describing the tty subsystem. See the first part describing the subsystem and giving an overview of its architecture #[a(href="/blog/54") here].
+  p This is the second of a three-part series describing the tty subsystem. See the first part describing the subsystem and giving an overview of its architecture #[a(href="/blog/54") here]. See the third part describing two relevant buffering data structures #[a(href="/blog/58") here].
 
   p Initially, I had thought that these "extra terminal behaviors" were unnecessary and not critical to my understanding and implementation of the terminal in Linux. I was very wrong; not only does line discipline make up many useful and familiar behaviors that create the look and feel of a terminal, but keeping it separate from the tty driver helps preserve the distinction between policy and mechanism in the kernel.
 
