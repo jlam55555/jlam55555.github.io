@@ -243,3 +243,7 @@
   destination: 59
   title: Outdoors, bowling, and anime
   date: 2023-05-17T09:44:04-07:00
+- template: ../posts/60
+  destination: 60
+  title: Synchronization on a uniprocessor/multicore system
+  date: 2023-05-17T15:10:39-07:00

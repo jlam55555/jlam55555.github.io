@@ -557,10 +557,12 @@ Experimental:
     desc: An experimental operating system for learning purposes. Developed for the x86_64 platform using the QEMU virtualization software. At the time of writing, this uses the Limine bootloader and I'm working on developing very simple text-mode terminal/keyboard/screen drivers. Very much a work in progress!
     links:
       Source: https://github.com/jlam55555/laos
+      Blog post (understanding memory): /blog/52
       Blog post (tty architecture): /blog/54
       Blog post (kbd driver): /blog/55
       Blog post (tty ldisc): /blog/56
       Blog post (tty buffering): /blog/58
+      Blog post (synchronization): /blog/60
   Flexible game library:
     anchor: bge
     year: 2022

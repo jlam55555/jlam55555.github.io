@@ -1,0 +1,69 @@
+extends blogpost
+
+block post
+  h4 Preface
+  p Like some of the recent posts, this post was made in an attempt to better understand a concept for my #[a(href="https://github.com/jlam55555/laos") OS project]. In this case, I needed to implement synchronization in data structures shared between interrupt-context and non-interrupt-context code. My OS also does not yet support multicore (or multithreading) yet, hence the focus on uniprocessor synchronization. My original question that led to a fuller discussion on synchronization was: #[em Do we need spinlocks on a uniprocessor architecture?] (The answer is no.)
+
+  hr
+  h4 Overview of uniprocessor synchronization
+  p Clearly, there is a need for synchronization techniques if there are multiple cores performing parallel access. A #[em uniprocessor] is a computer system that only has or makes use of a single core#[+footnote #[em Unicore] might be a more correct name, but historically I believe uniprocessor is the more common term. "Unicore" also is suspiciously close to "unicorn."]. There is no parallel execution in a uniprocessor system. However, we still need to worry about synchronization in two scenarios:
+  ul
+    li If the system uses preemptive multithreading, and two (userspace or kernel) threads have access to the same data.
+    li When an interrupt arrives, and the interrupt handler accesses shared kernel data#[+footnote Note that we don't have to worry about re-entrant interrupt or exception handlers, because further interrupts are disabled on the CPU from the beginning of an interrupt until the end-of-interrupt (EOI) message is sent to the PIC. And hopefully the interrupt handler will not generate any exceptions.].
+
+  p In both cases, we still need to be careful if execution is interrupted in the middle of a critical section. The first case applies both to userspace and kernel threads if multithreading is enabled. The second case applies even if the kernel doesn't implement multithreading.
+
+  hr
+  h4 Uniprocessor synchronization
+  p In the uniprocessor case, we only need mutual exclusion between the current code and any code that may interrupt the current code and also accesses shared data. Fences for memory ordering are not needed for a uniprocessor, because compiler optimizations and CPU instruction reordering should respect local memory ordering.
+
+  h5 Masking interrupts
+  p Conventional wisdom involves using spinlocks (e.g., #[code spin_lock_irqsave()], #[code spin_unlock_irqrestore()]) in the kernel for mutual exclusion, since critical sections tend to be small and sleeping is not allowed. However, spinning shouldn't be used for mutual exclusion for uniprocessor systems, as this will create a priority inversion scenario.
+  p In (non-threaded) kernel context, we won't be pre-empted by other kernel code, but we need to worry about being interrupted by an interrupt or exception if we share data with any interrupt service routine. We can implement mutual exclusion between kernel and interrupt code by masking interrupts for the duration of the critical section using #[code cli] (#[strong cl]ear #[strong i]nterrupt flag), and re-enabling interrupts using #[code sti] (#[strong s]e#[strong t] #[strong i]nterrupt flag). The spinlock interface in Linux optionally masks interrupts (providing mutual exclusion with interrupt context) in addition to spinning (providing mutual exclusion with parallel execution on other cores).
+  p In a userspace thread, there is no need to mask interrupts, because the userspace code shouldn't share data with any interrupt service routine.
+
+  h5 Yielding the CPU
+  p In threaded code, we may still require mutual exclusion from other threads. If threads are non-preemptible, then we don't have to worry about concurrent access in critical sections. If it is preemptible, we need a mutual exclusion mechanism such as spinlocks or mutexes#[+footnote Here, I use the terms #[em spinlocks] and #[em mutex] in the conventional sense. Spinlocks refer to busy-wait loops, and mutexes to locks that sleep (yield) if contended. However, I have seen the term "busy-waiting mutex" to refer to a spinlock, as the term "mutex" is quite general at face value (referring to any mutual exclusion mechanism).].
+  p Spinlocks, however, are wasteful and unnecessary in threaded userspace code in a preemptible uniprocessor system. Spinning will correctly provide mutual exclusion, but it will do so by spinning until the timeslice is used up, since it is not possible for the other thread to release the lock until it reaches the processor. Thus, mutual exclusion can be implemented efficiently in userspace code with a mutex -- yielding the processor (sleeping) on contention.
+  p If a kernel thread needs mutual exclusion from other threads and shares data with an interrupt handler, we may need to implement both techniques -- masking interrupts and sleeping on contention.
+
+  h5 Atomic operations
+  p Hardware atomic operations, such as #[em compare-and-swap], are typically used to implement efficient lock-free algorithms and data structures for the multicore case. They are usually recognized in the multiprocessor case, but they can still be used to avoid more expensive mutual exclusion methods in uniprocessor systems. The cost of these atomic operations usually is a few-instruction overhead (pausing the cache lines), but this is often cheaper than #[a(href="https://en.wikipedia.org/wiki/Compare-and-swap#Costs_and_benefits") masking interrupts for a short critical section] or yielding the CPU for some unbounded interval.
+
+  hr
+  h4 Extending to the multicore case
+  p In the multicore case, we need mutual exclusion between parallel execution in addition to worrying about pre-emption or interrupts, and we need to pay attention to memory ordering semantics. Upgrading from safe uniprocessor to safe multicore code is definitely a difficult and bug-prone process#[+footnote Getting locking right is #[a(href="https://www.realworldtech.com/forum/?threadid=189711&curpostid=189723") #[em really] hard].].
+
+  h5 Atomic operations for mutual exclusion
+  p While atomic operations are optional for a uniprocessor system, they become essential for multicore work on shared memory. Spinlocks and mutexes require atomic operations such as #[em test-and-set] (TAS) or #[em compare-and-swap] (CAS) operations. From this, we can build up more synchronization mechanisms such as semaphores, condition variables, and lock-free data structures to improve the software flow.
+  p Spinlocks now make sense for short critical sections in non-threaded code, because this means that another core is working on the critical section and should hopefully release the lock quickly. This is very useful in interrupt context and in kernel code where we cannot sleep and critical sections should be short, but is not so useful in threaded code because the spinlock holder may be scheduled out.
+
+  h5 Memory consistency considerations
+  p With a uniprocessor, all memory operations appear to the core in program order. With a multicore processor, memory operations to a single memory address is well-ordered (due to #[em cache-coherency] protocols), but memory operations to multiple memory addresses may #[a(href="/blog/52") appear out-of-order to different cores due to the memory hardware architecture]. Thus, we need to be really careful with our critical sections that involve multiple pieces of data by inserting #[em memory barriers] (a.k.a., #[em fences]) when necessary, to enforce some #[em memory ordering]. Usually, we use some sort of #[em acquire-release] or #[em sequential consistency] semantics, but it can be tricky to get right#[+footnote For an example of acquire-release semantics, see an excerpt from the #[code n_tty_read()] function in my #[a(href="/blog/58") blog post about the ldisc buffer implementation].].
+
+  hr
+  h4 Performance implications of synchronization
+  p Synchronization never improves performance by itself; it always introduces some overhead. Multicore parallelism may overcome this overhead, but this is not always the case. Performance also depends on the implementation of the synchronization primitives (e.g., see the motivation behind #[a(href="https://lwn.net/Articles/267968/") #[em ticket spinlocks]]), and of the high-level parallel code. Long critical sections or extraneous memory ordering may cause slowdowns, but optimizing them out can be tedious and error-prone.
+
+  p There are a lot of tradeoffs in the design space. Spinlocks work well for short critical sections, but they can lock up the CPU for an indeterminate amount of time (especially bad if they also mask interrupts!). Masking interrupts allows for easy mutual exclusion with interrupt code, but this only works for interrupts on the same CPU core and will increase interrupt latency. Mutexes are often slower than spinlocks for small critical sections because they incur large scheduling overheads, but they are kinder on system health for long critical sections.
+
+  p In the multicore or SMT (hyperthreading) case, we also have the orthogonal performance issues of shared caches and memory bandwidth. NUMA effects can be large and painful as well. This may make us want to consider pinning a thread to one CPU and allocating as many resources to it (i.e., preventing other threads from using that core, giving it a high scheduling coefficient, or disabling neighboring cores to decrease cache and memory bandwidth), if this outweighs benefits of parallelization#[+footnote As I've mentioned in #[a(href="/blog/52") an earlier blog post], the paper #[a(href="https://www.akkadia.org/drepper/cpumemory.pdf") "What every programmer should know about memory" by Ulrich Drepper] is a fantastic read that goes into concrete detail about memory effects and how a programmer can optimize for them.].
+
+  p Tradeoffs imply benchmarking! I honestly haven't gone too deeply into synchronization or parallelization effects of any given program or architecture, but the best performance depends on many factors such as the computer architecture, outside system load, and specific workloads.
+
+  hr
+  h4 In the Linux kernel
+  ul
+    li #[code arch/ia64/include/asm/spinlock.h]: Ticket spinlock implementation for IA64 (x86_64)
+    li #[code include/asm-generic/spinlock.h]: Generic (architecture-independent) ticket spinlock implementation
+    li #[code include/linux/spinlock.h]: Spinlock interface (including #[code *_irqsave/restore()] variants), which dispatches architecture-specific spinlock variants.
+
+  p There are two main spinlock interfaces in the Linux kernel: one that masks interrupts (#[code spin_lock_irqsave()], #[code spin_unlock_irqrestore()]), and one that doesn't mask interrupts (#[code spin_lock()], #[code spin_unlock()]). The former masks interrupts and is used for kernel code that shares data in its critical section with interrupt context code; the second does not mask interrupts, and is used for kernel code that doesn't share data with an interrupt service handler. The spinning is only needed to provide mutual exclusion between parallel execution on multiple cores, and is disabled on a uniprocessor system#[+footnote The IA64 spinlock file explicitly states that "this file is for SMP configurations only." I'm not sure exactly how this works in the Linux build system.].
+
+  hr
+  h4 Resources
+  ul
+    li #[a(href="https://www.quora.com/Multiprocessing-Why-arent-spinlocks-appropriate-for-a-single-processor") Why aren't spinlocks appropriate for a single processor?]
+    li #[a(href="https://stackoverflow.com/q/1025859/2397327") Is spin lock useful in a single processor uni core architecture?] 
+    li #[a(href="https://stackoverflow.com/q/9166779/2397327") Why spinlocks don't work in uniprocessor (unicore) systems?]
+    li #[a(href="https://lwn.net/Articles/267968/") Ticket spinlocks]: Explaining design decisions behind spinlocks in the Linux kernel
