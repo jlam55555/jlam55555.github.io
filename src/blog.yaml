@@ -247,3 +247,7 @@
   destination: 60
   title: Synchronization on a uniprocessor/multicore system
   date: 2023-05-17T15:10:39-07:00
+- template: ../posts/61
+  destination: 61
+  title: "Brain dump 5: post college chapter 2"
+  date: 2023-07-01T15:51:58-07:00
