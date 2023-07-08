@@ -1,0 +1,22 @@
+extends blogpost
+
+block post
+  +codestyle
+  p wip post -- uploading bc i have to nuke my computer in the near future
+
+  p leuven theme -- very easy on the eyes -- light theme, I have nothing against it, pleasant colors
+  p ivy/counsel/swiper -- (persp-)counsel-switch-buffer is pretty cool, otherwise swiper is pretty cool. Not sure exactly what ivy is in general, ivy for incremental selecting out of a list (haven't used helm, which seems to be an alternative to this)
+  p magit -- porcelain, works pretty well -- don't really use it for rebase/workspace things (e.g., using phabricator or Google critique), but very useful if using vanilla git
+  p treemacs -- project tree (plays well with projectile/perspective) -- heavier version of neotree
+  p projectile -- project management (e.g., find in project, run terminal, etc.)
+  p perspective -- workspace manager (e.g., separate Emacs buffers for different projects)
+  p vterm -- haven't used this in a while, but then we don't need an extra terminal to run simple things
+
+  p screen + bel setup; not really using at home
+  p git worktrees -- ditto
+
+  +imglink("62_emacs_setup.png", "Screenshot of my current Emacs setup")
+
+  p current emacs setup:
+  +precode('c')
+    include ../res/posts/62_emacs_init.el

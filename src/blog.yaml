@@ -251,3 +251,7 @@
   destination: 61
   title: "Brain dump 5: post college chapter 2"
   date: 2023-07-01T15:51:58-07:00
+- template: ../posts/62
+  destination: 62
+  title: Emacs project setup
+  date: 2023-07-03T09:48:49-07:00
